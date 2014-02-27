@@ -1,9 +1,9 @@
 ---
-title: Creating Posts
+title: Posts 만들기
 slug: creating-posts
 date: 0007/01/01
 number: 7
-contents: Learn how to submit a post client-side.|Implement a simple security check.|Restrict access to the post submit form.|Learn to use a server-side Method for added security.
+contents: 클라이언트쪽에서 Post를 보내는 방법을 배우자.|간단한 보안 확인을 구현한다.|post 제출 양식에서 접근을 제한한다.|보안을 위해 서버쪽 Method를 사용하는 것을 배우자.
 paragraphs: 60
 ---
 
@@ -11,7 +11,7 @@ paragraphs: 60
 
 ////
 
-### Building The New Post Page
+### 새 Post 페이지를 만들기
 
 ////
 
@@ -40,7 +40,7 @@ Router.map(function() {
 
 ////
 
-### Adding A Link To The Header
+### 헤더 링크 더하기
 
 ////
 
@@ -112,7 +112,7 @@ Router.map(function() {
 
 ////
 
-### Creating Posts
+### Posts 만들기
 
 ////
 
@@ -142,7 +142,7 @@ Template.postSubmit.events({
 
 ////
 
-### Adding Some Security
+### 약간의 보안을 더하기
 
 ////
 
@@ -157,7 +157,7 @@ $ meteor remove insecure
 
 ////
 
-### Allowing Post Inserts
+### Posts 삽입을 허가하기
 
 ////
 
@@ -192,7 +192,7 @@ Posts.allow({
 
 ////
 
-### Securing Access To The New Post Form
+### 새 Post 양식에서 보안 접근을 제한하기
 
 ////
 
@@ -302,7 +302,7 @@ Router.before(requireLogin, {only: 'postSubmit'});
 
 ////
 
-### Meteor Method: Better Abstraction and Security
+### Meteor Method: 더 나은 추상화와 보안
 
 ////
 
@@ -402,7 +402,7 @@ Meteor.methods({
 
 ////
 
-### Sorting Posts
+### Posts 정렬
 
 ////
 
