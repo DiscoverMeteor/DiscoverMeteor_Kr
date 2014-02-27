@@ -3,7 +3,7 @@ title: Collections
 slug: collections
 date: 0004/01/01
 number: 4
-contents: Learn about Meteor's core feature, realtime collections.|Understand how Meteor's data synchronization works.|Integrate collections with our templates.|Turn our basic prototype into a functioning realtime application!
+contents: Meteor의 핵심기능인 실시간 Collection에 대해 배워보자.|어떻게 Meteor의 자료 동기화가 작동하는지 이해하자.|우리에 Template에 Collection을 통합해보자.|우리의 기본 프토타입을 실시간 어플리케이션으로 바꿔보자!
 paragraphs: 72
 ---
 
@@ -32,7 +32,7 @@ Posts = new Meteor.Collection('posts');
 
 <% note do %>
 
-### To Var Or Not To Var?
+### To Var인가 Not To Var인가?
 
 ////
 
@@ -46,7 +46,7 @@ Posts = new Meteor.Collection('posts');
 
 ////
 
-#### Terminal
+#### 터미널
 
 <%= screenshot "terminal", "The Terminal" %>
 
@@ -55,7 +55,7 @@ Posts = new Meteor.Collection('posts');
 - ////
 - ////
 
-#### Browser Console
+#### 브라우저 콘솔
 
 <%= screenshot "browser-console", "The Browser Console" %>
 
@@ -64,7 +64,7 @@ Posts = new Meteor.Collection('posts');
 - ////
 - ////
 
-#### Mongo Shell
+#### Mongo 쉘
 
 <%= screenshot "mongo-shell", "The Mongo Shell" %>
 
@@ -77,7 +77,7 @@ Posts = new Meteor.Collection('posts');
 
 <% end %>
 
-### Server-Side Collections
+### 서버쪽 Collections
 
 ////
 
@@ -103,7 +103,7 @@ Posts = new Meteor.Collection('posts');
 
 ////
 
-### Client-Side Collections
+### 클라이언트쪽 Collections
 
 ////
 
@@ -113,13 +113,13 @@ Posts = new Meteor.Collection('posts');
 
 <% note do %>
 
-### Introducing MiniMongo
+### MiniMongo 소개
 
 ////
 
 <% end %>
 
-### Client-Server Communication
+### Client-Server 통신
 
 ////
 
@@ -176,13 +176,13 @@ Posts = new Meteor.Collection('posts');
 
 ////
 
-### Keeping it Real-time
+### 실시간을 유지하기
 
 ////
 
 ////
 
-### Populating the Database
+### 데이터베이스 생성하기
 
 ////
 
@@ -227,7 +227,7 @@ if (Posts.find().count() === 0) {
 
 ////
 
-### Wiring the data to our HTML with helpers
+### 헬퍼로 HTML과 데이터를 연결하기
 
 ////
 
@@ -254,7 +254,7 @@ Template.postsList.helpers({
 
 <% note do %>
 
-### Find & Fetch
+### 검색과 가져오기(Find & Fetch)
 
 ////
 
@@ -287,7 +287,7 @@ Template.postsList.helpers({
 
 <% note do %>
 
-### Inspecting DOM Changes
+### DOM의 변화를 감지하기
 
 ////
 
@@ -295,7 +295,7 @@ Template.postsList.helpers({
 
 <% end %>
 
-### Connecting Collections: Publications and Subscriptions
+### Collections에 접속하기: Publications(출판)과 Subscriptions(가입)
 
 ////
 
@@ -329,6 +329,6 @@ Meteor.subscribe('posts');
 
 ////
 
-### Conclusion
+### 결론
 
 ////

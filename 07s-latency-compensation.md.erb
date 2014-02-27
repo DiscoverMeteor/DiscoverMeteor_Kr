@@ -1,10 +1,10 @@
 ---
-title: Latency Compensation
+title: 지연 보정
 slug: latency-compensation
 date: 0007/01/02
 number: 7.5
 sidebar: true
-contents: Understand latency compensation.|Slow your app down and see what's going on.|Learn how Meteor Methods call each other.
+contents: 지연 보정(Latency Compensation)을 이해하자.|당신의 앱을 느리게 하고 무슨일이 일어나는지 확인하세요.|어떻게 Meteor Methods들이 서로를 호출하는지 배우자.
 paragraphs: 28
 ---
 
@@ -20,7 +20,9 @@ paragraphs: 28
 - *+200ms:* ////
 - *+500ms:* ////
 
-If this were the way Meteor operated, then there'd be a short lag between performing such actions and seeing the results (that lag being more or less noticeable depending on how close you were to the server). We can't have that in a modern web application!
+만일 이것이 Meteor를 운영하는 방법이었다면 동작이 일어나고 그 결과를 보는 사이에 짧은 지연이 있을 것이다. 
+(그 지연은 당신이 서버와 얼마나 가까운지에 따라 눈에 더 혹은 덜 띄게 일어날 것이다.).
+이것은 모던 웹 어플리케이션에선 있을 수 없는 일입니다!
 
 ### Latency Compensation
 
@@ -37,7 +39,7 @@ If this were the way Meteor operated, then there'd be a short lag between perfor
 
 ////
 
-### Observing Latency Compensation
+### 지연 보정 관찰하기
 
 ////
 
@@ -115,7 +117,7 @@ Template.postSubmit.events({
 
 <%= screenshot "s5-2", "Our post once the client receives the update from the server collection" %>
 
-### Client Collection Methods
+### 클라이언트 Collection Methods
 
 ////
 
@@ -124,7 +126,7 @@ Template.postSubmit.events({
 1. ////
 2. ////
   
-### Methods Calling Methods
+### Methods가 Methods를 호출
 
 ////
  
