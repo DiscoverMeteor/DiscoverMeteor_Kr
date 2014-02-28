@@ -1,60 +1,67 @@
 ---
-title: Publications(출판)과 Subscriptions(가입)
+title: 발행(Publication)과 구독(Subscription)
 slug: publications-and-subscriptions
 date: 0004/01/02
 number: 4.5
 sidebar: true
-contents: publication과 subscription이 어떻게 동작하는지 배운다.|기본 Autopulish 패키지가 무엇을 하는지 배운다.|몇 가지 publication 패턴을 살펴본다.
+contents: 발행과 구독의 작동방식을 이해한다.|초기 설정되는 Autopulish 패키지가 하는 일을 알아본다.|발행 패턴의 몇 가지 예제를 살펴본다.
 paragraphs: 52
 ---
 
-////
+발행(publication)과 구독(subscription)은 미티어에서 가장 기본적이고 중요한 개념 중의 하나이지만, 막상 시작해보면 이해하기 어렵다. 
 
-////
+이로 인해 미티어가 보안상 불안하다거나 미티어 앱은 대용량 데이터를 처리하지 못한다는 등의 오해를 가져왔다.
 
-////
+사람들이 이 개념에 대하여 초기에 다소 혼란을 느끼는 가장 큰 이유는 Meteor가 부리는 "마술"때문이다. 이 마술이 궁극적으로는 매우 유용할지라도, 보이지 않는 내부에서 실제로 일어나는 것을 (마술이란 게 그렇듯이) 이해하기 어렵게 할 수 있다. 그러므로, 이 마술 계층을 벗겨내고 그 내부에서 일어나는 것을 이해하도록 해보자.
 
-### 옛날 옛적에
 
-////
+### 옛날에는
 
-////
+우선 Meteor가 나오기 전인 2011년의 좋았던 시절로 돌아가보자. 독자는 간단한 Rails 앱을 개발하고 있다고 하자. 어떤 사용자가 독자의 사이트를 방문하면 클라이언트(즉, 브라우저)는 서버에서 구동되는 앱에 요청(request)을 보낸다.
 
-////
+앱의 첫 번째 일은 그 사용자가 원하는 데이터를 알아내는 것이다. 이것은 12페이지의 검색결과, Mary의 사용자 프로필, Bob의 최근 20개 트윗 등일 수 있다. 이것은 독자가 찾는 책을 찾아서 매장을 돌아다니는 서점 점원에 비유할 수 있다.
 
-////
+올바른 데이터를 구했다면, 앱의 두 번째 일은 이 데이터를 멋진, 사람이 읽을 수 있는 HTML(또는 API라면 JSON)로 번역하는 것이다.
 
-////
+서점에 비유하자면, 독자가 구매한 책을 포장하고, 멋진 백에 넣는 일일 것이다. 이것이 유명한 Model-View-Controller 모델의 "View" 영역이다.
 
-### Meteor식 방법
+마침내, 앱은 HTML 코드를 브라우저로 전송한다. 앱이 할 일은 다했다. 이제 그저 맥주나 마시며 다음 요청이 올 때를 기다리는 것이다.
 
-////
+### 미티어 방식
+
+이에 비하여 무엇이 미티어를 그렇게 특별하게 만드는 지를 살펴보도록 하자. 우리가 본 바와 같이, 미티어의 혁신의 핵심은 Rails 앱이 **서버에서만** 동작하는 반면에, 미티어 앱은 클라이언트(브라우저)에서 동작하는 클라이언트쪽 컴포넌트도 포함한다는 것이다.
 
 <%= diagram "client-server", "Pushing a subset of the database to the client.", "pull-right" %>
 
-////
+This is like a store clerk who not only finds the right book for you, but also follows you home to read it to you at night (which we'll admit does sound a bit creepy).
 
-////
+This architecture lets Meteor do many cool things, chief among them what Meteor calls [database everywhere](http://docs.meteor.com/#sevenprinciples). Simply put, Meteor will take a subset of your database and *copy it to the client*. 
 
-////
+This has two big implications: first, instead of sending HTML code to the client, a Meteor app will send **the actual, raw data** and let the client deal with it ([data on the wire](http://docs.meteor.com/#sevenprinciples)). Second, you'll be able to **access that data instantaneously** without having to wait for a round-trip to the server ([latency compensation](http://docs.meteor.com/#sevenprinciples)).
 
-### Publishing(출판)
+이것은 마치 서점 점원이 책을 찾아줄 뿐 아니라, 독자를 집에까지 따라와서 밤에 그 책을 읽어주는 것(약간 소름끼치는 소리로 받아들일 수 있지만)과 같다.
 
-////
+이 아키텍처로 인하여 미티어는 많은 멋진 기능을 제공하는데, 그 중에서도 으뜸은 미티어에서 [데이터베이스는 어디에서나](http://docs.meteor.com/#sevenprinciples)라고 부르는 것이다. 단지 데이터베이스에 넣기만 하면 미티어가 그 부분집합을 가져와서 *클라이언트에 복사하여* 둘 것이다.
 
-////
+이것은 두 가지 큰 의미를 가진다: 첫째, HTML 코드를 클라이언트로 보내는 대신, 미티어 앱은 **실제 생 데이터**를 보내고 클라이언트가 그것을 처리하게 한다(데이터만 전송). 둘째, 서버에 갔다오는 시간을 기다려야 하는 일없이 즉시 데이터에 접속할 수 있다([지연 보상](http://docs.meteor.com/#sevenprinciples)).
 
-////
+### 발행(Publishing)
+
+앱의 데이터베이스는 수 십만의 도큐먼트를 담을 수 있는데, 이들중 일부는 지극히 개인적이거나 민감할 수도 있다. 따라서 우리는 클라이언트에 이들 전체를 미러링하는 것은 보안상, 확장성 측면에서 해서는 안되는 것이 명백하다.
+
+따라서 우리는 미티어에게 데이터의 어떤 **부분집합**을 클라이언트로 보낼 지를 지정하는 방법이 필요하며, 이를 발행(publication)을 통해서 구현할 것이다.
+
+Microscope로 돌아가보자. 아래는 데이터베이스에 있는 앱의 post 목록 전체이다:
 
 <%= diagram "collections-1", "All the posts contained in our database.", "pull-center" %>
 
-////
+Microscope에 이 기능이 실제로 존재하지는 않는 것은 명백하지만, 이 post들의 일부가 욕설이 담긴 내용으로 표시가 되어 있다고 상상하자. 우리는 이들을 데이터베이스에 담아두기는 하지만, 사용자들이 이용할 수(즉, 클라이언트로 보내지는 경우)는 없어야 한다.
 
-////
+우리의 첫 과제는 미티어에게 클라이언트쪽에 전송한 데이터를 알려주는 일이 될 것이다. 우리는 미티어에게 표시가 없는 post들만을 **발행(publish)**하도록 할 것이다.
 
 <%= diagram "collections-2", "Excluding flagged posts.", "pull-center" %>
 
-////
+아래가 그 대응코드로 서버에 위치한다:
 
 ~~~js
 // on the server
@@ -63,29 +70,29 @@ Meteor.publish('posts', function() {
 });
 ~~~
 
-////
+이렇게 하면 클라이언트가 표시된 post에 접근할 수 있는 가능한 방법은 없다는 것이 확실하다. 이것이 미티어 앱을 안전하게 만드는 바로 그 방법이다: 현재 클라이언트가 접근할 수 있는 데이터만을 발행하는 것을 확실하게 하라.
 
 <% note do %>
 
 ### DDP
 
-////
+기본적으로, 발행/구독 시스템을 서버쪽(소스)의 컬렉션에서 클라이언트쪽(타겟)의 컬렉션으로 데이터를 전달하는 깔때기로 비유할 수 있다.
 
-////
+깔때기로 표현된 프로토콜을 **DDP**(Distributed Data Protocol)라 부른다. DDP에 대하여 더 자세하게 알고 싶으면, Matt DeBergalis(Meteor 설립자의 한 사람)의 [The Real-time Conference에서의 강연](http://2012.realtimeconf.com/video/matt-debergalis)이나 또는 독자를 이 개념으로 좀 더 상세하게 안내할 Chris Mather의 [screencast](http://www.eventedmind.com/posts/meteor-subscriptions-and-ddp)를 시청하기 바란다.
 
 <% end %>
 
-### Subscribing(가입)
+### 구독하기
 
-////
+우리가 표시되지 않은 post들을 클라이언트에 보내기를 원한다 해도, 한 번에 수십만 post를 보낼 수는 없다. 우리는 클라이언트가 특정한 시점에 그들이 원하는 데이터 세트를 지정하도록 하는 방법이 필요했고, 바로 그것이 **구독(subscription)**이 도입된 계기이다.
 
-////
+구독하는 데이터는 미티어의 MongoDB에 대한 클라이언트 구현체인 Minimongo 덕분에 클라이언트에 **미러된다**.
 
-////
+예를 들면, 우리가 현재 Bob Smith의 프로필 페이지를 열람중이고 *그가 등록한* post만을 보기를 원한다고 해보자.
 
 <%= diagram "collections-3", "Subscribing to Bob's posts will mirror them on the client.", "pull-center" %>
 
-////
+우선, 우리는 발행을 매개변수를 받도록 수정한다:
 
 ~~~js
 // on the server
@@ -94,22 +101,22 @@ Meteor.publish('posts', function(author) {
 });
 ~~~
 
-////
+그리고 앱의 클라이언트 쪽 코드에서 그 발행을 *구독*할 때 매개변수를 정의한다:
 
 ~~~js
 // on the client
 Meteor.subscribe('posts', 'bob-smith');
 ~~~
 
-////
+이것이 미티어 앱에 확장성있는 클라이언트 쪽을 구현하는 방법이다: 이용가능한 모든 데이터를 구독하는 대신, 현재 필요한 부분만을 선택하여 뽑아오는 것이다. 이 방식으로 서버쪽의 데이터베이스가 아무리 크다 해도 브라우저 메모리의 과부하를 피할 수 있다.
 
 ### 찾기
 
-////
+이제 Bob의 post들이 다양한 카테고리에 걸쳐서 있다고 하자(예를 들면, “JavaScript”, “Ruby”, 그리고 “Python”). 우리가 여전히 Bob의 모든 post를 메모리에 로드하기를 원하지만, 이제 그 중에서 “JavaScript” 카테고리에 있는 것들만을 보여주기를 원한다고 하자. 여기서 “찾기”가 도입된다.
 
 <%= diagram "collections-4", "Selecting a subset of documents on the client.", "pull-center" %>
 
-////
+서버에서 한 것과 마찬가지로, 우리는 `Posts.find()` 함수를 사용하여 데이터의 부분집합을 선택한다:
 
 ~~~js
 // on the client
@@ -120,25 +127,25 @@ Template.posts.helpers({
 });
 ~~~
 
-////
+이제 발행과 구독의 역할이 무엇인지를 잘 이해하게 되었으므로 몇 가지 자주 사용되는 구현 패턴을 깊이 있게 살펴보기로 하자.
 
 ### Autopublish
 
-////
+미티어 프로젝트를 처음부터 생성(즉, `meteor create` 명령어를 사용하여)하면 자동적으로 `autopublish` 패키지가 활성화된다. 이것이 정확하게 무엇을 하는 지를 알아보는 것으로 시작하자.
 
-////
+`autopublish`의 목표는 미티어 앱의 코딩을 매우 쉽게 시작하도록 하는 것이며, 이렇게 하기 위해서 클라이언트에서 서버에서 오는 _모든 데이터_를 자동으로 미러링하도록 하여, 발행과 구독을 처리한다.
 
 <%= diagram "autopublish", "Autopublish", "pull-center"%>
 
-////
+이것은 어떻게 작동할까? 서버에 `'posts'`라는 컬렉션이 있다고 가정하자. 그러면 `autopublish`는 Mongo posts 컬렉션에서 검색되는 모든 post를 클라이언트(하나만 있다고 가정한다)에 '`posts'`라 불리는 컬렉션으로 보낸다.
 
-////
+그러므로 `autopublish`를 사용하면 발행에 대하여는 생각할 필요가 없다. 데이터는 어디에나 있고 할 일은 단순하다. 물론, 애플리케이션의 데이터베이스에 완전한 복제품이 모든 사용자의 시스템에 캐시되어 있다는 것은 명백하게 문제가 될 수는 있다.
 
-////
+이런 이유로 autopublish는 처음에 시작할 때에 그리고 발행에 대하여 생각하지 않고 있을 때 까지만 적절하다.
 
-### 모든 Collections을 Publish(출판)하기
+### 컬렉션 전체를 발행
 
-////
+`autopublish`를 제거하면, 클라이언트에서 모든 데이터가 사라지는 것을 바로 알 수 있다. 이를 복원하는 쉬운 방법은 단순히 autopublish가 하는 일을 복제하여 컬렉션 전체를 발행하는 것이다. 예를 들면:
 
 ~~~js 
 Meteor.publish('allPosts', function(){
@@ -148,11 +155,11 @@ Meteor.publish('allPosts', function(){
 
 <%= diagram "fullcollection", "Publishing a full collection", "pull-center" %>
 
-////
+여전히 컬렉션 전체를 발행하지만, 이제는 최소한 어떤 컬렉션을 발행할 것인지 아닌지를 통제할 수는 있게 되었다. 이 경우에 우리는 `Posts` 컬렉션은 발행하지만 `Comments`는 하지 않는다.
 
-### 일부 Collections만 Publish(출판)하기
+### 컬렉션 일부만 발행
 
-////
+다음 단계는 컬렉션의 _일부_만을 발행하는 것이다. 예를 들어 특정 저자가 쓴 post만을 발행해보자:
 
 ~~~js 
 Meteor.publish('somePosts', function(){
@@ -166,27 +173,35 @@ Meteor.publish('somePosts', function(){
 
 ### 실제로 뒤에서 이루어지는 일은
 
-////
+If you've read the [Meteor publication documentation](http://docs.meteor.com/#publishandsubscribe), you were perhaps overwhelmed by talk of using `added()` and `ready()` to set attributes of records on the client, and struggled to square that with the Meteor apps that you've seen that never use those methods.
 
-////
+The reason is that Meteor provides a very important convenience: the `_publishCursor()` method. You've never seen that used either? Perhaps not directly, but if you return a [cursor](/chapter/meteor-vocabulary/) (i.e. `Posts.find({'author':'Tom'})`) in a publish function, that's exactly what Meteor is using.
 
-////
+When Meteor sees that the `somePosts` publication has returned a cursor, it calls `_publishCursor()` to -- you guessed it -- publish that cursor automatically. 
 
-////
+Here's what `_publishCursor()` does:
 
-- ////
-- ////
-- ////
+[Meteor publication documentation](http://docs.meteor.com/#publishandsubscribe)을 읽었다면, 아마도 클라이언트에서 레코드의 속성을 지정하기 위해 `added()`와 `ready()`를 사용하는 글에 압박을 받을 것이다. 그리고 그 글과 그런 메서드를 전혀 사용하지 않는 미티어 앱과 맞추어보느라 고생할 것이다.
 
-////
+그 이유는 미티어가 매우 중요한 편의를 제공하기 때문이다: 바로 `_publishCursor()` 메서드이다. 독자는 이것이 사용된 것을 본 적이 없다? 아마도 직접적으로는 아니겠지만, publish 함수에서 [커서](/chapter/meteor-vocabulary/)를 리턴한다면(즉, `Posts.find({'author':'Tom'})`), 이것이 바로 미티어가 사용하는 곳이다.
+
+미티어에서 `somePosts` 라는 발행 함수가 커서를 리턴할 때, 미티어는 커서를 자동적으로 발행하기 위해서 `_publishCursor()`를 - 예상한 대로 - 호출한다.
+
+`_publishCursor()`가 하는 일은 다음과 같다:
+
+- 서버쪽 컬렉션의 이름을 확인한다.
+- 커서로부터 일치하는 모든 도큐먼트들을 가져와서 *이름이 같은* 클라이언트 쪽의 컬렉션으로 보낸다(이 작업에 `.added()`를 사용한다).
+- 도큐먼트가 추가, 삭제, 변경될 때, 이 변경 내용을 클라이언트 쪽의 컬렉션으로 보낸다(커서에서 `.observe()`를 사용하다가 `.added()`, `.updated()` 그리고 `removed()`를 사용한다).
+
+그러므로 위의 예에서, 사용자는 자신의 클라이언트 쪽의 캐시에 관심있는 post 목록(Tom이 작성한 post들)만을 받게 되는 것을 알 수 있다.
 
 <% end %>
 
-### 일부 속성만 Publish(출판)하기
+### 일부 속성만 발행
 
-////
+Post 목록의 일부만을 발행하는 방법을 보았다. 하지만, 목록의 내용을 더 얇게 할 수도 있다! 특정한 *속성들*만을 발행하는 방법을 알아보자.
 
-////
+이전과 같이, `find()`를 사용하여 커서를 리턴하지만, 이번에는 다른 필드를 배제할 것이다:
 
 ~~~js
 Meteor.publish('allPosts', function(){
@@ -198,7 +213,7 @@ Meteor.publish('allPosts', function(){
 
 <%= diagram "partialproperties", "Publishing partial properties", "pull-center" %>
 
-////
+물론 이 두 가지를 결합할 수도 있다. 예를 들면, Tom이 작성한 모든 글에서 그 날짜는 제외하고 리턴하고 싶다면 다음과 같이 작성한다:
 
 ~~~js
 Meteor.publish('allPosts', function(){
@@ -210,8 +225,8 @@ Meteor.publish('allPosts', function(){
 
 ### 요약
 
-////
+지금까지 우리는 모든 컬렉션의 모든 도큐먼트들의 모든 속성을 발행하는 방법에서 일부 컬렉션의 일부 도큐먼트들의 일부 속성만을 발행하는 방법까지 알아보았다.
 
-////
+이 정도면 미티어 발행으로 할 수 있는 기본적인 것들은 모두 다루었다. 그리고 이 정도의 간단한 기법들로도 용례의 대부분을 커버할 것이다.
 
-////
+때로는, 발행들을 결합하고, 연결하고, 통합하여 더 나아갈 필요가 있을 수 있는데, 이런 것들은 나중에 다룰 것이다!
