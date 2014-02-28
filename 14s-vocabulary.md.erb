@@ -4,87 +4,89 @@ slug: meteor-vocabulary
 date: 0014/01/02
 number: 14.5
 sidebar: true
-contents: Review a few common Meteor terms. 
+contents: 몇몇의 미티어 용어에 대하여 알아본다. 
 paragraphs: 24
 ---
 
-////
+이 책에서, 독자는 새로울 수도 있고, 또는 미티어의 문맥에서 새로운 방식으로 사용되는 몇몇 단어들을 보게 될 것이다. 이 장에서는 이 단어들을 정의한다.
 
-#### Client
+#### 클라이언트
 
-////
+우리가 클라이언트를 언급할 때는 사용자의 *웹브라우저*에서 실행되는 코드를 의미하는 데, 이 때의 웹브라우저란 파이어폭스나 사파리와 같은 전통적인 브라우저, 또는 아이폰 전용 애플리케이션에서의 UIWebView와 같이 복잡한 형태를 가리킨다.
 
-#### Collection
+#### 컬렉션(Collection)
 
-////
+미티어 컬렉션은 클라이언트와 서버 사이에서 자동적으로 동기화되는 데이터 저장소이다. 컬렉션은 이름('posts'와 같은)을 가지며 보통 클라이언트와 서버 양쪽에 존재한다. 이들은 서로 다르게 동작하지만 Mongo의 API에 기반한 공통 API를 가진다.
 
-#### Computation
+#### 컴퓨테이션(Computation)
 
-////
+컴퓨테이션은 코드 블럭으로 이 코드가 의존하는 반응형 데이터 소스들 중의 하나라도 변경될 때마다 실행된다. 만약 반응형 데이터 소스(예를 들면, Session 변수)가 있고 그것에 따라서 반응이 일어나도록 하려면 이에 대하여 컴퓨테이션을 설정해야 한다.
 
-#### Cursor
+#### 커서(Cursor)
 
-////
- 
+커서는 Mongo 컬렉션에서 쿼리를 실행한 결과이다. 클라이언트에서, 커서는 단지 결과의 배열이 아니라, 연관된 컬렉션의 객체들이 추가, 삭제, 변경되는 것을 관찰할 수 있는 *반응형* 객체이다.
+
 #### DDP
 
-////
+DDP는 미티어의 분산 데이터 프로토콜(Distributed Data Protocol)로서 컬렉션들을 동기화하거나 메서드(Method)를 호출하는데 사용되는 와이어 프로토콜(wire protocol)이다. DDP는 일반적인 프로토콜로 계획되었으며 데이터가 많은 실시간 애플리케이션에서 HTTP를 대체한다.
 
 #### Deps
 
-////
+Deps는 미티어의 반응형 시스템이다. Deps는 HTML과 연계된 데이터 모델의 동기화를 자동적으로 유지하기 위하여 배후에서 드러나지 않는 방식으로 사용된다.
 
-#### Document
+#### 도큐먼트(Document)
 
-////
+Mongo is a document-based data-store, so the objects that come out of collections are called "documents". They are plain JavaScript objects (although they can't contain functions) with a single special property, the `_id`, which Meteor uses to track their properties over DDP.
+Mongo는 도큐먼트 기반의 데이터 저장소인데, 이 컬렉션들에서 추출된 객체들은 "도큐먼트"라 불린다. 이 도큐먼트는 평범한 JavaScript 객체(함수를 포함하지 않는)로 유일한 특별한 속성, '_id', 를 가지는 데 미티어는 이를 이용하여 DDP를 통해서 다른 속성값들을 읽는다.
 
-#### Helpers
+#### 헬퍼(Helpers)
 
-////
+템플릿에서 도큐먼트 속성보다 좀 더 복잡한 것을 화면에 그리고자 할 때, 헬퍼를 호출할 수 있다. 헬퍼란 화면에 그리는 것을 돕는 목적으로 사용되는 함수를 말한다.
 
-#### Latency Compensation
+#### 지연보상(Latency Compensation)
 
-////
+지연보상이란 서버의 응답을 기다리는 동안 발생하는 시간의 지연을 회피할 목적으로 클라이언트에서 메서드 호출을 흉내내도록 하는 기술이다.
 
-#### Method
+#### 메서드(Method)
 
-////
+미티어 메서드는 클라이언트에서 서버로 요청하는 원격 프로시저 호출로서 컬렉션의 변경을 추적하고 지연 보상(Latency Compensation)을 허용하는 특별한 로직을 가진다.
 
 #### MiniMongo
 
-////
+클라이언트에 존재하는 컬렉션은 Mongo 스타일의 API를 제공하는 메모리 데이터 저장소이다. 이런 동작을 지원하는 라이브러리를 "MiniMongo"라고 하는데, 이는 전적으로 메모리에서 동작하는 Mongo의 소형 버전임을 의미한다.
 
-#### Package
+#### 패키지(Package)
 
-////
+미티어 패키지는 다음으로 이루어진다:
 
-  1. ////
-  2. ////
-  3. ////
-  4. ////
+  1. 서버에서 실행되는 JavaScript 코드.
+  2. 클라이언트에서 실행되는 JavaScript 코드.
+  3. 리소스(SASS에서 CSS를 다루는 것과 같은)를 처리하는 방법에 대한 지침.
+  4. 처리될 리소스.
 
-////
+패키지는 초강력 라이브러리와 같다. 미티어에는 핵심 패키지들의 광범위한 집합이 제공된다. 또한 [Atmosphere](http://atmosphere.meteor.com)는 커뮤니티에서 공급하는 써드파티 패키지들의 모음이다.
 
-#### Publication
+#### 발행(Publication)
 
-////
+발행이란 이름을 가지는 데이터 집합으로 이것에 구독(subscription)하는 각 사용자에 따라 변경된다. 발행은 서버에서 설정한다.
 
-#### Server
+#### 서버
 
-////
+미티어 서버는 node.js에 의해서 실행되는 HTTP와 DDP 서버이다. 이것은 모든 미티어 라이브러리뿐 아니라 독자가 작성한 서버에서 구동되는 Javascript 코드가 함께 이루어진다. 미티어 서버가 구동될 때, 이것은 몽고 데이터베이스(개발과정에서는 스스로 구동된다)에 접속한다.
 
-#### Session
+#### 세션
 
-////
+미티어에서 세션이란 독자가 작성하는 애플리케이션에서 사용자의 상태를 추적하기 위하여 사용하는 클라이언트 쪽의 반응형 데이터 소스를 의미한다.
 
-#### Subscription
+#### 구독(Subscription)
 
-////
+구독이란 특정한 클라이언트가 발행(publication)에 접속하는 것을 의미한다. 구독은 브라우저에서 실행되는 코드로서 서버에 존재하는 발행과 통신하여 데이터를 동기화 상태로 유지한다.
 
-#### Template
+#### 템플릿(Template)
 
-////
+템플릿은 JavaScript로 HTML을 생성하는 수단이다. 미티어는 현재 logic-less 템플릿 시스템인 Handlebars를 지원하지만, 미래에 더 많은 템플릿 언어를 지원할 계획이다.
 
 #### Template Data Context
 
-////
+템플릿이 화면을 그릴 때, 여기에 필요한 특정한 데이터를 제공하는 JavaScript 객체를 참조한다. 보통 이런 객체들은 평범한 JavaScript 객체들(POJOs)인데, 종종 컬렉션에서 추출된 도큐먼트들이기도 하다. 이들은 좀 더 복잡하거나 함수들을 포함하기도 한다.
+
