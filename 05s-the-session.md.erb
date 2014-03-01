@@ -1,39 +1,45 @@
 ---
-title: The Session
+title: 세션
 slug: the-session
 date: 0005/01/02
 number: 5.5
 sidebar: true
-contents: Meteor의 Session에 대해 배우자.|autorun 함수를 배우자.|Hot Code Reload에 대해 배우자.
+contents: 미티어 세션에 대하여 배운다.|autorun 함수에 대하여 배운다.|Hot Code Reload에 대하여 배운다.
 paragraphs: 33
 ---
 
-////
+Meteor is a reactive framework. What this means is that as data changes, things in your application change without you having to explicitly do anything. 
 
-////
+We've already seen this in action in how our templates change as the data and the route changes.
 
-////
+We'll dive deeper into how this works in later chapters, but for now, we'd like to introduce some basic reactive features that are extremely useful in general apps.
 
-### Meteor에서 Session
+미티어는 반응형 프레임워크이다. 이 의미는 데이터가 변경될 때, 명시적으로 무언가를 하지 않아도 앱에서 무언가 변경된다는 것이다.
 
-////
+우리는 이미 데이터와 route가 변경될 때 템플릿이 변하는 과정에서 실제로 일어나는 것을 보았다.
 
-////
+우리는 이것에 대하여 다음 장에서 더 깊이있게 살펴보기로 하고, 여기서는 일반적인 앱에서 특히 유용한 기본적인 반응형 특성에 대하여 몇 가지 소개하고자 한다.
 
-////
+### 미티어 세션
 
-### Session 변경하기
+현재 Microscope에서는, 사용자 앱의 현재 상태는 URL(그리고 데이터베이스)에 모두 들어있다.
 
-////
+하지만 많은 경우에, 앱의 현재 사용자 버전에 해당하는 일시적인 상태 정보(예를 들면, 어떤 엘리먼트가 보여지는 지, 숨겨지는 지)를 저장할 필요가 있다. 세션은 이런 것을 처리하는 데 편리한 방법이다.
+
+세션은 전역 반응형 데이터 소스이다. 이것은 전역 싱글톤 객체라는 의미에서 전역적이다: 세션은 하나이고 어디서나 접근할 수 있다. 전역 변수는 보통 나쁜 것이라는 인식이 있지만, 이 경우에 세션은 앱의 여러 다른 파트에서 접근할 수 있는 중심 통신 수단으로서 사용된다.
+
+### 세션의 변경
+
+세션은 어디에서나 `Session` 객체로 이용할 수 있다. 세션에 값을 저장하려면 아래와 같이 한다:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A different title');
 ~~~
 <%= caption "Browser console" %>
 
-////
+세션에서 값을 읽을 때는 `Session.get('mySessionProperty');`로 한다. 이것은 반응형 데이터 소스인데, 이것은 만약 헬퍼에 이것을 넣으면, 헬퍼의 출력값이 세션 변수의 변경에 따라 반응형으로 변경되는 것을 볼 수 있다는 것을 의미한다.
 
-////
+직접 해보자. 아래와 같은 코드를 layout 템플릿에 추가한다:
 
 ~~~html
 <header class="navbar">
@@ -51,30 +57,32 @@ Template.layout.helpers({
 ~~~
 <%= caption "client/views/application/layout.js"%>
 
-////
+미티어의 자동 리로드(“hot code reload” 또는 HCR로 알려진)는 세션 변수를 보호한다. 따라서, nav bar에서 “A different title”이 보일 것이다. 만약 보이지 않으면, 이전의 명령어인 `Session.set()`을 다시 한 번 입력하면 된다.
 
-////
+더욱이 우리가 그 값을 한 번 더 바꾸면(브라우저 콘솔에서), 바뀐 제목이 나타나는 것을 볼 수 있다:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A brand new title');
 ~~~
 <%= caption "Browser console" %>
 
-////
+The Session is globally available, so such changes can be made anywhere in the application. This gives us a lot of power, but can also be a trap if used too much.
+
+세션은 전역에서 이용할 수 있으므로, 이런 변경은 앱의 어디에서나 일어난다. 이는 큰 힘이 되기도 하지만, 너무 많이 사용하면 함정이 될 수도 있다.
 
 <% note do %>
 
-### 동일한 변경
+### 같은 값으로 변경
 
-////
+만약 세션 변수를 `Session.set()`으로 변경하되 동일한 값으로 변경하면, 미티어는 똑똑하게도 반응 체인에서 이를 그냥 건너뛰어 불필요한 함수 호출을 피한다.
 
 <% end %>
 
 ### Autorun 소개
 
-////
+우리는 반응형 데이터 소스의 예를 본 적이 있고, 템플릿 헬퍼의 내부에서 실제로 그것이 동작하는 것을 보았다. 그런데 미티어의 일부 context(템플릿 헬퍼 같은)는 태생부터 반응형이지만, 미티어의 앱 코드의 대부분은 여전히 전통적인 비-반응형 Javascript이다.
 
-////
+우리 앱의 일부에 아래와 같은 코드가 있다고 가정해보자:
 
 ~~~js
 helloWorld = function() {
@@ -82,11 +90,11 @@ helloWorld = function() {
 }
 ~~~
 
-////
+우리가 세션변수를 호출한다 해도, 이를 호출하는 *context*는 반응형이 아니다. 이는 변수를 변경할 때마다 alert가 구동되는 것은 아니라는 의미이다.
 
-////
+여기에서 [Autorun](http://docs.meteor.com/#deps_autorun)이 등장한다. 그 이름에서 의미하는 바와 같이, autorun 블럭의 내부의 코드는 자동적으로 실행이 되고 그 안에서 사용된 반응형 데이터 소스가 변경될 때마다 계속 실행된다.
 
-////
+아래 코드를 브라우저 콘솔에서 입력해보자:
 
 ~~~js
 ❯ Deps.autorun( function() { console.log('Value is: ' + Session.get('pageTitle')); } );
@@ -94,7 +102,9 @@ Value is: A brand new title
 ~~~
 <%= caption "Browser console" %>
 
-////
+As you might expect, the block of code provided inside the `autorun` runs once, outputting its data to the console. Now, let's try changing the title:
+
+예상한대로, autorun 내부에 입력된 코드 블럭이 실행되고, 그 결과는 콘솔에 나타난다. 이제, 제목을 변경해보자:
 
 ~~~js
 ❯ Session.set('pageTitle', 'Yet another value');
@@ -102,9 +112,9 @@ Value is: Yet another value
 ~~~
 <%= caption "Browser console" %>
 
-////
+마술같다! 세션값이 변경되니, `autorun`이 이를 인지하고 그 내부의 내용을 모두 재실행하여 그 출력을 콘솔로 내보냈다.
 
-////
+따라서 이전 예제로 돌아가서, 세션변수가 변경될 때마다 경고가 구동되게 하려면, 우리가 할 일은 코드를 `autorun` 블럭에 넣는 것이다:
 
 ~~~js
 Deps.autorun(function() {
@@ -112,15 +122,21 @@ Deps.autorun(function() {
 });
 ~~~
 
-////
+방금 본 바와 같이, autorun은 반응형 데이터 소스를 추적하고, 그것에 즉각 대응하는 데 매우 유용하다.
 
 ### Hot Code Reload
 
-////
+During our development of Microscope, we've been taking advantage of one of Meteor's time-saving features: hot code reload (HCR). Whenever we save one of our source code files, Meteor detects the changes and transparently restarts the running Meteor server, informing each client to reload the page.
 
-////
+This is similar to an automatic reload of the page, but with an important difference. 
 
-////
+To find out what that is, start by resetting the session variable we've been using:
+
+Microscope를 개발하는 동안, 우리는 미티어의 시간절약 기능 중의 하나인 hot code reload (HCR)을 이용해왔다. 우리가 소스 코드 파일 중의 하나를 저장할 때마다, 미티어는 이를 감지하고 현재 실행중인 미티어 서버를 재실행하고 각 클라이언트에 해당 페이지를 다시 로드하도록 통지한다.
+
+이것은 페이지의 자동 리로드와 비슷하지만 중요한 차이점이 있다.
+
+그것이 무엇인지를 알기 위해서, 우리가 사용한 세션 변수를 리셋해보자:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A brand new title');
@@ -129,7 +145,7 @@ Deps.autorun(function() {
 ~~~
 <%= caption "Browser console" %>
 
-////
+만약 브라우저 창을 수동으로 리로드하면, 세션 변수는 자연적으로 소멸될 것이다(이렇게 하면 새로운 세션이 생성되기 때문이다). 반면에 hot code reload 기능을 구동하면 (예를들면, 소스파일의 일부를 저장하여), 페이지는 리로드되지만 세션변수는 여전히 값을 유지할 것이다. 지금 해보라!
 
 ~~~js
 ❯ Session.get('pageTitle');
@@ -137,11 +153,11 @@ Deps.autorun(function() {
 ~~~
 <%= caption "Browser console" %>
 
-////
+그러므로, 사용자가 무엇을 하고 있는지를 정확하게 추적하려고 세션 변수를 사용한다면, HCR은 그 사용자에게 한없이 투명해야 한다. 이것이 모든 세션변수의 값을 보존하기 때문이다. 이것으로 사용자에게 지장을 최소화할 것이라는 확신을 가지고 미티어 앱의 제품화 버전을 배포할 수 있게 된다.
 
-////
+잠깐 이에 대하여 숙고해보자. 우리가 URL와 세션에 모든 상태값을 저장하게 되면, 각 클라이언트마다 최소한의 지장을 주는 수준에서 앱의 실행중인 소스코드를 명백하게 변경할 수 있다.
 
-////
+이제 페이지를 수동으로 갱신할 때 무슨 일이 벌어지는 지를 살펴보자:
 
 ~~~js
 ❯ Session.get('pageTitle');
@@ -149,9 +165,10 @@ null
 ~~~
 <%= caption "Browser console" %>
 
-////
+페이지가 리로드되면, 세션 정보는 사라진다. HCR에서 미티어는 세션을 브라우저에 있는 로컬 저장소에 저장하다. 그리고 리로드 후에 그것을 다시 읽어들인다. 그런데, 명시적인 리로드에서의 다른 행위는 의미가 있다: 사용자가 페이지를 리로드하면, 그것은 사용자가 동일한 URL로 브라우징을 다시 한 것으로 인식한다. 그래서 그 세션 정보를 초기화되어 사용자가 해당 URL을 방문할 때 보는 초기상태로 설정된다.
 
-////
+이 모두에서 얻는 중요한 교훈은 다음과 같다:
 
-1. ////
-2. ////
+  1. 항상 사용자 상태를 세션이나 URL에 저장하여 변경된 코드의 리로드가 일어날 때, 사용자가 받는 영향을 최소화하도록 한다.
+  2. 사용자들 사이에 공유되기를 원하는 어떤 상태이든 *URL에 저장하라*.
+
