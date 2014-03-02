@@ -1,25 +1,25 @@
 ---
-title: 사용자 추가하기
+title: 사용자 추가
 slug: adding-users
 date: 0006/01/01
 number: 6
-contents: Meteor에서 사용자 계정에 대해 배운다.|Microscope에 필요한 모든 인증을 추가한다.|기존에 만들어 놓은 accounts-ui package로 즉석에서 사용자 인터페이스를 만든다.
+contents: 미티어에서 사용자 계정에 대해 배운다.|Microscope에 필요한 모든 인증과정을 추가한다.|빌트인 accounts-ui 패키지로 순식간에 사용자 인터페이스를 만든다.
 paragraphs: 27
 ---
 
-////
+이제까지, 우리는 일부 정적 데이터를 적절하게 만들어 화면에 보여주었고, 이들을 서로 연결하여 간단한 프로토타입을 구성하여 보았다. 
 
-////
+UI가 데이터의 변경에 어떻게 반응하는 지도 보았고, 추가되거나 수정된 데이터가 바로 화면에 나타나는 것도 보았다. 하지만, 여전히 우리 사이트는 데이터를 입력하지 못하고 있다. 사실 우리는 아직 사용자조차도 없다!
 
-////
+이런 문제를 처리하는 방법을 알아보자.
 
-### Accounts: 사용자를 단순하게
+### 계정: 간단하게 만들어지는 사용자
 
-////
+대부분의 웹 프레임워크에서 사용자 계정을 추가하는 일은 익숙하면서도 지루한 일거리다. 확실히, 이 일은 거의 모든 프로젝트에서 구현해야 하지만, 결코 쉽지 않다. 더군다나, OAuth나 다른 서드파티 인증 체계를 처리해야 하는 경우에는 일거리는 불쾌할 정도로 늘어난다.
 
-////
+다행히, 미티어가 알아서 해준다. 미티어 패키지가 서버(Javascript)와 클라이언트(JavaScript, HTML, 그리고 CSS) 양쪽에서 작동하는 덕분에 계정 시스템이 거의 공짜로 구현된다.
 
-////
+우리는 미티어의 계정에 대한 빌트인 UI(`mrt add accounts-ui` 명령으로)를 사용하면 되는데, 현재 앱을 Bootstrap으로 구현하고 있으므로, 대신에 `accounts-ui-bootstrap-dropdown` 패키지(걱정마라. 다른 점은 오로지 스타일뿐이다)로 구현한다. 커맨드 라인에서 다음과 같이 입력한다:
 
 ~~~bash
 $ mrt add accounts-ui-bootstrap-dropdown
@@ -27,9 +27,9 @@ $ mrt add accounts-password
 ~~~
 <%= caption "Terminal" %>
 
-////
+위의 두 명령어는 특별한 accounts 템플릿을 제공한다; 우리는 이들을 사이트에서 `{{loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{loginButtons align="right"}}`).
 
-////
+헤더에 버튼을 추가한다. 그리고 헤더가 좀 커질 수 있으므로, 템플릿에 공간을 좀 더 주도록 하자(이것을 `client/views/includes/`에 넣는다). 또한 일부 추가 마크업과 Bootstrap 클래스를 사용하여 외관을 멋지게 마무리한다:
 
 ~~~html
 <template name="layout">
@@ -65,13 +65,13 @@ $ mrt add accounts-password
 ~~~
 <%= caption "client/views/includes/header.html" %>
 
-////
+이제, 브라우저로 앱을 열면, 사이트의 우상단에 계정 로그인 버튼을 볼 수 있다.
 
 <%= screenshot "6-1", "Meteor's built-in accounts UI" %>
 
-////
+이것으로 회원 가입, 로그인, 비밀번호 변경 요청, 그리고 비밀번호 기반의 계정 시스템에서 요구되는 그 밖의 모든 것을 구현할 수 있다.
 
-////
+이 계정 시스템에서 username으로 로그인을 구현하도록 설정하려면, `client/helpers/` 내부에 `config.js` 파일을 만들고 여기에 `Accounts.ui` 설정 블럭을 만들어 적용한다:
 
 ~~~js
 Accounts.ui.config({
@@ -82,20 +82,20 @@ Accounts.ui.config({
 
 <%= commit "6-1", "Added accounts and added template to the header" %>
 
-### Creating Our First User
+### 첫 사용자 등록하기
 
-////
+계속해서 계정을 등록해보자: "Sign in" 버튼이 등록한 username으로 바뀌어 보여질 것이다. 이것은 계정이 생성되었음을 의미한다. 그런데 이 계정 데이터는 어디서 온 것일까?
 
-////
+`accounts` 패키지를 추가함으로써, 미티어는 특별한 컬렉션을 생성하였고, 이것은 `Meteor.users`로 접근할 수 있다. 이를 보려면, 브라우저 콘솔을 열고 다음과 같이 입력해보라:
 
 ~~~js
 ❯ Meteor.users.findOne();
 ~~~
 <%= caption "Browser console" %>
 
-////
+콘솔은 방금 입력한 사용자 정보를 담은 객체를 리턴할 것이다; 이를 살펴보면, 등록한 username이 있고, 유일한 키인 `_id`도 들어있다. `Meteor.user()` 명령으로도 현재 로그인한 사용자 정보를 얻을 수 있다.
 
-////
+이제 로그아웃하고 다른 계정을 등록해보자. `Meteor.user()` 명령은 두 번째 사용자 정보를 리턴할 것이다. 그런데, 다음을 실행해보자:
 
 ~~~js
 ❯ Meteor.users.find().count();
@@ -103,9 +103,9 @@ Accounts.ui.config({
 ~~~
 <%= caption "Browser console" %>
 
-////
+콘솔은 1을 리턴한다. 잠깐 2이어야 하지 않나? 첫 번째 등록한 계정은 삭제된 것일까? 첫 번째 계정으로 다시 로그인해보면 그것은 아니라는 것을 알게 될 것이다.
 
-////
+Canonical 데이터 저장소인 Mongo 데이터베이스에서 확인해보자. Mongo에 로그인(터미널에서 `meteor mongo`를 입력한다)하여 확인해보자:
 
 ~~~bash
 > db.users.count()
@@ -113,21 +113,23 @@ Accounts.ui.config({
 ~~~
 <%= caption "Mongo console" %>
 
-////
+There are definitely two users. So why can we only see a single one at a time in the browser?
 
-### 미스터리한 Publication(출판)!
+분명히 두 명의 사용자가 있다. 그러면, 왜 브라우저에서는 한 명만 보이는 것일까?
 
-////
+### 미스터리한 발행(Publication)!
 
-////
+4장을 돌이켜보면, `autopublish` 기능을 꺼두었던 일을 기억할 것이다. 이것으로 서버의 컬렉션에 담긴 모든 데이터가 연결된 클라이언트의 로컬 컬렉션으로 자동으로 보내지는 것을 중지한 것이다. 우리는 발행과 구독의 쌍을 구현하여 그 데이터가 서로 전달되도록 해야 한다.
 
-////
+그런데, 우리는 계정에 대한 발행은 설정한 적이 없다. 그러니 우리가 어떻게 사용자 정보를 볼 수 있겠는가?
 
-////
+답은 `accounts` 패키지는 현재 로그인한 사용자 계정에 대하여만 "auto-publish"를 한다는 것이다. 이것이 작동하지 않으면, 사용자는 결코 사이트에 로그인 할 수가 없다!
 
-////
+accounts 패키지는 현재 사용자 계정만을 발행한다. 이것이 바로 한 사용자가 또 다른 사용자의  계정 정보를 볼 수 없는 이유를 설명해준다.
 
-////
+그러므로 발행은 로그인한 사용자당 하나의 계정 객체(로그인하지 않으면 하나도 없다)만을 발행한다.
+
+더욱이, 사용자 계정 컬렉션의 내용을 보면 서버에서와 클라이언트에서 동일한 필드를 보여주지 않는다는 것도 알 수 있다. Mongo에서 사용자 계정은 많은 데이터를 가지고 있다. Mongo 터미널에서 다음을 입력해보자:
 
 ~~~bash
 > db.users.findOne()
@@ -156,7 +158,7 @@ Accounts.ui.config({
 ~~~
 <%= caption "Mongo console" %>
 
-////
+한편, 브라우저에서 사용자 계정 정보는 동일한 명령어를 입력하여 보면, 훨씬 줄어들어 있다는 것을 볼 수 있다:
 
 ~~~js
 ❯ Meteor.users.findOne();
@@ -164,7 +166,7 @@ Object {_id: "kYdBd9hr3fWPGPcii", username: "tmeasday"}
 ~~~
 <%= caption "Browser console" %>
 
-////
+이 예제는 로컬 컬렉션이 어떻게 실제 데이터베이스의 *보안이 강화된 부분집합*이 되는 지를 보여준다. 로그인 사용자는 실제 작동에 필요한 데이터만을 볼 수 있는 것이다 (이 경우, 로그인). 이는 배워둘 만한 유용한 패턴으로 나중에 볼 것이다.
 
-////
+이것이 보다 많은 데이터를 공개하고자 할 때, 이를 할 수 없다는 의미는 아니다. [Meteor docs](http://docs.meteor.com/#meteor_users)를 참조하면 `Meteor.users` 컬렉션에서 더 많은 필드를 공개하는 방법을 알 수 있다.
 
