@@ -8,12 +8,6 @@ contents: 미티어 세션에 대하여 배운다.|autorun 함수에 대하여 �
 paragraphs: 33
 ---
 
-Meteor is a reactive framework. What this means is that as data changes, things in your application change without you having to explicitly do anything. 
-
-We've already seen this in action in how our templates change as the data and the route changes.
-
-We'll dive deeper into how this works in later chapters, but for now, we'd like to introduce some basic reactive features that are extremely useful in general apps.
-
 미티어는 반응형 프레임워크이다. 이 의미는 데이터가 변경될 때, 명시적으로 무언가를 하지 않아도 앱에서 무언가 변경된다는 것이다.
 
 우리는 이미 데이터와 route가 변경될 때 템플릿이 변하는 과정에서 실제로 일어나는 것을 보았다.
@@ -65,8 +59,6 @@ Template.layout.helpers({
 ❯ Session.set('pageTitle', 'A brand new title');
 ~~~
 <%= caption "Browser console" %>
-
-The Session is globally available, so such changes can be made anywhere in the application. This gives us a lot of power, but can also be a trap if used too much.
 
 세션은 전역에서 이용할 수 있으므로, 이런 변경은 앱의 어디에서나 일어난다. 이는 큰 힘이 되기도 하지만, 너무 많이 사용하면 함정이 될 수도 있다.
 
@@ -125,12 +117,6 @@ Deps.autorun(function() {
 방금 본 바와 같이, autorun은 반응형 데이터 소스를 추적하고, 그것에 즉각 대응하는 데 매우 유용하다.
 
 ### Hot Code Reload
-
-During our development of Microscope, we've been taking advantage of one of Meteor's time-saving features: hot code reload (HCR). Whenever we save one of our source code files, Meteor detects the changes and transparently restarts the running Meteor server, informing each client to reload the page.
-
-This is similar to an automatic reload of the page, but with an important difference. 
-
-To find out what that is, start by resetting the session variable we've been using:
 
 Microscope를 개발하는 동안, 우리는 미티어의 시간절약 기능 중의 하나인 hot code reload (HCR)을 이용해왔다. 우리가 소스 코드 파일 중의 하나를 저장할 때마다, 미티어는 이를 감지하고 현재 실행중인 미티어 서버를 재실행하고 각 클라이언트에 해당 페이지를 다시 로드하도록 통지한다.
 
