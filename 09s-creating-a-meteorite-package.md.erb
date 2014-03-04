@@ -1,18 +1,25 @@
 ---
-title: Creating a Meteorite Package
+title: Meteorite 패키지 만들기
 slug: creating-a-meteorite-package
 date: 0009/01/02
 number: 9.5
 sidebar: true
-contents: Write a local in-app package.|Write some tests for your package.|Release your package on Atmosphere.
+contents: Local in-app 패키지를 작성한다.|패키지에 대한 몇 가지 테스트 방법을 알아본다.|작성한 패키지를 Atmosphere에 릴리즈한다.
 paragraphs: 22
 ---
 
-////
+We've built a re-usable pattern with our errors work, so why not package it up into a smart package and share it with the rest of the Meteor community?
 
-////
+First we need to create some structure for our package to reside in. We put the package in a directory named `packages/errors/`. This creates a custom package that's automatically used. (You might have noticed that Meteorite installs packages via symlinks in the `packages/` directory).
 
-////
+Second, we'll create `package.js` in that folder, the file that informs Meteor of how the package should be used, and the symbols that it exports.
+
+오류에 대한 재사용 가능한 패턴을 구축했는데, 이를 묶어 스마트 패키지를 만들고 이를 미티어 커뮤니티에서 공유하도록 하면 어떨까?
+
+첫째, 이 패키지의 구조를 만들어야 한다. 우리는 이 패키지를 `packages/errors` 라는 이름의 디렉토리에 넣는다. 이렇게 하면 자동으로 사용되는 커스텀 패키지가 된다(Meteorite가 `packages/` 디렉토리 에 symlink로 패키지를 설치한다는 사실을 알고 있었을 지 모르겠다.). 
+
+
+둘째, 그 폴더에 `package.js`를 만든다. 이 파일은 미티어에게 해당 패키지를 사용하는 방법과 그 패키지가 내보내는 symbol들을 알려준다.
 
 ~~~js
 Package.describe({
@@ -30,7 +37,7 @@ Package.on_use(function (api, where) {
 ~~~
 <%= caption "packages/errors/package.js" %>
 
-////
+이 패키지에 세 개의 파일들을 추가한다. 이 파일들은 Microscope에서 가져오는데 네임스페이스를 바꾸는 것과 약간 개선된 API를 제외하면 거의 변화가 없다:
 
 ~~~js
 Errors = {
@@ -80,9 +87,9 @@ Template.meteorError.rendered = function() {
 ~~~
 <%= caption "packages/errors/errors_list.js" %>
 
-### Testing the package out with Microscope
+### Microscope로 패키지 테스트하기
 
-////
+작성한 코드가 작동하는 지를 확인하기 위해 로컬에서 Microscope로 테스트를 진행한다. 패키지를 프로젝트에 연동하기 위해 `meteor add errors` 명령을 수행한다. 그 다음, 이 새 패키지로 인해서 불필요하게된 기존의 파일들을 삭제한다:
 
 ~~~bash
 $ rm client/helpers/errors.js
@@ -91,7 +98,7 @@ $ rm client/views/includes/errors.js
 ~~~
 <%= caption "removing old files on the bash console" %>
 
-////
+한 가지 더 할 일은 올바른 API를 사용하도록 약간 수정을 하는 것이다:
 
 ~~~js
 Router.before(function() { Errors.clearSeen(); });
@@ -123,13 +130,17 @@ Posts.update(currentPostId, {$set: postProperties}, function(error) {
 
 <%= scommit "9-5-1", "Created basic errors package and linked it in." %>
 
-////
+이 수정작업이 완료되고 나면, 패키지 이전의 상태로 되돌려야 한다.
 
-### Writing tests
+### 테스트 작성하기
 
-////
+The first step in developing a package is testing it against an application, but the next is to write a test suite that properly tests the package's behaviour. Meteor itself comes with Tinytest (a built in package tester), which makes it easy to run such tests and maintain peace of mind when sharing our package with others.
 
-////
+Let's create a test file that uses Tinytest to run some tests against the errors codebase:
+
+패키지를 개발하는 첫 단계는 애플리케이션에서 테스트하는 것이지만, 그 다음 단계는 패키지의 작동을 적절하게 테스트하는 테스트 세트를 작성하는 것이다. 미티어 자체에 Tinytest(빌트인 패키지 테스터)가 들어있는 데, 이것을 이용하면 테스트를 쉽게 할 수 있고, 다른 사람들과 이 패키지를 공유할 때 평정심을 유지할 수 있다.
+
+오류 코드로 몇 가지 테스트를 수행하기 위해 Tinytest를 사용하는 테스트 파일을 만들어보자:
 
 ~~~js
 Tinytest.add("Errors collection works", function(test) {
@@ -163,11 +174,17 @@ Tinytest.addAsync("Errors template works", function(test, done) {
 ~~~
 <%= caption "packages/errors/errors_tests.js" %>
 
-////
+In these tests we're checking the basic `Meteor.Errors` functions work, as well as double checking that the `rendered` code in the template is still functioning.
 
-////
+We won't cover the specifics of writing Meteor package tests here (as the API is not yet finalized and highly in flux), but hopefully it's fairly self explanatory how it works.
 
-////
+To tell Meteor how to run the tests in `package.js`, use the following code:
+
+이 테스트에서는 기본함수인 `Meteor.Errors`이 동작하는 지를 검사한다. 뿐만 아니라 템플릿에서 `rendered` 코드가 여전히 기능하는 지에 대해서도 검사한다.
+
+미티어 패키지 테스트를 작성하는 과정의 세세한 것까지 여기서 다루지는 않을 것이다(API는 아직 확정된 것이 아니고 매우 유동적이다). 하지만 희망하건데 이것의 작동 방법은 자체로 입증이 될 것이다.
+
+미티어에게 `package.js`에서의 테스트 실행 방법을 지시하려면 다음 코드를 사용하기 바란다:
 
 ~~~js
 Package.on_test(function(api) {
@@ -181,7 +198,7 @@ Package.on_test(function(api) {
 
 <%= scommit "9-5-2", "Added tests to the package." %>
 
-////
+그러면 다음 명령어로 테스트를 실행할 수 있다:
 
 ~~~bash
 $ meteor test-packages errors
@@ -190,11 +207,11 @@ $ meteor test-packages errors
 
 <%= screenshot "s7-1", "Passing all tests" %>
 
-### Releasing the package
+### 패키지 릴리즈
 
-////
+이제, 패키지를 릴리즈하여 모두가 이를 이용할 수 있게 하려고 한다. 그렇게 하려면 Atmosphere에 올리면 된다.
 
-////
+우선, `smart.json`을 추가하여 Meteorite와 Atmosphere에 그 패키지에 대한 중요한 상세 내용을 알린다:
 
 ~~~json
 {
@@ -212,11 +229,17 @@ $ meteor test-packages errors
 
 <%= scommit "9-5-3", "Added a smart.json" %>
 
-////
+We put in some basic metadata to provide information about the package, including what it does, the git location where we're going to host it, and an initial version number. If our package was relying on other Atmosphere packages, we could also use a `"packages"` section to outline its dependencies.
 
-////
+Once all this is in place, releasing is easy. We'll need to create a git repository, push to a remote git server somewhere, and link to that location in our `smart.json`.
 
-////
+The process for doing this for [GitHub](http://github.com) is to first create a new repository, then follow the standard practice to get the package's code within that repository. Then, we use the `mrt release` command to publish it:
+
+그 패키지에 대한 정보를 제공하기 위하여 몇 가지 기본적인 메타데이터를 넣는다. 여기에는 이것의 주요 기능, 호스트 git 주소, 그리고 초기 버전 정보가 포함된다. 만약 이 패키지가 다른 Atmosphere 패키지에 의존한다면, 그 의존성 정보를 기술하는 `"packages"` 섹션을 추가한다.
+
+이 모두가 마무리되면 릴리즈는 쉽다. git 저장소를 만들고 원격 git 서버로 올리고, `smart.json`에 그 주소에 대한 연결정보를 추가한다.
+
+[GitHub](http://github.com)에서 이 작업을 하려면, 우선 새 저장소를 만든 다음, 그 저장소에서 패키지의 코드를 얻는 일반적인 과정을 따른다. 그리고, `mrt release` 명령어를 사용하여 게재한다:
 
 ~~~bash
 $ git init
@@ -229,11 +252,11 @@ Done!
 ~~~
 <%= caption "Terminal (run from within `packages/errors`)" %>
 
-////
+주: 패키지 이름은 유일해야 한다. 위의 내용을 문자 그대로 따라하여 동일한 패키지 이름을 사용하면, 충돌이 발생해서 작동하지 않게 될 것이다. 미래에 Atmosphere는 저자에 따른 네임스페이스를 가지게 될 것이므로, 이 이름이 바뀔 수 있다는 점을 감안하기 바란다.
 
-////
+두 번째 주:  http://atmosphere.meteor.com에 로그인하여 `mrt release`를 호출할 때 커맨드 라인에서 입력할 username과 비밀번호를 만들어야 한다.
 
-////
+이제 패키지가 릴리즈되면, 프로젝트에서 그것을 제거하고 Meteorite를 이용하여 그것을 직접 복원한다:
 
 ~~~bash
 $ rm -r packages/errors
@@ -243,4 +266,4 @@ $ mrt add errors
 
 <%= scommit "9-5-4", "Removed package from development tree." %>
 
-////
+이제 Meteorite에서 패키지를 다운로드하는 것을 처음으로 볼 수 있을 것이다. 잘했다!
