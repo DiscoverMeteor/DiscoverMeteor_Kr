@@ -1,23 +1,35 @@
 ---
-title: Pagination
+title: 페이지 만들기
 slug: pagination
 date: 0012/01/01
 number: 12
-contents: Learn more about Meteor's subscriptions, and how we can use them to control data.|Implement infinite-style pagination.|Use the `iron-router-progress` package to implement a nifty iOS-style progress bar.|Create a special subscription to deal with direct links to posts page.
+contents: 미티어의 구독에 대하여 더 상세하게 배운다. 그리고 이를 이용하여 데이터를 제어하는 법을 배운다.|무한 방식의 페이지 만들기를 구현한다.|`iron-router-progress`패키지를 이용하여 멋진 iOS 스타일의 프로그레스 바를 구현한다.|Post 페이지에 대한 직접 링크를 처리하는 특별한 구독을 만든다.
 paragraphs: 67
 ---
 
-////
+Things are looking great with Microscope, and we can expect a hit reception when it's released to the world. 
 
-////
+So we should probably think a little about the performance implication of the number of new posts that will be entered into the site as it takes off!
 
-////
+We've spoken before about how a client-side collection should contain a subset of the data on the server, and we've even managed to achieve this for our notification and comments collections. 
 
-////
+At present though, we are still publishing all of our posts in one go, to all connected users. Eventually, if thousands of links are posted, this will become problematic. To solve this, we need to paginate our posts.
 
 ### Adding More Posts
 
-////
+First, in our fixture data, let's load up enough posts so that pagination actually makes sense:
+
+Microscope는 훌륭해 보인다. 그리고 우리는 이것이 세계에 모습을 드러낼 때 큰 환영을 기대한다. 
+
+그래서 우리는 이것이 등장할 때, 등록될 수 많은 post들로 인한 성능에의 영향을 걱정을 할 수도 있다!
+
+우리는 앞서 클라이언트 쪽의 컬렉션이 서버에 있는 데이터의 부분집합을 가지는 방법에 대하여 다룬 적이 있다. 그리고 알림과 댓글 컬렉션에서 이 방식을 구현하여 왔다.
+
+현재까지는 여전히 우리는 모든 post를 연결된 모든 사용자에게 발행하고 있다. 결국 수 천 개의 링크가 등록된다면 이것은 문제가 될 것이다. 이를 위해서 우리의 post에 대하여 페이징 처리를 할 필요가 있다.
+
+더 많은 Post 추가하기
+
+첫째, 초기 설정 데이터에서 페이징이 의미를 가지는 충분한 post 목록을 로드하도록 한다:
 
 ~~~js
 // Fixture data 
@@ -49,25 +61,25 @@ if (Posts.find().count() === 0) {
 <%= caption "server/fixtures.js" %>
 <%= highlight "15~24" %>
 
-////
+`meteor reset`을 실행하고 나면, 다음과 같은 화면을 보게 될 것이다:
 
 <%= screenshot "12-1", "Displaying dummy data. " %>
 
 <%= commit "12-1", "Added enough posts that pagination is necessary." %>
 
-### Infinite Pagination
+### 무한 방식의 페이지
 
-////
+우리는 "무한" 방식의 페이징을 구현할 것이다. 이것이 의미하는 바는, 처음에는 화면에 10개의 posts를 보여주고 아랫쪽에 "더 보기" 링크를 보여준다. 이 링크를 누르면 10개의 추가 목록을 아래에 붙인다. 이렇게 무한 반복한다. 이 의미는 화면에 보여주는 post의 갯수를 지정하는 하나의 매개변수로 전체 페이징을 제어할 수 있다는 것이다.
 
-////
+이제 필요한 것은 서버에게 이 매개변수에 대하여 알려주는 방법이다. 그래서 클라이언트에 얼마나 많은 post를 보낼 것인지를 알 수 있게 한다. 우리는 이미 라우터에서 `posts` 발행을 구독해왔다. 그래서 우리는 이를 이용하여 라우터가 페이징도 조작할 수 있게 할 것이다.
 
-////
+이를 설정하는 가장 쉬운 방법은 post의 갯수를 경로의 일부로, `http://localhost:3000/25`와 같은 형태의 폼으로 URL을 지정하는 것이다. 다른 방식에 비해서 이런 URL을 사용하는 또 하나의 장점은 현재 25개의 post를 보여주는데 실수로 브라우저 창을 새로고침한다면, 화면에는 여전히 25개의 post가 다시 보일 것이다.
 
-////
+이를 적절하게 구현하려면, 우리가 post에 구독하는 방식을 바꿀 필요가 있다. 우리가 *댓글* 장에서 했던 방식과 마찬가지로, 우리는 구독 코드를 *라우터* 수준에서 *route* 수준으로 이동할 필요가 있다.
 
-////
+이 모두를 한 번에 받아들이기에는 많아 보이지만, 코드를 보면 훨씬 명확해질 것이다.
 
-////
+우선, `Router.configure()` 블록에서 `posts` 발행에 구독하는 것을 중지할 것이다. 그리고, `Meteor.subscribe('posts')`를 삭제하고 `notifications` 구독만 남겨둔다:
 
 ~~~js
 Router.configure({
@@ -81,7 +93,7 @@ Router.configure({
 <%= caption "lib/router.js" %>
 <%= highlight "5" %>
 
-////
+그 다음, 경로에 매개변수 `postsLimit`를 추가한다. 매개변수 명 다음에 `?`를 추가하는 것은 이것이 선택적이라는 의미이다. 그러므로 route는 `http://localhost:3000/50`뿐 아니라 이전의 `http://localhost:3000`도 수용한다.
 
 ~~~js
 Router.map(function() {
@@ -95,11 +107,11 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "5" %>
 
-////
+유의할 사항은 `/:paramter?`의 형태를 가지는 경로는 모든 가능한 경로와 다 맞는다는 점이다. 각 route가 순차적으로 파싱이 이루어지면서 현재 경로와 맞는 것을 찾으므로, route의 순서를 특수성을 줄이는 방향으로 정렬을 시켜야 한다.
 
-////
+다른 말로 표현하면, `/posts/:_id` 와 같이 특정한 route를 타겟으로 하는 route는 먼저 오고 `postList` route는 거의 모든 경로와 맞게 되므로 마지막으로 이동하여야 한다.
 
-////
+이제 올바른 데이터를 찾고 구독하는 힘든 문제를 해결해야 할 시간이다. 우리는 매개변수 `postsLimit`의 값이 없는 경우 여기에 초기값을 지정하는 방법을 처리해야 한다. 초기값으로는 “5”를 지정하여 페이징처리 과정에서 충분한 여유를 두려고 한다.
 
 ~~~js
 Router.map(function() {
@@ -117,7 +129,7 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "6~9" %>
 
-////
+주목할 점은 `posts` 발행의 이름 다음에 JavaScript 객체({limit: postsLimit})를 매개변수로 전달하고 있는 것이다. 이 객체는 서버쪽의 `Posts.find()`문에 대하여 `options` 매개변수를 제공할 것이다. 서버쪽 코드를 이것을 구현한 것으로 바꾸어 보자:
 
 ~~~js
 Meteor.publish('posts', function(options) {
@@ -137,15 +149,15 @@ Meteor.publish('notifications', function() {
 
 <% note do %>
 
-### Passing Parameters
+### 매개변수 전달
 
-////
+위의 발행 코드는 요컨데 `find()`문의 매개변수 `options`에 대하여 클라이언트(여기서는 `{limit: postsLimit}`)가 어떤 Javascript 객체를 보내더라도 신뢰할 수 있다고 서버에게 말하는 것이다. 그러므로 사용자가 브라우저 콘솔을 통해서 임의의 options을 전송하는 것도 가능하다.
 
-////
+우리의 경우, 이것은 상대적으로 해가 되지는 않는데, 사용자가 할 수 있는 것이 post를 다르게 재정렬하는 것이거나 또는 (우리가 처음에 원했던) 한계치를 변경하는 것이기 때문이다.
 
-////
+그러나, 발행되지 않은 필드에 데이터를 저장할 때에는 이 패턴을 사용해서는 안되는 데, 사용자가 그것에 접근하려고 `fields` 옵션을 조작할 수 있기 때문이다. 그리고 아마도 그것을 `find()` 문의 셀렉터 매개변수에 사용하는 것도 동일한 보안상의 이유로 피했을 것이다.
 
-////
+보다 안전한 패턴은 데이터를 확실하게 통제하기 위하여 전체 객체 대신에 개별 매개변수를 전달하는 것이다:
 
 ~~~js
 Meteor.publish('posts', function(sort, limit) {
@@ -155,9 +167,9 @@ Meteor.publish('posts', function(sort, limit) {
 
 <% end %>
 
-////
+이제 route 수준에서 구독하려면, 같은 자리에 데이터 컨텍스트를 설정하는 것이 의미가 있다. 우리는 이전의 패턴에서 약간 벗어나서 `data` 함수가 커서를 리턴하는 대신에 Javascript 객체를 리턴하도록 할 것이다. 이렇게 하여 우리가 *named* data context를 생성하는데, 이를 `posts`라 부른다.
 
-////
+이 의미는 단순히 템플릿 내에서 `this`로 은연중에 사용하는 대신에 데이터 컨텍스트에서 `posts`를 이용할 수 있게 될 것이다. 이 작은 요소는 제외하면 나머지 코드는 익숙할 것이다:
 
 ~~~js
 Router.map(function() {
@@ -181,9 +193,9 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "8~13" %>
 
-////
+라우터 수준에서 데이터 컨텍스트를 지정하였으므로, 우리는 `posts_list.js` 파일 내에 있는 `posts` 템플릿 헬퍼를 안전하게 제거할 수 있다. 그리고 우리가 데이터 컨텍스트를 `posts`라고 (헬퍼와 동일한 이름으로) 명명하였으므로 `postsList` 템플릿을 건들 필요도 없다!
 
-////
+다시 보자. 새로운 개선된 router.js 코드는 다음과 같다:
 
 ~~~js
 Router.configure({
@@ -217,39 +229,43 @@ Router.map(function() {
 
 <%= commit "12-2", "Augmented the postsList route to take a limit." %>
 
-////
+이 새로운 페이징 시스템을 체험해보자. 이제 URL 매개변수를 바꾸기만 하면 홈페이지의 post 숫자를 임의로 조정하여 보여줄 수 있는 상태가 되었다. 예를 들어, `http://localhost:3000/3`으로 접속해보면, 다음과 같은 화면을 보게 될 것이다:
 
 <%= screenshot "12-2", "Controlling the number of posts on the homepage. " %>
 
 <% note do %>
 
-### Why Not Pages?
+### 복수의 페이지가 아닌 이유?
 
-////
+구글 검색결과와 같이 연속되는 10개의 post를 각각 보여주는 대신에 “무한 페이징” 방식을 사용하는 이유는 무엇일까? 그것은 사실은 미티어가 받아들인 실시간 패러다임 때문이다.
 
-////
+구글 결과 페이징 패턴을 사용하여 `Posts` 컬렉션에 대한 페이징을 하는데, 현재 2 페이지에 위치하여 10번째에서 20번째의 post 목록을 보여주고 있다고 가정해보자. 만약 다른 사용자가 이전 10개의 post 중의 어느 것이라도 삭제한다면 무슨 일이 일어날까?
 
-////
+우리 앱은 실시간이므로, 데이터 세트가 변경될 것이다. 10번 post는 이제 9번 post가 되므로, 우리 시야에서 빠지는 반면에, 11번 post는 범위안에 있게 된다. 궁극적 결과는 사용자는 아무런 이유도 없이 post목록이 갑자기 변하는 것을 보게 될 것이다!
 
-////
+우리가 설사 이런 기묘한 UX를 받아들인다 해도, 전통적인 페이징 방식은 기술적 이유로도 구현하기가 어렵다.
 
-////
+이전 예제로 돌아가보자. 우리는 `Posts` 컬렉션에서 10번째에서 20번째 까지의 post 목록을 발행하고 있다. 클라이언트에서 어떻게 그 post 목록을 찾을까? 클라이언트 쪽의 데이터 세트에는 10개의 post만 있으므로 10번째에서 20번째까지의 post 목록을 추출하지 못한다.
 
-////
+한 가지 해법은 서버에서 그 10개의 post 목록을 발행하는 것이다. 그리고 클라이언트 쪽에서 `Posts.find()`를 호출하여 *모든* 발행 post 목록을 가져온다.
 
-////
+이것은 하나의 구독만 있다면 동작한다. 그러나 곧 해보겠지만, post 구독을 하나 이상의 갯수로 시작하면 어떻게 하나?
 
-////
+하나의 구독이 10에서 20까지의 post 목록을 요구한다고 해보자. 그리고 또 다른 것이 30에서 40까지의 목록을 요구한다고 하자. 이제 클라이언트에서 어느 구독에 속하는 지 모른채로 총 20개의 post를 가지게 된다.
 
-////
+이런 이유로, 전통적인 페이징 방식은 미티어에서는 별 의미가 없다.
 
 <% end %>
 
-### Creating a Route Controller
+### Route Controller 만들기
 
-////
+You might have noticed that we're repeating the `var limit = parseInt(this.params.postsLimit) || 5;` line twice. Plus, hard-coding the number “5” isn't exactly ideal. This is not the end of the world, but since it's always better to follow the DRY (Don't Repeat Yourself) principle if you can, let's see how we can refactor things a bit. 
 
-////
+We'll introduce a new aspect of Iron Router, *Route Controllers*. A route controller is simply a way to group routing features together in a nifty reusable package that any route can inherit from. Right now we'll only use it for a single route, but you'll see in the next chapter how this feature will come in handy. 
+
+다음의 `var limit = parseInt(this.params.postsLimit) || 5;` 줄이 두 번 반복되었음을 눈치챘을지 모르겠다. 여기에, 숫자 “5”이 하드코딩된 것도 바람직하지 않다. 이것이 다는 아니다. 할 수만 있다면 DRY(Don't Repeat Yourself) 원칙을 따르는 것은 항상 좋으니까, 이것을 어떻게 고치면 좋을 지 알아보자.
+
+Iron Router의 새로운 관점, *Route Controller*를 소개한다. Route controller는 어떤 route도 상속받을 수 있는 멋진 재사용가능한 패키지에 라우팅 기능들을 모아서 그룹을 만드는 간단한 방법이다. 여기서는 단일 route에 대하여만 이것을 사용하지만, 다음 장에서는 이 기능이 얼마나 편리한 지를 보게될 것이다.
 
 ~~~js
 PostsListController = RouteController.extend({
@@ -280,23 +296,23 @@ Router.map(function() {
 ~~~
 <%= caption "lib/router.js" %>
 
-////
+단계별로 해보자. 첫째, `RouteController`를 확장한 controller를 만든다. 다음, `template` 속성을 전에 했던 것처럼 지정한다. 그 다음, `increment` 속성을 지정한다.
 
-////
+그리고 새로 `limit` 함수를 만들어 현재 목록 한계치를 리턴하게 한다. 그리고 options 객체를 리턴하는 `findOptions` 함수를 만든다. 지금은 불필요한 일 같지만 나중에 이를 사용할 것이다.
 
-////
+다음 단계로, 이전처럼 `waitOn`과 `data` 함수를 정의한다. 여기서 새로 만든 `findOptions` 함수를 사용한다.
 
-////
+마지막 단계로 할 일은 새로운 controller에 대한 route를 controller 속성에 `postsList`로 지정하는 것이다.
 
 <%= commit "12-3", "Refactored postsLists route into a RouteController." %>
 
-### Adding A Load More Link
+### 더보기 링크 추가하기
 
-////
+페이징이 작동한다. 그리고 코드도 좋다. 한 가지 문제만 남았다: URL을 수동으로 바꾸는 것 말고는 페이징을 실제로 *이용할* 방법이 없다. 이 상태로는 훌륭한 사용자 체험을 줄 수 없다. 이 문제를 해결해보자.
 
-////
+우리가 원하는 것은 단순하다. Post 목록의 아랫쪽에 “load more” 버튼을 추가할 것이다. 이 버튼을 클릭할 때마다 보여지는 post 목록 갯수가 5씩 증가한다. 따라서 현재 위치가 URL 'http://localhost:3000/5`인 주소에 있다면, “load more” 버튼을 누르면 `http://localhost:3000/10` 주소로 이동해야 한다. 벌써 이걸 알았다면, 산수 좀 할 줄 안다고 믿어주겠다!
 
-////
+이전과 같이, 우리의 route에 페이징 로직을 추가하려고 한다. 우리가 익명의 커서를 사용하지 않고 명시적으로 데이터 콘텍스트를 명명했던 때가 언제인지 기억하는가? 글쎄, `data` 함수가 커서만 전달할 수 있다는 그런 규칙은 없다. 그러므로 “load more” 버튼의 URL을 사용하는데 동일한 기법을 사용할 것이다.
 
 ~~~js
 PostsListController = RouteController.extend({
@@ -327,25 +343,25 @@ PostsListController = RouteController.extend({
 <%= caption "lib/router.js" %>
 <%= highlight "16~23" %>
 
-////
+이 마술같은 라우터를 깊이있게 들여다보자. (현재 작동하는 `PostsListController controller`에서 상속받을) `postsList` route는 매개변수 `postsLimit`를 가진다는 점을 기억하기 바란다.
 
-////
+그러므로 `this.route.path()`에 `{postsLimit: this.postsLimit() + this.increment}`를 지정하는 것은 `postsList` route에 그 Javascript 객체를 데이터 컨텍스트로 사용하는 경로를 구축하라는 의미이다.
 
-////
+다른 말로 표현하면, 이것은 우리가 은연중에 `this`를 우리가 만든 데이터 컨텍스트로 바꾸는 것을 제외하면 `{{pathFor 'postsList'}}` Handlebars 헬퍼를 사용하는 것과 같다.
 
-////
+우리는 그 경로를 채택하고 이를 템플릿의 데이터 컨텍스트에 추가하되, 보여줄 post들이 *더 있을 때에만* 그렇다. 우리가 하는 방식은 다소 기교적이다.
 
-////
+`this.limit()`는 우리가 보여주려는 post의 현재 갯수를 리턴하는데 이 값은 현재 URL에 있는 값이거나 또는 URL에 매개변수가 없을 경우의 초기 설정값 (5)이다.
 
-////
+한 편, `this.posts`는 현재 커서를 가리키므로, `this.posts.fetch().length`는 커서에 실제로 존재하는 posts의 갯수를 가리킨다.
 
-////
+그러므로 여기서 우리가 말하려는 것은 `n`개의 post를 요구하면 `n`개를 얻고, 계속 “load more” 버튼을 보여준다. 그러나 `n`개를 요구했는데 `n`개보다 *적은* 갯수를 얻게되면, 한계에 온 것을 의미하고 버튼을 보여주는 것을 중단하라는 것이다.
 
-////
+말하자면, 우리 시스템은 다음의 경우에는 실패한다: 데이터베이스에 있는 아이템의 갯수가 *정확하게* `n`개일 경우다. 만약 이 경우라면, 클라이언트는 `n`개를 요구하고 `n`개를 받고, 계속 “load more” 버튼을 보여주지만, 남은 아이템이 없다는 것은 모르고 있는 상태가 된다.
 
-////
+안타깝지만, 이 문제를 간단하게 우회하는 방법은 없어서, 현재까지는 이 덜 완벽한 구현에 만족할 수 밖에 없다.
 
-////
+남은 할 일은 post 목록의 아랫쪽에 “load more” 링크를 추가하는 것이다. 그리고 로드할 post가 더 있는 지를 보여주는 것이다:
 
 ~~~html
 <template name="postsList">
@@ -363,7 +379,7 @@ PostsListController = RouteController.extend({
 <%= caption "client/views/posts/posts_list.html" %>
 <%= highlight "7~10" %>
 
-////
+Post 목록 화면은 다음과 같이 보일 것이다:
 
 <%= screenshot "12-3", "The “load more” button. " %>
 
@@ -371,28 +387,28 @@ PostsListController = RouteController.extend({
 
 <% note do %>
 
-### Count vs Length
+### Count 대 Length
 
-////
+this.posts.count()를 사용하지 않고 this.posts.fetch().length을 사용하는 것에 궁금해 할 지 모르겠다. 이것은 현재의 미티어에 존재하는 [버그](https://github.com/meteor/meteor/issues/654)를 피하기 위한 임시 방편이다. 이 버그가 빠른 시일에 해소되기를 바란다!
 
 <% end %>
 
-### A Better Progress Bar
+### 더 나은 프로그레스 바
 
-////
+페이징은 현재 잘 작동하지만, 한 가지 짜증나는 일이 있다: “load more” 버튼을 누를 때마다 라우터는 더 많은 post를 요구하고 새로운 데이터를 받을 때까지 loading 템플릿이 구동된다. 이 결과로 로딩될 때마다 페이지의 탑으로 이동해서 아랫쪽으로 스크롤해야 하는 사태가 일어난다.
 
-////
+한 페이지에서 이 작업을 계속하면, 새로운 데이터가 현재 로딩중이라는 알림이 계속 보여지고, 상태는 더욱 심해질 것이다. 다행히 `iron-router-progress` 패키지가 바로 이 문제를 해결해준다.
 
-////
+iOS의 사파리나 Medium과 유튜브같은 사이트와 유사하게, `iron-router-progress`는 얇은 로딩바를 화면의 상단에 추가한다. 이를 구현하는 것은 앱에 패키지를 추가하는 것처럼 쉽다:
 
 ~~~bash
 mrt add iron-router-progress
 ~~~
 <%= caption "bash console" %>
 
-////
+이 스마트 패키지가 부리는 마술을 통해, 우리의 새로운 프로그레스 알리미는 완벽하게 작동할 것이다. 프로그레스바는 각 route별로 작동하여, 그 route에서 요구하는 데이터 로딩이 끝나면 자동으로 완료한다.
 
-////
+한 가지 약간 고칠 것이 있다. `postSubmit` 요청을 처리할 때에는 `iron-router-progress`를 사용하지 않게 한다. 이 경우는 어떤 구독 데이터도 기다릴 필요가 없기 때문이다(사실상, 이것은 그저 빈 폼이다):
 
 ~~~js
 Router.map(function() {
@@ -410,17 +426,17 @@ Router.map(function() {
 
 <%= commit "12-5", "Use the iron-router-progress package to make pagination nicer." %>
 
-### Accessing Any Post
+### Post 열람페이지 접속
 
-////
+우리는 현재 초기 설정값으로 첫 5개의 post를 보여주게 하고 있다. 그런데, 특정 post페이지로 브라우징하면 무슨 일이 일어날까?
 
 <%= screenshot "12-4", "An empty template." %>
 
-////
+해보면, 빈 post 템플릿으로 채워진 페이지를 보게 될 것이다. 이것은 말이 된다: 우리는 라우터에게 `postsList` 경로를 로드할 때 `posts` 발행을 구독하라고 했지만, `postPage` 경로에 대하여는 지시한 바가 없다.
 
-////
+그러나 지금까지, 우리가 알고 있는 방법은 `n` 개의 최근 post 목록에 구독하는 것이다. 그러면 한 개의 단일 post에 대하여 서버에 어떻게 요청할까? 여기서 약간의 비밀을 알려줄 것이다: 각 컬렉션에 한 개 이상의 발행이 가능하다!
 
-////
+이 빠진 부분을 채워넣기 위해서, 우리는 `_id`로 구하는 하나의 post만을 발행하는 새로운 `singlePost` 구독을 만든다.
 
 ~~~js
 Meteor.publish('posts', function(options) {
@@ -434,7 +450,7 @@ Meteor.publish('singlePost', function(id) {
 <%= caption "server/publications.js" %>
 <%= highlight "5~7" %>
 
-////
+이제 클라이언트 쪽의 post 목록을 구독한다. 우리는 이미 `postPage` route의 `waitOn` 함수에 `comments` 발행을 구독하고 있다. 그래서 여기에 `singlePost`에 대한 구독을 추가한다. 그리고 같은 데이터를 요구하는 `postEdit` route에도 동일한 구독을 추가하는 것을 잊지 말라.:
 
 ~~~js
 Router.map(function() {
@@ -469,4 +485,4 @@ Router.map(function() {
 
 <%= commit "12-6","Use a single post subscription to ensure that we can always see the right post." %>
 
-////
+페이징이 구현되니 우리 앱은 이제 더 이상 확장성 문제로 어려움을 겪지 않는다. 그리고 사용자들은 전보다 더 많은 링크를 등록할 수 있다. 이제 이 링크에 순위를 매기는 것이 좋을까? 이것이 바로 다음 장의 주제, *투표*이다.
