@@ -1,35 +1,36 @@
 ---
-title: Voting
+title: 투표
 slug: voting
 date: 0013/01/01
 number: 13
-contents: Build a system where users can vote on posts.|Rank our posts by vote on a "best" post page.|Learn how to write a general handlebars helper.|Learn a little more about data security in Meteor.|Cover some interesting performance considerations in MongoDB.
+contents: 사용자가 post에 투표할 수 있는 시스템을 구축한다.|Post에 "best" 투표를 한 것으로 post들의 순위를 매긴다.|일반적인 handlebars 헬퍼 작성법을 배운다.|미티어에서의 데이터 보안에 대하여 더 상세히 배운다.|MongoDB에서의 몇 가지 흥미로운 성능 개선 방안을 다룬다.
 paragraphs: 49
 ---
 
-////
+사이트가 점점 인기가 올라가면, 최고 링크를 찾는 일은 빠르게 기교를 요구하게 된다. 이제 필요한 것은 post에 대한 일종의 순위 시스템이다.
 
-////
+우리가 이용자의 활동, 시간 경과에 따른 포인트의 감소, 그리고 기타 다양한 방식을 가지는 복잡한 순위 시스템을 구축할 수 도 있다 (이 대부분이 Microscope의 빅브라더인 [Telescope](http://telesc.pe)에는 구현되어 있다). 하지만 여기서는 단순하게 각 post가 받는 투표 숫자로 순위를 매기기로 한다.
 
-////
+post에 사용자가 투표를 할 수 있는 방법을 구현하여 시작해보자.
 
-### Data Model
+### 데이터 모델
 
-////
+우리는 사용자에게 투표 버튼을 보여줄 지 말지를 판단하고 사용자들이 투표를 두 번 하지 않도록 하기 위하여 각 post별로 투표자의 목록을 저장하려고 한다.
 
 <% note do %>
 
-### Data Privacy & Publications
+### 데이터 프라이버시와 발행
 
-////
+이 투표자 목록은 모든 사용자에게 발행될 것이고, 따라서 브라우저 콘솔을 통해서 이 데이터를 공개적으로 접근할 수 있도록 할 것이다.
 
-////
+이로 인해서 컬렉션의 작동 방식으로부터 일종의 데이터 프라이버시 문제가 발생한다. 예를 들면, 사람들이 각 post에 누가 투표했는지를 볼 수 있도록 하는 것을 우리가 원할까? 이 경우, 이들 정보를 공개하는 것이 정말로 주목을 받지는 않겠지만, 최소한 이런 이슈가 있다는 것을 알고 있는 것은 중요하다.
 
-////
+Also note that if we *did* want to restrict some of this information, we'd have to make sure that the client can't tamper with the `fields` options of our publication, either by removing that property server-side, or by not passing the whole options object from client to server. 
 
+또한, 우리가 이러한 정보의 일부라도 제한하기를 *정말로* 원한다면, 클라이언트가 서버쪽에서 속성을 제거하거나 또는 클라이언트에서 서버로 전체 옵션 객체를 전달하지 않는 식으로, 발행의 'fields' 옵션을 조작할 수 없다는 것을 확실하게 해두어야 한다.
 <% end %>
 
-////
+또한 임의의 post에 대한 투표자의 총 숫자를 비정규화하여 그 값을 보다 쉽게 얻을 수 있게 할 것이다. 그래서 post에 두 개의 속성, `upvoters`와 `votes`를 추가한다. 먼저 이를 초기화 파일에 추가하도록 하자:
 
 ~~~js
 // Fixture data 
@@ -108,7 +109,7 @@ if (Posts.find().count() === 0) {
 <%= caption "server/fixtures.js" %>
 <%= highlight "22, 48, 58, 69" %>
 
-////
+그래 왔던대로, 앱을 중지하고, `meteor reset`를 실행하고, 앱을 재시동하고, 새로 계정을 등록한다. 그리고 post가 등록될 때, 두 속성이 초기화되는 것을 확인하기 바란다:
 
 ~~~js
 //...
@@ -139,9 +140,9 @@ return postId;
 <%= caption "collections/posts.js" %>
 <%= highlight "16~17" %>
 
-### Building our Voting Templates
+### 투표 템플릿 구축하기
 
-////
+먼저, post 부분에 지지 버튼을 추가한다:
 
 ~~~html
 <template name="postItem">
@@ -165,7 +166,7 @@ return postId;
 
 <%= screenshot "13-1", "The upvote button" %>
 
-////
+다음, 사용자가 버튼을 클릭할 때, 서버의 upvote 메서드를 호출한다:
 
 ~~~js
 //...
@@ -180,7 +181,7 @@ Template.postItem.events({
 <%= caption "client/views/posts/post_item.js" %>
 <%= highlight "3~8" %>
 
-////
+마지막으로, `collections/posts.js` 파일에 post의 투표 숫자를 증가시키는 서버쪽 메서드를 추가한다:
 
 ~~~js
 Meteor.methods({
@@ -213,13 +214,13 @@ Meteor.methods({
 
 <%= commit "13-1", "Added basic upvoting algorithm." %>
 
-////
+이 메서드는 쭉 따라가면 된다. 사용자가 로그인 상태인지를 검사하고, post가 정말 존재하는 지를 검사한다. 그리고 사용자가 해당 post에 이미 투표했는 지를 검사하고, 하지 않았으면 총 투표수를 1 증가시킨 다음 투표자 명단에 그 사용자를 추가한다.
 
-////
+이 마지막 단계가 흥미로운 것은, Mongo의 특별한 연산자를 두 번 사용해서다. 이 부분에 배울 것이 많이 있지만, 특히 이 두 개는 특별히 도움이 된다: `$addToSet`은 항목을 배열 속성에 이미 존재하지 않는 경우에 추가한다. 그리고 `$inc`는 정수 필드를 단순히 1 증가시킨다.
 
-### User Interface Tweaks
+### 사용자 인터페이스 살짝 바꾸기
 
-////
+만약 사용자가 로그인 상태가 아니거나, 이미 그 post에 투표했다면, 그들은 다시 투표할 수 없다. 이것을 우리 UI에 반영하기 위해, 헬퍼를 사용하여 조건적으로 upvote 버튼에 `disabled` CSS 클래스를 추가한다.
 
 ~~~html
 <template name="postItem">
@@ -261,13 +262,13 @@ Template.postItem.events({
 <%= caption "client/views/posts/post_item.js" %>
 <%= highlight "8~15, 19" %>
 
-////
+우리는 class를 `.upvote`에서 `.upvotable`로 바꾼다. 따라서, 클릭 이벤트 핸들러도 바꾸는 것을 잊지 말기 바란다.
 
 <%= screenshot "13-2", "Greying out upvote buttons." %>
 
 <%= commit "13-2", "Grey out upvote link when not logged in / already voted." %>
 
-////
+다음, 투표수가 1인 post는 "1 vote**s**"라고 표시되는 것을 볼 수 있다. 이 부분을 적절하게 복수처리를 하도록 하자. 복수처리는 복잡한 프로세스가 될 수 있지만, 우리는 매우 단순한 방법으로 할 것이다. 어디에서나 사용할 수 있는 일반적인 Handlebars helper를 만든다:
 
 ~~~js
 Handlebars.registerHelper('pluralize', function(n, thing) {
@@ -281,7 +282,7 @@ Handlebars.registerHelper('pluralize', function(n, thing) {
 ~~~
 <%= caption "client/helpers/handlebars.js" %>
 
-////
+우리가 전에 만든 헬퍼들은 적용되는 관리자와 템플릿에 묶여 있었다. 그러나 `Handlebars.registerHelper`를 사용함으로써, 어느 템플릿에서나 사용할 수 있는 *전역* 헬퍼를 만든다:
 
 ~~~html
 <template name="postItem">
@@ -302,19 +303,19 @@ Handlebars.registerHelper('pluralize', function(n, thing) {
 
 <%= commit "13-3", "Added pluralize helper to format text better." %>
 
-////
+이제 "1 vote"로 표시되는 것을 볼 수 있을 것이다.
 
-### Smarter Voting Algorithm
+### 더 똑똑한 투표 알고리즘
 
-////
+투표 관련 코드는 좋아 보이지만, 아직도 더 개선할 수 있다. upvote 메서드에서 Mongo에 두 번의 호출을 한다: 하나는 post를 가져오는 것이고 다른 하나는 그것을 갱신하는 것이다.
 
-////
+여기에는 두 개의 이슈가 있다. 첫째, 데이터베이스를 두 번 호출하는 것은 다소 비효율적이다. 하지만 더 중요한 것은, 이것이 경쟁 조건을 도입한다는 것이다. 우리는 다음 알고리즘을 따르고 있다:
 
-1. ////
-2. ////
-3. ////
+1. 데이터베이스에서 post를 가져온다.
+2. 사용자가 투표를 했는지 검사한다.
+3. 투표하지 않았으면, 투표를 실행한다.
 
-////
+동일한 사용자가 위의 1~3단계 사이에 있을 때 다시 투표를 하면 어떻게 될까? 현재 코드는 이런 경우의 두 번 투표하는 것이 가능하게 되어 있다. 다행히 Mongo에는 위의 3단계를 1개의 Mongo 명령어로 처리할 수 있는 방법이 있다:
 
 ~~~js
 Meteor.methods({
@@ -343,42 +344,42 @@ Meteor.methods({
 
 <%= commit "13-4", "Better upvoting algorithm." %>
 
-////
+위 코드의 의미는 "사용자가 아직 투표하지 않은 이 `id`값을 가지는 모든 post를 찾아서, 이 방법으로 갱신하라"이다. 만약 사용자가 아직 *투표하지 않았다면*, 그 `id`를 가지는 post를 찾게 될 것이다. 한 편 사용자가 *투표했다면*, 그 쿼리는 결과를 찾지 못하고 결과적으로 아무 일도 일어나지 않을 것이다.
 
-////
+유일한 단점은, 그것은 사용자가 이미 투표를 했을 경우, 투표했다는 메시지를 보여줄 수 없다는 것이다(이를 체크하는 데이터베이스 요청을 삭제했기 때문이다). 그러나, 사용자들은 사용자 인터페이스 상에서 "지지" 버튼이 disable 상태가 되는 것으로 알게 될 것이다..
 
 <% note do %>
 
-### Latency Compensation
+### 대기시간 보정
 
-////
+독자가 시스템을 속여서 특정한 post의 투표 숫자를 바꿔서 목록의 상단으로 보내려고 시도한다고 하자:
 
 ~~~js
 > Posts.update(postId, {$set: {votes: 10000}});
 ~~~
 <%= caption "Browser console" %>
 
-////
+(여기서 `postId`는 독자가 작성한 post들 중의 하나의 `id`이다)
 
-////
+이런 뻔뻔스런 시도는 `deny()` 콜백 (`collections/posts.js` 안에 있다. 기억하시나?)에 걸려서 바로 거절된다.
 
-////
+그러나 주의깊게 관찰하면, 이 동작에서 대기시간 보정을 볼 수 있을지 모른다. 순간적이지만, post는 제 위치로 돌아오기 전에 목록의 상단으로 점프할 것이다.
 
-////
+무슨 일이 일어났을까? 당신의 로컬 `Posts` 컬렉션에서, 갱신이 문제없이 일어난 것이다. 이것은 순간적으로 일어나고, post는 목록의 상단으로 올라간다. 그 사이에 서버에서 갱신은 거절된다. 그래서 잠시 뒤에 (측정하면 수 밀리초이내에) 서버는 오류를 리턴하고 로컬 컬렉션에게 되돌리도록 지시한다.
 
-////
+최종 결과: 서버가 응답하는 것을 기다리는 동안, 사용자 인터페이스는 로컬 컬렉션을 믿지 않을 수 없다. 서버의 리턴결과가 변경을 거절하고, 사용자 인터페이스는 그 결과를 반영한다.
 
 <% end %>
 
-### Ranking the Front Page Posts
+### 프론트 페이지 Post 목록에 순위 매기기
 
-////
+이제 투표수에 기반한 각 post별 점수를 가지게 되었으니 최고 post의 목록을 보여주도록 해보자. 그렇게 하기 위해, post 컬렉션에 대한 두 개의 분리된 구독을 관리하는 방법을 알아보고, `postsList` 템플릿을 보다 범용으로 만들어보자.
 
-////
+정렬 방식에 따른 *두* 개의 구독을 구현하려고 한다. 여기에 적용할 기법은 두 구독이 *동일한* `posts` 발행에 구독하되 매개변수만 다르게 한다는 것이다!
 
-////
+또한 두 개의 새 route를 만드는데 그 이름은 `newPosts`와 `bestPosts`이며 그 URL은 각각 `/new`와 `/best`(물론 페이징을 적용하면 `/new/5`와 `/best/5`)이다.
 
-////
+이를 구현하기 위하여, `PostsListController`를 *확장하여* `NewPostsListController`와 `BestPostsListController` controller들을 만든다. 이것은 `home`과 `newPosts` route에 대한 것과 정확하게 똑같은 route option을 재사용한다. 이것이 바로 Iron Router가 얼마나 유연한 지를 보여주는 훌륭한 사례이다.
 
 ~~~js
 PostsListController = RouteController.extend({
@@ -440,11 +441,11 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "8,16,21~34,36~49" %>
 
-////
+이제 route가 하나 이상이 되었으므로, `nextPath` 로직을 `PostsListController`의 외부로 뽑아내어 `NewPostsListController`와 `BestPostsListController`의 내부로 넣는다. 이 각각의 경로가 다르기 때문이다.
 
-////
+추가적으로, `votes`로 정렬을 할 때, 정렬이 올바르게 처리되도록 두 번째 정렬 조건에 시간을 넣는다.
 
-////
+그리고 header에도 링크를 추가한다:
 
 ~~~html
 <template name="header">
@@ -484,17 +485,17 @@ Router.map(function() {
 <%= caption "client/views/include/header.html" %>
 <%= highlight "9, 15~21" %>
 
-////
+이 모두가 완료되면 최고 post 목록은 다음과 같다:
 
 <%= screenshot "13-4", "Ranking by points" %>
 
 <%= commit "13-5", "Added routes for post lists, and pages to display them." %>
 
-### A Better Header
+### 더 나은 Header
 
-////
+이제 두 개의 post 목록 페이지가 생겼는데, 독자가 어떤 목록을 현재 보고 있는지 알기는 어렵다. 그래서 header 파일을 고쳐 이를 좀 더 알아보기 쉽게 바꾼다. 우리는 `header.js`파일을 만들고 네비게이션 항목에 active 클래스를 지정하기 위해서 현재 경로와 하나 이상의 이름있는 route를 사용하는 헬퍼를 만든다.
 
-////
+우리가 다중으로 이름있는 route들을 지원하는 이유는 `home`과 `newPosts` 경로 모두가 (각각 `/`와 `/new` URL에 대응한다) 동일한 템플릿을 가져오기 때문이다. 그리고 `activeRouteClass`가 똑똑해서 이 두 경우 모두 `<li>` 태그를 active 상태로 바꾸어야 한다.
 
 ~~~html
 <template name="header">
@@ -554,20 +555,20 @@ Template.header.helpers({
 
 <% note do %>
 
-### Helper Arguments
+### 헬퍼 매개변수
 
-////
+지금까지 우리는 특별한 패턴을 사용하지는 않았지만, 다른 Handlebars 태그와 같이 템플릿 헬퍼 태그는 매개변수를 가질 수 있다.
 
-////
+그리고 당연히 특정한 이름의 매개변수를 함수로 전달할 수 있고, 또한 지정하지 않은 갯수의 익명의 매개변수를 전달하고 이를 함수 내부에서 arguments 객체를 호출하여 얻을 수 있다.
 
-////
+바로 위의 예에서 우리는 arguments 객체를 Javascript 배열로 변환하고자 했고, Handlebars로 끝에 추가된 해시를 제거하려고 pop()를 호출했다.
 
 <% end %>
 
-////
+네비게이션 요소별로, `activeRouteClass` 헬퍼가 경로목록을 읽어서, Underscore의 `any()` helper를 사용하여 테스트(즉, 대응하는 URL이 현재 경로와 같은지)를 통과하는 route가 있는지를 찾는다.
 
-////
+현재 경로와 일치하는 route가 있다면, `any()`는 `true`를 리턴한다. 결국, 우리는 `boolean && string` Javascript 패턴을 이용하여 `false && myString`는 `false`를 리턴하고, `true && myString`는 `myString`를 리턴하는 결과를 얻는다.
 
 <%= commit "13-6", "Added active classes to the header." %>
 
-////
+이제 사용자들은 실시간으로 post에 투표를 할 수 있게 되었고, 그 순위가 변하게 되면 자동으로 위, 아래로 이동하는 링크를 볼 수 있다. 그런데, 이것이 멋진 애니메이션으로 부드럽게 이루어지면 더 훌륭하지 않을까?

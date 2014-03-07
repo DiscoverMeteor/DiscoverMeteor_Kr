@@ -3,11 +3,11 @@ title: 라우팅
 slug: routing
 date: 0005/01/01
 number: 5
-contents: 미티어의 라우팅에 대하여 배운다.|개별 URL을 갖는 토론 페이지를 만들어본다.|이 URL에 적절하게 링크를 거는 방법을 배운다.
+contents: 미티어의 라우팅에 대하여 배운다.|유일한 URL을 갖는 토론 페이지를 만들어본다.|이 URL에 적절하게 링크를 거는 방법을 배운다.
 paragraphs: 72
 ---
 
-이제 post(결국엔 사용자가 등록할) 목록 페이지가 있으니, 사용자들이 각 post마다 토론을 할 수 있는 개별적인 post 페이지가 필요하다.
+이제 (결국엔 사용자가 등록할) post 목록 페이지가 있으니, 사용자들이 각 post마다 토론을 할 수 있는 개별적인 post 페이지가 필요하다.
 
 우리는 이 페이지들을 *퍼머링크(permalink)*를 통해서 접근할 수 있게 하려고 한다. 퍼머링크란 각 post마다 유일한 `http://myapp.com/posts/xyz`(여기서 `xyz`는 MongoDB의 `_id`)라는 형태의 URL을 가리킨다.
 
@@ -34,15 +34,13 @@ $ mrt add iron-router
 
 ### Router 용어
 
-We'll be touching on a lot of different features of the router in this chapter. If you have some experience with a framework such as Rails, you'll already be familiar with most of these concepts. But if not, here's a quick glossary to bring you up to speed:
-
 이 장에서 우리는 라우터의 많은 다양한 기능을 다룰 것이다. Rails와 같은 프레임워크에 대한 경험이 있다면, 이 개념의 대부분에 이미 익숙할 것이다. 하지만, 그렇지 않다면 좀 더 빠르게 배울 수 있도록 용어를 제공한다:
 
 - **Routes**: Route는 라우팅의 기본 구축 블록이다. 이것은 앱에게 어디로 갈지 그리고 URL을 만나면 무엇을 할 지를 지시하는 지침의 집합이다.
 - **경로(Paths)**: 경로는 앱에 있는 URL이다. 이것은 정적(｀/terms_of_service｀)일 수도 있고, 동적(｀/posts/xyz｀)일 수도 있으며, 쿼리 매개변수(｀/search?keyword=meteor｀)를 담을 수도 있다.
 - **세그먼트(Segments）**: 슬래시 문자(｀/｀)로 구분되는 경로의 일부를 의미한다.
 - **Hooks**: Hooks는 라우팅 프로세스의 전, 후 또는 그 프로세스 중간에 실행될 수 있는 동작이다. 전형적인 예제로는 페이지를 보여주기 전에 사용자가 적절한 권한을 가지고 있는지 확인하는 것이 있다.
-- **Filters**: Filter는 하나 또는 그 이상의 route에서 전역적으로 정의하는 단순한 hook이다.
+- **Filters**: Filter는 하나 이상의 route에서 전역적으로 정의하는 단순한 hook이다.
 - **루트 템플릿(Route Templates)**: 각 route는 템플릿을 지정해야 한다. 만약 템플릿을 지정하지 않으면, 라우터는 route와 이름이 같은 템플릿을 찾는다.
 - **레이아웃(Layouts)**: 레이아웃을 디지털 사진 프레임의 하나로 간주할 수 있다. 레이아웃은 현재의 템플릿을 감싸는 모든 HTML 코드를 포함하며, 템플릿이 변경되어도 현재 상태를 유지한다.
 - **Controllers**: 때때로, 많은 템플릿이 동일한 매개변수를 재사용하는 것을 볼 수 있다. 이 경우에 코드를 반복하는 대신에, 이런 route들마다 라우팅 로직 전체를 담고 있는 하나의 *routing controller*에서 상속받아 구현하게 할 수 있다.
@@ -121,11 +119,11 @@ Router.map(function() {
 
 여기서 모호한 부분을 명확하게 해두자. 우리는 route를 `postsList`라고 이름지었는데, 또한 템플릿에도 `postsList`라는 이름이 있다. 그럼, 여기에 무슨 일이 있을까?
 
-기본적으로, Iron Router는 route와 동일한 이름을 가진 템플릿을 찾는다. 사실은 route 이름으로 *경로*를 찾기도 하는데, 이것은 path(route 정의에서 `path` 옵션을 지정하는 방법으로)를 정의하지 않았다면, URL `/postLists`에서 템플릿에 접근이 가능했을 것이라는 것을 의미한다.
+초기 설정 상태의 Iron Router는 route와 동일한 이름을 가진 템플릿을 찾는다. 사실은 route 이름으로 *경로(path)*를 찾기도 하는데, 이것은 커스텀 경로(route 정의에서 `path` 옵션을 지정하는 방법으로)를 정의하지 않았다면, 템플릿은 URL `/postLists`로 접근이 가능했을 것이라는 것을 의미한다.
 
-처음부터 이렇게 route의 이름을 지어야 하는 지에 대하여 궁금해 할 지 모르겠다. Route의 이름을 짓는 것은 앱 내부에서 링크를 구축하는 것을 보다 용이하게하는 Iron Router의 주요 기능 중의 하나이다. 가장 유용한 것이 `{{pathFor}}` Handlebars 헬퍼로서, 이는 route의 URL 경로를 리턴한다.
+맨 먼저 route의 이름부터 지어야 하는 지에 대하여 궁금해 할 지 모르겠다. Route의 이름을 지음으로써 앱 내부에서의 링크 지정을 보다 쉽게 하는 Iron Router의 주요 기능을 사용할 수 있다. 가장 유용한 것이 `{{pathFor}}` Handlebars 헬퍼인데, 이는 route의 URL 경로를 리턴한다.
 
-우리는 메인 홈 링크가 post 목록 페이지를 가리키기를 원하면, 정적인 `/` URL을 지정하는 대신에 Handlebars 헬퍼를 사용할 수 있다. 결국 그 결과는 같지만, 이렇게 하는 것이 나중에 라우터가 그 루트 경로를 변경하더라도 헬퍼가 항상 올바른 URL 경로를 리턴하게 하는 유연성을 준다.
+메인 홈 링크가 post 목록 페이지를 가리키도록 하려면, 정적인 `/` URL을 지정하는 대신에 Handlebars 헬퍼를 사용할 수 있다. 결국 그 결과는 같지만, 이렇게 하는 것이 나중에 라우터가 그 루트 경로를 변경하더라도 헬퍼가 항상 올바른 URL 경로를 리턴하게 하는 유연성을 준다.
 
 ~~~html
 <header class="navbar">
@@ -141,19 +139,13 @@ Router.map(function() {
 
 <%= commit "5-1", "Very basic routing." %>
 
-### 데이터 기다리기
-
-If you deploy the current version of the app (or launch the instance using the link above), you'll notice that the list appears empty for a few moments before the posts appear. This is because when the page first loads, there are no posts to display until the `posts` subscription is done grabbing the post data from the server.
-
-It would be a much better user experience to provide some visual feedback that something is happening, and that the user should wait a moment.
-
-Luckily, Iron Router gives us an easy way to do that -- we'll `waitOn` the subscription:
+### 데이터 기다리기(Wait on)
 
 만약 앱의 현재 버전을 배포한다면(또는 위 링크를 사용하여 인스턴스를 구동한다면), post 목록이 나타나기 전에 잠깐 동안 목록이 빈 상태로 보여지는 것을 볼 수 있다. 이것은 페이지가 처음 로드될 때, `posts` 구독(subscription)이 서버로부터 데이터를 가져오는 작업을 완료할 때까지는 보여줄 목록이 없기 때문이다.
 
-진행되는 과정에 대하여 그리고 사용자가 잠깐 기다리는 동안 시각적인 피드백을 제공하는 것은 매우 좋은 사용자 경험이다.
+무슨 일이 진행되는 동안, 그리고 사용자가 잠깐 기다려야 하는 동안 시각적인 피드백을 제공하는 것은 매우 좋은 사용자 경험이 될 것이다.
 
-다행히 Iron Router는 이를 처리하는 편리한 방법을 제공한다 - 바로 `waitOn`에서 구독을 구현하면 된다:
+다행히 Iron Router는 이를 처리하는 편리한 방법을 제공한다 -- 우리는 구독을 기다릴(`waitOn`) 것이다:
 
 ~~~js
 Router.configure({
@@ -169,7 +161,7 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "3,4" %>
 
-하나씩 구체적으로 분석하여 보자. 첫째, 우리는 `Router.configure()` 부분을 수정하여 라우터에게 템플릿 로딩중(곧 만들 것이다)의 이름을 지정하고 앱이 데이터를 기다리는 중인 상태로 리다이렉트하도록 했다.
+하나씩 구체적으로 분석하여 보자. 첫째, 우리는 `Router.configure()` 부분을 수정하여 라우터에게 `loadingTemplate`의 이름을 지정하고(곧 만들 것이다) 앱이 데이터를 기다리는 중인 상태로 리다이렉트하도록 했다.
 
 둘째, 우리는 `waitOn` 함수를 추가하여, 여기서 `posts` 구독 결과를 리턴하도록 했다. 이 의미는 `posts` 구독 결과가 리턴된 후에 라우터에게 사용자를 원래 요구했던 route로 보내라는 것이다.
 
@@ -179,7 +171,7 @@ Router.map(function() {
 
 구독을 기다리도록 하는 것은 좋은 아이디어이다. 사용자 체험 측면에서 뿐 아니라, 데이터를 템플릿 내부에서 항상 이용할 수 있다고 생각할 수 있다는 점에서도 그렇다. 이렇게 함으로써 데이터를 받기 전에 템플릿이 화면을 그리도록 - 종종 기교를 부려야 한다 - 해야 할 필요가 없게 된다. 
 
-마지막 단계는 바로 로딩중 템플릿이다. 우리는 `spin` 패키지를 사용하여 멋진 애니메이션이 되는 스피너를 만든다. `mrt add spin`명령어로 추가한 다음, 아래 코드로 `loading` 템플릿을 만든다:
+마지막 단계는 바로 `loadingTemplate`이다. 우리는 `spin` 패키지를 사용하여 멋진 애니메이션이 되는 스피너를 만든다. `mrt add spin`명령어로 추가한 다음, 아래 코드로 `loading` 템플릿을 만든다:
 
 ~~~html
 <template name="loading">
@@ -188,7 +180,7 @@ Router.map(function() {
 ~~~
 <%= caption "client/views/includes/loading.html" %>
 
-유의할 것은 `{{>spinner}}`이 `spin` 패키지에 포함된 일부라는 점이다. 이 부분이 앱의 “외부” 가져왔어도, 다른 템플릿과 마찬가지로 사용할 수 있다.
+유의할 것은 `{{>spinner}}`이 `spin` 패키지에 포함된 일부라는 점이다. 이 부분이 앱의 “외부”에서 왔어도, 다른 템플릿과 마찬가지로 사용할 수 있다.
 
 <%= commit "5-2", "Wait on the post subscription." %>
 
@@ -242,11 +234,11 @@ Router.map(function() {
 
 우리는 이제 올바른 템플릿에 라우팅을 하고 있지만, 여전히 무언가 빠져있다: 라우터는 우리가 보여주려는 post의 `_id`값을 알고 있지만, 템플릿은 여전히 실마리를 풀지 못하고 있다. 그렇다면 우리는 이 차이를 어떻게 좁힐 것인가?
 
-감사하게도, 라우터에는 영리한 빌트인 솔루션이 있다: 이는 당신에게 템플릿의 **data context**를 지정하도록 한다. Data context란 템플릿과 레이아웃으로 만들어진 맛있는 케이크의 내부를 채우는 것과 비슷하다. 단순히 템플릿을 아래 내용으로 채우기만 하면 된다: 
+감사하게도, 라우터에는 영리하게 구축된 해법이 있다: 바로 템플릿의 **데이터 컨텍스트(data context)**를 지정하는 것이다. 데이터 컨텍스트(data context)란 템플릿과 레이아웃으로 만들어진 맛있는 케이크의 내부를 채우는 것과 비슷하다. 단순히 템플릿을 아래 내용으로 채우기만 하면 된다: 
 
 <%= diagram "router-diagram-2", "The data context.", "pull-center" %>
 
-위 예제에서, 우리는 URL에서 추출한 `_id`를 기반으로 post를 찾아서 올바른 data context를 얻는다:
+위 예제에서, 우리는 URL에서 추출한 `_id`를 기반으로 post를 찾아서 적절한 데이터 컨텍스트를 얻는다:
 
 ~~~js
 Router.map(function() {
@@ -268,15 +260,11 @@ Route에서의 `data` 함수 내부에서, `this`는 현재 일치한 route에 �
 
 <% note do %>
 
-### Data Context에 대한 추가 정보
+### 데이터 컨텍스트에 대한 추가 정보
 
-By setting a template's *data context*, you can control the value of `this` inside template helpers.
+템플릿의 *데이터 컨텍스트(data context)*를 설정함으로써, 템플릿 헬퍼 내부의 `this`의 값을 제어할 수 있다.
 
-This is usually done implicitly with the `{{#each}}` iterator, which automatically sets the data context of each iteration to the item currently being iterated on:
-
-템플릿의 *data context*를 설정함으로써, 템플릿 헬퍼 내부의 `this`의 값을 제어할 수 있다.
-
-이것은 보통 `{{#each}}` 반복자(iterator)에서 보이지 않게 행해지는데, 이 반복자는 각 반복 할 때의 data context를 자동적으로 해당 아이템에 지정한다:
+이것은 보통 `{{#each}}` 반복자(iterator)에서 은연중에 처리되는데, 이 반복자는 각 반복 할 때의 데이터 컨텍스트를 자동적으로 해당 아이템에 지정한다:
 
 ~~~html
 {{#each widgets}}
@@ -292,7 +280,7 @@ This is usually done implicitly with the `{{#each}}` iterator, which automatical
 {{/with}}
 ~~~
 
-Context를 템플릿 호출에 대한 *매개변수*로 전달하여 동일한 결과를 얻을 수 있다. 그러므로 위의 코드는 아래와 같이 다시 쓸 수 있다:
+또한 컨텍스트를 템플릿 호출에 대한 *매개변수*로 전달하여 동일한 결과를 얻을 수 있다. 그러므로 위의 코드는 아래와 같이 다시 쓸 수 있다:
 
 ~~~js
 {{> widgetPage myWidget}}
@@ -320,21 +308,11 @@ Context를 템플릿 호출에 대한 *매개변수*로 전달하여 동일한 �
 <%= highlight "6" %>
 <%= commit "5-3", "Routing to a single post page." %>
 
-But wait, how exactly does the router know where to get the `xyz` part in `/posts/xyz`? After all, we're not passing it any `_id`. 
-
-It turns out that Iron Router is smart enough to figure it out by itself. We're telling the router to use the `postPage` route, and the router knows that this route requires an `_id` of some kind (since that's how we defined our `path`) .
-
-So the router will look for this `_id` in the most logical place available: the data context of the `{{pathFor 'postPage'}}` helper, in other words `this`. And it so happens that our `this` corresponds to a post, which (surprise!) does possess an `_id` property. 
-
-Alternatively, you can also explicitely tell the router where you'd like it to look for the `_id` property, by passing a second argument to the helper (i.e. `{{pathFor 'postPage' someOtherPost}}`). A practical use of this pattern would be getting the link to the previous or next posts in a list, for example. 
-
-To see if it works correctly, browse to the post list and click on one of the 'Discuss' links. You should see something like this:
-
 그런데 잠깐, 라우터는 `/posts/xyz`에서 `xyz`부분을 구하는 방법을 어떻게 정확하게 알까? 어찌되었건, 우리는 어떤 `_id`도 전달하지 않는다.
 
 Iron Router가 참으로 똑똑해서 스스로 그것을 알아낸다는 것이 밝혀졌다. 우리는 라우터에게 `postPage` 루트를 사용하도록 지시했다. 그리고 라우터는 이 루트가 일종의 `_id`를 요구한다는 것을 안다(이것이 `path`를 정의하는 방법이기 때문이다).
 
-그래서 라우터는 이 `_id`를 논리적으로 가장 적합한 위치 - `{{pathFor 'postPage'}}` 헬퍼의 data context, 다시말하면 `this` - 에서 찾는다. 그리고 `this`는 해당 post에 대응하는데, 이 post는 (놀랍게도!) `_id`속성을 가진다.
+그래서 라우터는 이 `_id`를 논리적으로 가장 적합한 위치 - `{{pathFor 'postPage'}}` 헬퍼의 데이터 컨텍스트, 다시말하면 `this` - 에서 찾는다. 그리고 `this`는 해당 post에 대응하는데, 이 post는 (놀랍게도!) `_id`속성을 가진다.
 
 다른 방법으로, 라우터에게 `_id` 속성값을 찾고 있다는 것을 알릴 수 있다. 그 방법은 헬퍼에게 두 번째 매개변수를 전달(즉,`{{pathFor 'postPage' someOtherPost}}`)하는 것이다. 이 패턴의 실제 적용사례는 예를 들면 목록에서 이전, 다음 post에 대한 링크를 얻을 때이다.
 
@@ -348,9 +326,7 @@ Iron Router가 참으로 똑똑해서 스스로 그것을 알아낸다는 것이
 
 알아두어야 할 한 가지는 이 URL들의 변경은 [HTML5 pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history?redirectlocale=en-US&redirectslug=Web%2FGuide%2FDOM%2FManipulating_the_browser_history)를 이용하여 일어난다는 것이다.
 
-
 라우터는 사이트 내부 URL에 대한 클릭을 인지하면, 브라우저가 현재 앱에서 다른 곳으로 나가는 것을 방지하면서, 대신에 앱의 상태에 필요한 수정을 한다.
-
 
 모든 것이 잘 동작하면 해당 페이지는 즉시 변경된다. 사실 때때로 이 변화가 너무 빨라서 일종의 페이지 변이가 요구될 수도 있다. 이것은 이 장의 범위를 넘는 것이지만, 그래도 흥미있는 주제이기는 하다.
 
