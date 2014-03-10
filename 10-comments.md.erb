@@ -137,11 +137,7 @@ Template.postPage.helpers({
 <%= caption "client/views/posts/post_page.js" %>
 <%= highlight "2~4" %>
 
-We put the `{{#each comments}}` block inside the post template, so `this` is a post within the `comments` helper. To find the relevant comments, we check those that are linked to that post via the `postId` attribute.
-
-Given what we've learnt about helpers and handlebars, rendering a comment is fairly straightforward. We'll create a new `comments` directory inside `views` to store all our comment information:
-
-`{{#each comments}}` 블럭은 post 템플릿 내부에 넣는다. 여기서 `this`는 `comments` 헬퍼 안에 있는 post를 가리킨다. 적절한 댓글 목록을 찾기 위해서는 `postId` 속성으로 post에 연결된 것들을 검색한다.
+`{{#each comments}}` 블록은 post 템플릿 내부에 넣는다. 여기서 `this`는 `comments` 헬퍼 안에 있는 post를 가리킨다. 적절한 댓글 목록을 찾기 위해서는 `postId` 속성으로 post에 연결된 것들을 검색한다.
 
 헬퍼와 handlebars에 대하여 배운 것에 의하면, 댓글을 화면에 그리는 것은 바로 알 수 있다. 댓글 정보를 저장하기 위해서 `views` 디렉토리에 `comments` 디렉토리를 만든다:
 
@@ -157,8 +153,6 @@ Given what we've learnt about helpers and handlebars, rendering a comment is fai
 </template>
 ~~~
 <%= caption "client/views/comments/comment.html" %>
-
-Let's set up a quick template helper to format our `submitted` date in a human-readable format (unless you're one of those people who can understand UNIX timestamps and hexadecimal color codes fluently?)
 
 템플릿 헬퍼를 설정하여 `submitted` 일시를 (UNIX의 timestamp와 16진 색상 코드를 능숙하게 이해할 수 없다면?) 읽기 편한 형식으로 바꾼다.
 
@@ -266,8 +260,6 @@ Template.postItem.helpers({
 
 <%= screenshot "10-2", "The comment submit form" %>
 
-To submit our comments, we call a `comment` Method in the `commentSubmit` manager that operates in a similar way to the `postSubmit` manager:
-
 댓글을 submit하기 위해서, `postSubmit` 매니저와 비슷한 방식으로 작동하는 `commentSubmit` 매니저에 있는 `comment` 메서드를 호출한다:
 
 ~~~js
@@ -327,7 +319,7 @@ Meteor.methods({
 
 <%= commit "10-3", "Created a form to submit comments." %>
 
-이것이 무슨 화려한 작업을 하는 것은 아닌데, 사용자가 로그인했는 지를 확인하고, comment에 본문이 있는지 그리고 post에 연결되었는 지를 확인한다.
+이것이 무슨 근사한 작업을 하는 것은 아니며, 사용자가 로그인했는 지를 확인하고, comment에 본문이 있는지 그리고 post에 연결되었는 지를 확인하는 것이다.
 
 ### Comments 구독을 제어하기
 

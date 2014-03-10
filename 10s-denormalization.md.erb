@@ -8,14 +8,6 @@ contents: 비정규화란 무엇인지를 이해한다.|Mongo를 전통적인 �
 paragraphs: 15
 ---
 
-Denormalizing data means not storing that data in a "normal" form. In other words, denormalization means having multiple copies of the same piece of data hanging about. 
-
-In the last chapter, we denormalized the count of the number of comments into the post object to avoid having to load all the comments all the time. In a data modelling sense this is redundant, as we could instead just count the correct set of comments at any time to figure out that value (leaving out performance considerations).
-
-Denormalizing often means extra work for the developer. In our example, every time we add or remove a comment we'll also need to remember to update the relevant post to ensure that the `commentsCount` field stays accurate. This is exactly why relational databases such as MySQL frown upon this approach.
-
-However, the normal approach also has its drawbacks: without a `commentsCount` property, we'd need to send _all_ comments down the wire at all times just to be able to count them, which is what we were doing in the beginning. Denormalizing lets us avoid this entirely.
-
 데이터를 비정규화한다는 것은 데이터를 "정규화"한 형태로 저장하지 않는다는 것을 의미한다 - 다른 말로 표현하면, 비정규화란 데이터의 같은 조각에 대한 여러 복사본을 가진다는 것을 의미한다.
 
 이전 장에서, 우리는 매 시점마다 댓글 전체를 로드하는 것을 피하기 위해서 post 객체에 연결된 comment의 숫자를 비정규화했다. 데이터 모델링의 관점에서는 불필요한 작업이다. 댓글의 숫자를 (성능 문제를 제외한다면) 어느 때나 계산할 수 있기 때문이다.
@@ -34,22 +26,6 @@ However, the normal approach also has its drawbacks: without a `commentsCount` p
 
 <% end %>
 
-Of course, such considerations are application-specific: if you are writing code where data integrity is of paramount importance, then avoiding data inconsistencies is far more important and of a higher priority to you than performance gains.
-
-### Embedding Documents or Using Multiple Collections
-
-If you are experienced with Mongo, you might have been surprised to see that we created a second collection just for comments: why not just embed the comments in a list within the post document?
-
-It turns out that many of the tools Meteor gives us work a lot better when operating at the collection level. For example:
-
-1. The `{{#each}}` helper is very efficient when iterating over a cursor (the result of `collection.find()`). The same is not true when it iterates over an array of objects within a larger document.
-2. `allow` and `deny` operate at the document level, and thus make it easy to ensure that any modifications of individual comments are correct in a way that would be more complex if we operated at a post level.
-3. DDP operates at the level of top-level attributes of a document--this would mean if `comments` was a property of a `post`, every time a comment was created on a post, the server would send the entire updated comment list of that post out to each connected client.
-4. Publications and subscriptions are a lot easier to control at the level of documents. For example, if we wanted to paginate comments on a post we would find it difficult to do so unless comments were in their own collection.
-
-Mongo suggests embedding documents in order to reduce the number of expensive queries to fetch documents. However, this is less of an issue when we take into account Meteor's architecture: most of the time we are querying comments on the *client*, where database access is essentially free.
-
-
 물론, 이러한 고려는 애플리케이션에 따라 달라진다: 만약 데이터의 정합성이 극히 중요한 곳에 코드를 작성한다면, 데이터의 비정합성을 회피하는 것이야 말로 성능상의 이익을 얻는 것보다 훨씬 더 중요하고 더 높은 우선순위를 가지는 것이다.
 
 ### 도큐먼트를 임베드할 것인가 다중 컬렉션을 사용할 것인가
@@ -58,8 +34,8 @@ Mongo에 경험이 있다면, 댓글에 대한 두 번째 컬렉션을 만든 �
 
 미티어의 많은 도구들이 컬렉션 수준에서 더 잘 작동하는 것이 밝혀졌다. 예를 들면:
 
-1. The `{{#each}}` 헬퍼는 (`collection.find()`의 결과) 커서를 따라서 반복할 때 매우 효율적이다. 이것이 큰 도큐먼트에서 객체의 배열을 따라서 반복할 때는 그렇지 않다.
-2. `allow`와 `deny`는 도큐먼트 수준에서 작동한다. 그리고 이 경우에 개별 댓글의 수정도 쉽게 처리된다. 상대적으로 post 수준에서 작동하면 더 복잡하다.
+1. `{{#each}}` 헬퍼는 (`collection.find()`의 결과) 커서를 따라서 반복할 때 매우 효율적이다. 이것이 큰 도큐먼트에서 객체의 배열을 따라서 반복할 때는 그렇지 않다.
+2. `allow`와 `deny`는 도큐먼트 수준에서 작동한다. 그리고 이 경우에 개별 댓글을 수정하는 것도 쉽다. 상대적으로 post 수준에서 작동하면 더 복잡하다.
 3. DDP는 도큐먼트의 탑-레벨 속성의 수준에서 작동한다 -- 이것은 `comments`가 `post`의 속성이라면, post에서 comment가 생성될 때마다 서버가 각 연결된 클라이언트들에게 post에 연결된 comment 목록 전체를 보내는 것을 의미한다.
 4. 발행과 구독은 도큐먼트 수준에서 제어하기가 훨씬 쉽다. 예를 들어, post의 comment들을 페이징 처리를 하려면, comment가 자체로 컬렉션이 아니라면 매우 어렵다는 것을 알게 될 것이다.
 

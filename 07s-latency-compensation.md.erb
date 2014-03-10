@@ -8,7 +8,7 @@ contents: 대기시간 보정에 대하여 이해한다.|앱에 대한 진도를
 paragraphs: 28
 ---
 
-이전 장에서 우리는 미티어 세계의 새로운 개념인 **Method**에 대하여 소개했다.
+이전 장에서 우리는 미티어 세계의 새로운 개념인 **메서드(Method)**에 대하여 소개했다.
 
 <%= diagram "latency1", "Without latency compensation", "pull-right" %>
 
@@ -80,7 +80,7 @@ Meteor.methods({
 
 주의: `this.isSimulation`에 있는 `this`는 다양한 유용한 변수에 접근할 수 있는 [Method 구동 객체](http://docs.meteor.com/#meteor_methods)이다.
 
-[Futures](https://npmjs.org/package/future)의 작동 원리는 이 책의 범위 밖에 있지만, 우리는 단순하게 서버 컬렉션에 등록하기 전에 5초를 기다리도록 하는데 사용하였다.
+[Futures](https://npmjs.org/package/future)의 작동 원리는 이 책의 범위를 벗어나지만, 우리는 단순하게 서버 컬렉션에 등록하기 전에 5초를 기다리도록 하는데 사용하였다.
 
 또한 등록 후 post 목록으로 바로 리다이렉트하도록 하였다:
 
@@ -118,7 +118,7 @@ Template.postSubmit.events({
 
 ### 클라이언트 컬렉션 Methods
 
-이 과정을 공부하고 나서 메서드가 복잡하다고 생각할 지 모르겠지만, 사실 메서드는 아주 단순하다. 실제로 우리는 이미 아주 단순한 3개의 메서드를 본 적이 있다: 컬렉션 조작 메서드인 insert, update 그리고 remove이다.
+이 과정을 공부하고 나서 메서드가 복잡하다고 생각할 지 모르겠지만, 사실 메서드는 아주 단순하다. 실제로 우리는 이미 아주 단순한 3개의 메서드를 본 적이 있다: 컬렉션을 다루는 메서드인 insert, update 그리고 remove이다.
 
 'posts'라는 이름의 서버 컬렉션을 정의할 때, 이미 3개의 메서드를 은연중에 정의하는 것이다: `posts/insert`, `posts/update` 그리고 `posts/delete`. 다른 말로 표현하면, 클라이언트 컬렉션에서 `Posts.insert()`을 호출하는 것은 다음 두 가지 작업을 수행하는 대기시간 보정 메서드를 호출하는 것이다:
 
