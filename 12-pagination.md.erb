@@ -7,18 +7,6 @@ contents: 미티어의 구독에 대하여 더 상세하게 배운다. 그리고
 paragraphs: 67
 ---
 
-Things are looking great with Microscope, and we can expect a hit reception when it's released to the world. 
-
-So we should probably think a little about the performance implication of the number of new posts that will be entered into the site as it takes off!
-
-We've spoken before about how a client-side collection should contain a subset of the data on the server, and we've even managed to achieve this for our notification and comments collections. 
-
-At present though, we are still publishing all of our posts in one go, to all connected users. Eventually, if thousands of links are posted, this will become problematic. To solve this, we need to paginate our posts.
-
-### Adding More Posts
-
-First, in our fixture data, let's load up enough posts so that pagination actually makes sense:
-
 Microscope는 훌륭해 보인다. 그리고 우리는 이것이 세계에 모습을 드러낼 때 큰 환영을 기대한다. 
 
 그래서 우리는 이것이 등장할 때, 등록될 수 많은 post들로 인한 성능에의 영향을 걱정을 할 수도 있다!
@@ -27,7 +15,7 @@ Microscope는 훌륭해 보인다. 그리고 우리는 이것이 세계에 모�
 
 현재까지는 여전히 우리는 모든 post를 연결된 모든 사용자에게 발행하고 있다. 결국 수 천 개의 링크가 등록된다면 이것은 문제가 될 것이다. 이를 위해서 우리의 post에 대하여 페이징 처리를 할 필요가 있다.
 
-더 많은 Post 추가하기
+### 더 많은 Post 추가하기
 
 첫째, 초기 설정 데이터에서 페이징이 의미를 가지는 충분한 post 목록을 로드하도록 한다:
 
@@ -111,7 +99,7 @@ Router.map(function() {
 
 다른 말로 표현하면, `/posts/:_id` 와 같이 특정한 route를 타겟으로 하는 route는 먼저 오고 `postList` route는 거의 모든 경로와 맞게 되므로 마지막으로 이동하여야 한다.
 
-이제 올바른 데이터를 찾고 구독하는 힘든 문제를 해결해야 할 시간이다. 우리는 매개변수 `postsLimit`의 값이 없는 경우 여기에 초기값을 지정하는 방법을 처리해야 한다. 초기값으로는 “5”를 지정하여 페이징처리 과정에서 충분한 여유를 두려고 한다.
+이제 올바른 데이터를 찾고 구독하는 어려운 문제를 해결해야 할 시간이다. 우리는 매개변수 `postsLimit`의 값이 없는 경우 여기에 초기값을 지정하는 방법을 처리해야 한다. 초기값으로는 “5”를 지정하여 페이징처리 과정에서 충분한 여유를 두려고 한다.
 
 ~~~js
 Router.map(function() {
@@ -258,10 +246,6 @@ Router.map(function() {
 <% end %>
 
 ### Route Controller 만들기
-
-You might have noticed that we're repeating the `var limit = parseInt(this.params.postsLimit) || 5;` line twice. Plus, hard-coding the number “5” isn't exactly ideal. This is not the end of the world, but since it's always better to follow the DRY (Don't Repeat Yourself) principle if you can, let's see how we can refactor things a bit. 
-
-We'll introduce a new aspect of Iron Router, *Route Controllers*. A route controller is simply a way to group routing features together in a nifty reusable package that any route can inherit from. Right now we'll only use it for a single route, but you'll see in the next chapter how this feature will come in handy. 
 
 다음의 `var limit = parseInt(this.params.postsLimit) || 5;` 줄이 두 번 반복되었음을 눈치챘을지 모르겠다. 여기에, 숫자 “5”이 하드코딩된 것도 바람직하지 않다. 이것이 다는 아니다. 할 수만 있다면 DRY(Don't Repeat Yourself) 원칙을 따르는 것은 항상 좋으니까, 이것을 어떻게 고치면 좋을 지 알아보자.
 
