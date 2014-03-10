@@ -1,3 +1,4 @@
 [Discover Meteor](http://discovermeteor.com)의 한글판입니다.
 
-See it live at http://kr.discovermeteor.com/
+http://kr.discovermeteor.com/ 에서 바로 볼 수 있습니다.
+
