@@ -25,7 +25,7 @@ UI가 데이터의 변경에 어떻게 반응하는 지도 보았고, 추가되�
 $ mrt add accounts-ui-bootstrap-dropdown
 $ mrt add accounts-password
 ~~~
-<%= caption "Terminal" %>
+<%= caption "터미널" %>
 
 위의 두 명령어는 특별한 accounts 템플릿을 제공한다; 우리는 이들을 사이트에서 `{{loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{loginButtons align="right"}}`).
 
@@ -67,7 +67,7 @@ $ mrt add accounts-password
 
 이제, 브라우저로 앱을 열면, 사이트의 우상단에 계정 로그인 버튼을 볼 수 있다.
 
-<%= screenshot "6-1", "Meteor's built-in accounts UI" %>
+<%= screenshot "6-1", "미티어의 빌트인 accounts UI" %>
 
 이것으로 회원 가입, 로그인, 비밀번호 변경 요청, 그리고 비밀번호 기반의 계정 시스템에서 요구되는 그 밖의 모든 것을 구현할 수 있다.
 
@@ -80,7 +80,7 @@ Accounts.ui.config({
 ~~~
 <%= caption "client/helpers/config.js" %>
 
-<%= commit "6-1", "Added accounts and added template to the header" %>
+<%= commit "6-1", "계정을 추가하고 헤더에 템플릿을 추가했다." %>
 
 ### 첫 사용자 등록하기
 
@@ -91,7 +91,7 @@ Accounts.ui.config({
 ~~~js
 ❯ Meteor.users.findOne();
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 콘솔은 방금 입력한 사용자 정보를 담은 객체를 리턴할 것이다; 이를 살펴보면, 등록한 username이 있고, 유일한 키인 `_id`도 들어있다. `Meteor.user()` 명령으로도 현재 로그인한 사용자 정보를 얻을 수 있다.
 
@@ -101,7 +101,7 @@ Accounts.ui.config({
 ❯ Meteor.users.find().count();
 1
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 콘솔은 1을 리턴한다. 잠깐, 2이어야 하지 않나? 첫 번째 등록한 계정은 삭제된 것일까? 첫 번째 계정으로 다시 로그인해보면 그것은 아니라는 것을 알게 될 것이다.
 
@@ -111,7 +111,7 @@ Accounts.ui.config({
 > db.users.count()
 2
 ~~~
-<%= caption "Mongo console" %>
+<%= caption "Mongo 콘솔" %>
 
 분명히 두 명의 사용자가 있다. 그러면, 왜 브라우저에서는 한 명만 보이는 것일까?
 
@@ -154,7 +154,7 @@ accounts 패키지는 현재 사용자 계정만을 발행한다. 이것이 바�
   "username" : "tmeasday"
 }
 ~~~
-<%= caption "Mongo console" %>
+<%= caption "Mongo 콘솔" %>
 
 한편, 브라우저에서 사용자 계정 정보는 동일한 명령어를 입력하여 보면, 훨씬 줄어들어 있다는 것을 볼 수 있다:
 
@@ -162,7 +162,7 @@ accounts 패키지는 현재 사용자 계정만을 발행한다. 이것이 바�
 ❯ Meteor.users.findOne();
 Object {_id: "kYdBd9hr3fWPGPcii", username: "tmeasday"}
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 이 예제는 로컬 컬렉션이 어떻게 실제 데이터베이스의 *보안이 강화된 부분집합*이 되는 지를 보여준다. 로그인 사용자는 실제 작동에 필요한 데이터만을 볼 수 있는 것이다 (이 경우, 로그인). 이는 배워둘 만한 유용한 패턴으로 나중에 볼 것이다.
 

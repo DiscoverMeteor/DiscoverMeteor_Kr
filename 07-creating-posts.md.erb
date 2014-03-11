@@ -108,7 +108,7 @@ Route를 설정했다는 것은 사용자가 브라우저에서 `/submit` URL을
 
 주: 많은 마크업이 있지만, 이들은 단순히 Twitter Bootstrap에서 온 것이다. form 엘리먼트들만이 필수적이고, 나머지 마크업은 앱을 다소 보기좋게 해 줄 뿐이다. 이것은 아래와 같이 보일 것이다:
 
-<%= screenshot "7-1", "The post submit form" %>
+<%= screenshot "7-1", "Post 등록폼" %>
 
 이것은 단순한 폼이다. 이 폼의 작동여부에 대하여는 걱정할 필요없다. 우리는 폼의 submit 이벤트를 가로채어 Javascript를 통해서 데이터를 갱신할 것이다(Javascript가 비활성화된 경우, 미티어 앱이 전혀 동작하지 않는 경우를 고려하여, JS가 없을 때의 대체 페이지를 제공하는 것은 별 의미는 없다.).
 
@@ -134,7 +134,7 @@ Template.postSubmit.events({
 ~~~
 <%= caption "client/views/posts/post_submit.js" %>
 
-<%= commit "7-1", "Added a submit post page and linked to it in the header." %>
+<%= commit "7-1", "Post 등록 페이지를 추가하고 헤더에 이 페이지로의 링크를 추가했다." %>
 
 이 함수는 [jQuery](http://jquery.com)를 사용하여 폼 필드의 값들을 추출하고, 그 결과로부터 새로운 post 객체를 구성한다. 여기서 핸들러의 매개변수 `event`의 `preventDefault` 메서드를 호출하여 브러우저가 폼의 submit을 그대로 진행하지 않도록 차단해야 한다.
 
@@ -153,7 +153,7 @@ Post를 등록하는 과정은 잘 되지만, 모든 방문자들이 다 등록�
 ~~~bash
 $ meteor remove insecure
 ~~~
-<%= caption "Terminal" %>
+<%= caption "터미널" %>
 
 이렇게 하면, post 등록 폼이 더 이상 동작하지 않는 것을 볼 수 있다. 이것은 `insecure` 패키지가 없으면, 클라이언트 쪽에서 post 컬렉션에 등록하는 것이 _더 이상 허용되지 않기_ 때문이다. 클라이언트 쪽에서 post 등록을 가능하게 하려면 미티어에게 명시적인 규정을 부여하거나, 그렇지 않으면 서버쪽에서 post를 등록해야 한다.
 
@@ -174,7 +174,7 @@ Posts.allow({
 <%= caption "collections/posts.js" %>
 <%= highlight "3~8" %>
 
-<%= commit "7-2", "Removed insecure, and allowed certain writes to posts." %>
+<%= commit "7-2", "패키지 insecure를 삭제하고 post에 쓰기를 허용했다." %>
 
 우리는 `Posts.allow`를 호출한다. 이것은 미티어에게 "다음 조건하에서 클라이언트의 Posts 컬렉션 조작을 허용한다."라고 지시하는 것이다. 위의 경우, 우리는 "클라이언트가 `userId`를 가지고 있으면 post를 등록하도록 허용한다" 라고 지시하는 것이다.
 
@@ -182,7 +182,7 @@ Posts.allow({
 
 우리는 post를 등록하려면 로그인하도록 해왔다. 로그아웃한 다음 post를 등록하려고 시도해보기 바란다; 그러면 콘솔에서 이런 메시지를 볼 것이다:
 
-<%= screenshot "7-2", "Insert failed: Access denied " %>
+<%= screenshot "7-2", "등록 실패: Access denied " %>
 
 그런데, 우리는 여전히 다음의 이슈들을 처리해야 한다:
 
@@ -239,11 +239,11 @@ Router.before(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "client/views/includes/access_denied.html" %>
 
-<%= commit "7-3", "Denied access to new posts page when not logged in." %>
+<%= commit "7-3", "로그인 상태가 아닐 때 post 등록 페이지로의 접근을 거절했다." %>
 
 이제 로그인하지 않은 상태로 http://localhost:3000/submit/ URL에 접근 요청을 하면 다음과 같은 장면을 보게 된다:
 
-<%= screenshot "7-3", "The access denied template" %>
+<%= screenshot "7-3", "Access denied 템플릿" %>
 
 이러한 라우팅 hook의 좋은 점은 이것이 _반응형_이라는 점이다. 이 의미는 우리가 선언적일 수 있으며, 사용자가 로그인할 때, 콜백이나 그 비슷한 것을 생각할 필요가 없다는 것이다. 사용자의 로그인 상태가 변할 때, 라우터의 페이지 템플릿은 `accessDenied`에서 `postSubmit`로 순간적으로 변하는 데, 이 과정에 이를 다루는 어떤 명시적 코드도 작성할 필요가 없다.
 
@@ -285,7 +285,7 @@ Router.before(requireLogin, {only: 'postSubmit'});
 <%= caption "lib/router.js" %>
 <%= highlight "16~19" %>
 
-<%= commit "7-4", "Show a loading screen while waiting to login." %>
+<%= commit "7-4", "로그인을 기다리는 동안 로딩중 화면을 보인다." %>
 
 ### 링크 숨기기
 
@@ -298,7 +298,7 @@ Router.before(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "client/views/includes/header.html" %>
 
-<%= commit "7-5", "Only show submit post link if logged in." %>
+<%= commit "7-5", "로그인 상태인 경우만 post 등록 링크를 보인다." %>
 
 `currentUser` 헬퍼는 accounts 패키지에서 제공하며 `Meteor.user()`와 동등한 handlebars이다. 이것은 반응형이므로 이 링크는 로그인 여부에 따라서 보여지거나 숨겨질 것이다.
 
@@ -386,7 +386,7 @@ Meteor.methods({
 ~~~
 <%= caption "collections/posts.js" %>
 
-<%= commit "7-6", "Use a method to submit the post." %>
+<%= commit "7-6", "메서드를 사용하여 post를 등록한다." %>
 
 이 메서드는 약간 복잡하지만, 충분히 따라갈 수 있을 것이다.
 
@@ -416,7 +416,7 @@ Template.postsList.helpers({
 <%= caption "client/views/posts/posts_list.js" %>
 <%= highlight "3" %>
 
-<%= commit "7-7", "Sort posts by submitted timestamp." %>
+<%= commit "7-7", "등록일시로 post목록을 정렬한다." %>
 
 다소의 작업이 있었지만, 마침내 우리는 앱에 콘텐츠를 안전하게 입력하는 사용자 인터페이스를 구축했다!
 

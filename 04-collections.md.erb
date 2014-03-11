@@ -26,7 +26,7 @@ Posts = new Meteor.Collection('posts');
 ~~~
 <%= caption "collections/posts.js" %>
 
-<%= commit "4-1", "Added a posts collection" %>
+<%= commit "4-1", "Posts 컬렉션을 추가했다." %>
 
 `client/`나 `server/`가 아닌 폴더에 있는 코드는 양쪽 모두에서 실행된다. 따라서 `Posts` 컬렉션은 클라이언트와 서버 모두에서 이용이 가능하다. 하지만, 각각의 환경에서 컬렉션이 하는 일은 매우 다르다.
 
@@ -48,7 +48,7 @@ Posts = new Meteor.Collection('posts');
 
 #### 터미널
 
-<%= screenshot "terminal", "The Terminal" %>
+<%= screenshot "terminal", "터미널" %>
 
 - 운영체제에서 구동된다.
 - **서버에서의** `console.log()`를 호출하면 여기로 출력된다. 
@@ -57,7 +57,7 @@ Posts = new Meteor.Collection('posts');
 
 #### 브라우저 콘솔
 
-<%= screenshot "browser-console", "The Browser Console" %>
+<%= screenshot "browser-console", "브라우저 콘솔" %>
 
 - 브라우저 내부에서 구동되어, JavaScript 코드를 실행한다.
 - **클라이어트에서의** `console.log()`를 호출하면 여기로 출력된다.  
@@ -66,7 +66,7 @@ Posts = new Meteor.Collection('posts');
 
 #### Mongo 쉘
 
-<%= screenshot "mongo-shell", "The Mongo Shell" %>
+<%= screenshot "mongo-shell", "Mongo 쉘" %>
 
 - 터미널에서 `meteor mongo`나 `mrt mongo` 명령어를 실행하여 구동된다.
 - 앱의 데이터베이스에 직접 접속한다. 
@@ -89,7 +89,7 @@ Mongo 데이터베이스의 내부를 보려면, 새로운 터미널 창을 열�
 > db.posts.find();
 { "_id": ObjectId(".."), "title" : "A new post"};
 ~~~
-<%= caption "The Mongo Shell" %>
+<%= caption "Mongo 쉘" %>
 
 <% note do %>
 
@@ -131,13 +131,13 @@ Mongo의 문법도 Javascript 인터페이스를 사용하므로 익숙하다. �
 > db.posts.find();
 {title: "A new post", _id: ObjectId("..")};
 ~~~
-<%= caption "The Mongo Shell" %>
+<%= caption "Mongo 쉘" %>
 
 ~~~js
 ❯ Posts.findOne();
 {title: "A new post", _id: LocalCollection._ObjectID};
 ~~~
-<%= caption "First browser console" %>
+<%= caption "브라우저 콘솔 1" %>
 
 이제, 새로운 post를 등록한다. 브라우저 창의 하나에서 아래 명령을 실행한다:
 
@@ -149,7 +149,7 @@ Mongo의 문법도 Javascript 인터페이스를 사용하므로 익숙하다. �
 ❯ Posts.find().count();
 2
 ~~~
-<%= caption "First browser console" %>
+<%= caption "브라우저 콘솔 1" %>
 
 예상한대로, post는 로컬 컬렉션에 저장된다. 이제 Mongo에서 확인해보자:
 
@@ -158,7 +158,7 @@ Mongo의 문법도 Javascript 인터페이스를 사용하므로 익숙하다. �
 {title: "A new post", _id: ObjectId("..")};
 {title: "A second post", _id: 'yyy'};
 ~~~
-<%= caption "The Mongo Shell" %>
+<%= caption "Mongo 쉘" %>
 
 보는 바와 같이, 클라이언트에서 서버로 보내는 한 줄의 코드 작성없이도 post를 Mongo 데이터베이스로 삽입했다(뭐, 엄격하게 말하면, 딱 _한_ 줄의 코드를 작성하긴 했다: `new Meteor.Collection('posts'))`. 하지만 이게 다는 아니다!
  
@@ -168,7 +168,7 @@ Mongo의 문법도 Javascript 인터페이스를 사용하므로 익숙하다. �
 ❯ Posts.find().count();
 2
 ~~~
-<%= caption "Second browser console" %>
+<%= caption "브라우저 콘솔 2" %>
 
 여기에도 post가 있다! 이 두 번째 브라우저를 새로고침하거나 교류하지 않았어도, 어떤 코드도 작성하지 않았어도 그렇다. 나중에 이에 대하여 보다 명백하게 밝혀지겠지만, 이것은 마술처럼 그리고 순간적으로 일어났다.
 
@@ -221,7 +221,7 @@ if (Posts.find().count() === 0) {
 ~~~
 <%= caption "server/fixtures.js" %>
 
-<%= commit "4-2", "Added data to the posts collection." %>
+<%= commit "4-2", "Posts 컬렉션에 데이터를 추가했다." %>
 
 우리는 이 파일을 `server/` 디렉토리에 넣었으므로, 이는 사용자 브라우저에는 로드되지 않을 것이다. 이 코드는 서버가 구동될 때 바로 실행되어 `Posts` 컬렉션에 3개의 post를 추가하도록 데이터베이스에 `insert` 요청을 한다. 아직은 어떠한 데이터 보안 처리를 하지 않았으므로, 이 파일이 서버에서 구동되나, 브라우저에서 구동되나 차이는 없다.
 
@@ -234,7 +234,7 @@ if (Posts.find().count() === 0) {
 ~~~js
 ❯ Posts.find().fetch();
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 이 post들을 HTML에 보이기 위해서, 템플릿 헬퍼를 사용한다. 3장에서 우리는 미티어에서 단순 데이터 구조의 HTML 뷰를 구축하기 위하여 *데이터 컨텍스트*를 Handlers 템플릿에 엮는 방법을 적용해 보았다. 컬렉션 데이터도 같은 방법으로 엮을 수 있다. 단지, 정적인 `postsData` Javascript 데이터 객체를 동적인 컬렉션으로 바꾸기만 하면 된다.
 
@@ -250,7 +250,7 @@ Template.postsList.helpers({
 <%= caption "client/views/posts/posts_list.js" %>
 <%= highlight "2~4" %>
 
-<%= commit "4-3", "Wired collection into `postsList` template." %>
+<%= commit "4-3", "컬렉션을 `postsList` 템플릿과 연동했다." %>
 
 <% note do %>
 
@@ -264,7 +264,7 @@ Template.postsList.helpers({
 
 이제, 변수에 지정된 정적 배열로부터 post의 목록을 가져오는 대신, `posts` 헬퍼에 대한 커서를 리턴한다. 그러나 이것이 무엇을 하는 걸까? 브라우저로 돌아가보면 우리는 다음을 본다:
 
-<%= screenshot "4-3", "Using live data" %>
+<%= screenshot "4-3", "라이브 데이터 사용하기" %>
 
 이와같이 우리는 `{{#each}}` 헬퍼가 `Posts` 전체를 반복하여, 이들을 화면에 뿌려주었다는 것을 명확하게 알게 된다. 서버쪽의 컬렉션은 Mongo로부터 post 목록을 추출하여, 이들을 클라이언트쪽의 컬렉션에 넘기고, handlebars 헬퍼가 이들을 템플릿으로 전달한 것이다.
 
@@ -277,11 +277,11 @@ Template.postsList.helpers({
   url: 'http://docs.meteor.com'
 });
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 다시 브라우저를 보면 다음과 같이 나타난다:
 
-<%= screenshot "4-4", "Adding posts via the console" %>
+<%= screenshot "4-4", "콘솔에서 post 추가하기" %>
 
 독자는 처음으로 반응형으로 동작하는 것을 본 것이다. 우리가 handlebars에게 `Posts.find()` 커서를 통해서 반복하도록 지시했을 때, 이것은 지속적으로 변화를 관찰하면서, 그 HTML을 가장 간단한 방식으로 수정하여 화면에 올바른 데이터를 보여준다.
 
@@ -325,7 +325,7 @@ Meteor.subscribe('posts');
 ~~~
 <%= caption "client/main.js" %>
 
-<%= commit "4-4", "Removed `autopublish` and set up a basic publication." %>
+<%= commit "4-4", "패키지 `autopublish`를 삭제하고 기본적인 발행을 작성했다." %>
 
 다시 브라우저를 보면, post 목록이 모두 돌아왔다. 휴!
 

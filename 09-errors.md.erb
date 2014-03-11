@@ -97,7 +97,7 @@ Template.errors.helpers({
 ~~~
 <%= caption "client/views/includes/errors.js" %>
 
-<%= commit "9-1", "Basic error reporting." %>
+<%= commit "9-1", "기본적인 오류 보고." %>
 
 ### 오류 만들기
 
@@ -133,11 +133,11 @@ Template.postSubmit.events({
 <%= caption "client/views/posts/post_submit.js" %>
 <%= highlight "12~14, 16~21" %>
 
-<%= commit "9-2", "Actually use the error reporting." %>
+<%= commit "9-2", "오류 보고를 실제로 사용한다." %>
 
 시도해보자: URL `http://meteor.com`를 입력하여 post를 등록해보자. 이 URL이 이미 존재하는 post에 등록되었기 때문에, 다음과 같은 화면을 볼 것이다:
 
-<%= screenshot "9-1", "Triggering an error" %>
+<%= screenshot "9-1", "오류화면 보이기" %>
 
 ### 오류 지우기
 
@@ -204,7 +204,7 @@ Template.error.rendered = function() {
 <%= caption "client/views/includes/errors.js" %>
 <%= highlight "7~12" %>
 
-<%= commit "9-3", "Monitor which errors have been seen, and clear on routing." %>
+<%= commit "9-3", "어떤 오류가 보여지는 지를 관찰하고 라우팅 과정에서 삭제한다." %>
 
 `rendered` 콜백은 브라우저에서 템플릿이 렌더링되었을 때 한 번 구동된다. 콜백 내부에서 `this`는 현 템플릿 인스턴스를 가리키며, `this.data`로 현재 렌더링이 일어나는 객체(여기서는 오류 객체)의 데이터에 접근할 수 있다.
 

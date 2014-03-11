@@ -20,19 +20,19 @@ Git 저장소의 기본 작업단위는 *커밋(commit)*이다. 커밋은 주어
 
 예를 들면, 이것은 [이전 장의 마지막 커밋](https://github.com/DiscoverMeteor/Microscope/commit/chapter3-2)의 모습이다:
 
-<%= screenshot "s3-1", "A Git commit as shown on GitHub." %>
+<%= screenshot "s3-1", "GitHub에서의 Git 커밋 화면." %>
 
 아래에 보이는 것은 `post_item.js` 파일의 “diff” (“difference”를 의미)로서, 다른 표현으로는 이 커밋에 따른 변경 사항을 의미한다. 이 경우, `post_item.js` 파일은 처음부터 작성되었으므로, 그 내용 전체가 녹색으로 나타난다.
 
 [이 책의 나중 부분](https://github.com/DiscoverMeteor/Microscope/commit/chapter13-1)의 예제와 비교해 보기 바란다:
 
-<%= screenshot "s3-2", "Modifying code." %>
+<%= screenshot "s3-2", "코드 수정." %>
 
 이번에는, 수정된 라인들만 녹색으로 나타난다.
 
 물론, 때로는 코드 라인을 추가하거나 수정하는 것이 아니라 [삭제](https://github.com/DiscoverMeteor/Microscope/commit/chapter12-2)하기도 한다:
 
-<%= screenshot "s3-3", "Deleting code." %>
+<%= screenshot "s3-3", "코드 삭제." %>
 
 이와같이 우리는 GitHub를 처음 사용해보았다: 변경 사항을 한 눈에 보기
 
@@ -42,15 +42,15 @@ Git의 커밋 뷰는 이 커밋에 반영된 변경사항들을 보여주지만,
 
 다시 GitHub로 돌아가자. 커밋 페이지에 있을 때, **Browse code** 버튼을 눌러보라:
 
-<%= screenshot "s3-5", "The Browse code button." %>
+<%= screenshot "s3-5", "Browse code 버튼." %>
 
 이제 *특정한 커밋상태의* 저장소에 접근할 수 있을 것이다.
 
-<%= screenshot "s3-6", "The repository at commit 3-2." %>
+<%= screenshot "s3-6", "commit 3-2의 저장소." %>
 
 GitHub에서 우리가 해당 커밋에서 찾는 시각적 단서를 많이 주지는 않지만, “normal” master view와 비교하여 그 파일 구조가 달라진 것을 한 눈에 볼 수 있다.
 
-<%= screenshot "s3-7", "The repository at commit 14-2." %>
+<%= screenshot "s3-7", "commit 14-2의 저장소." %>
 
 ### 로컬로 커밋에 접근하기
 
@@ -98,7 +98,7 @@ Git은 우리가 “detached HEAD” 상태에 있다는 것을 알려주고 있
 
 다시 한 번, GitHub는 우리의 삶을 보다 편안하게 해준다. 커밋의 해시는 파란 커밋 헤더 박스의 오른쪽 하단에서 찾을 수 있다:
 
-<%= screenshot "s3-4", "Finding a commit hash." %>
+<%= screenshot "s3-4", "Commit hash 찾기." %>
 
 그러면 태그 대신 해시로 시도해보자:
 
@@ -120,20 +120,20 @@ $ git checkout master
 
 우선, GitHub에 있는 저장소의 파일중의 하나에 접근하여, “History” 버튼을 누른다:
 
-<%= screenshot "s3-8", "GitHub's History button." %>
+<%= screenshot "s3-8", "GitHub의 History 버튼." %>
 
 이제 이 특정한 파일에 영향을 준 모든 커밋 목록이 정돈되어 나타난다.
 
-<%= screenshot "s3-9", "Displaying a file's history." %>
+<%= screenshot "s3-9", "파일의 history 보기." %>
 
 ### 책임 공방(Blame Game)
 
 마무리 단계로 **Blame**을 살펴보자:
 
-<%= screenshot "s3-10", "GitHub's Blame button." %>
+<%= screenshot "s3-10", "GitHub의 Blame 버튼." %>
 
 이 깔끔한 뷰는 어느 커밋에서, 어떤 파일의 라인마다 누가 수정하였는 지를(바꾸어 말하면, 누구의 잘못으로 작동하지 않는 지를) 보여준다:
 
-<%= screenshot "s3-11", "GitHub's Blame view." %>
+<%= screenshot "s3-11", "GitHub의 Blame 열람." %>
 
 Git은 매우 복잡한 도구이다 - GitHub도 그렇다 -, 그러므로 이 단일 장에서 모두 다루기를 기대할 수는 없다. 사실, 이들 도구로 가능한 것들에 대한 겉핥기만 한 것이다. 하지만, 바라건데, 이 정도만으로도 이 책의 나머지를 따라 가는데에 도움이 될 것이다.

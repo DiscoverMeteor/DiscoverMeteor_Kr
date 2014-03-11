@@ -51,9 +51,9 @@ if (Posts.find().count() === 0) {
 
 `meteor reset`을 실행하고 나면, 다음과 같은 화면을 보게 될 것이다:
 
-<%= screenshot "12-1", "Displaying dummy data. " %>
+<%= screenshot "12-1", "더미 데이터 보이기. " %>
 
-<%= commit "12-1", "Added enough posts that pagination is necessary." %>
+<%= commit "12-1", "페이징이 필요할 만큼의 충분한 post 목록을 추가했다." %>
 
 ### 무한 방식의 페이지
 
@@ -215,11 +215,11 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "5, 11~21" %>
 
-<%= commit "12-2", "Augmented the postsList route to take a limit." %>
+<%= commit "12-2", "제한을 걸기 위해서 postsList route에 코드를 추가했다." %>
 
 이 새로운 페이징 시스템을 체험해보자. 이제 URL 매개변수를 바꾸기만 하면 홈페이지의 post 숫자를 임의로 조정하여 보여줄 수 있는 상태가 되었다. 예를 들어, `http://localhost:3000/3`으로 접속해보면, 다음과 같은 화면을 보게 될 것이다:
 
-<%= screenshot "12-2", "Controlling the number of posts on the homepage. " %>
+<%= screenshot "12-2", "주소창에서 페이징 갯수를 조절하기. " %>
 
 <% note do %>
 
@@ -288,7 +288,7 @@ Router.map(function() {
 
 마지막 단계로 할 일은 새로운 controller에 대한 route를 controller 속성에 `postsList`로 지정하는 것이다.
 
-<%= commit "12-3", "Refactored postsLists route into a RouteController." %>
+<%= commit "12-3", "postsLists route 코드를 RouteController로 리팩토링하였다." %>
 
 ### 더보기 링크 추가하기
 
@@ -365,9 +365,9 @@ PostsListController = RouteController.extend({
 
 Post 목록 화면은 다음과 같이 보일 것이다:
 
-<%= screenshot "12-3", "The “load more” button. " %>
+<%= screenshot "12-3", "“load more” 버튼. " %>
 
-<%= commit "12-4", "Added nextPath() to the controller and use it to step through posts." %>
+<%= commit "12-4", "Controller에 nextPath()을 추가하고 이를 post의 페이지 이동을 구현했다." %>
 
 <% note do %>
 
@@ -408,13 +408,13 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "7" %>
 
-<%= commit "12-5", "Use the iron-router-progress package to make pagination nicer." %>
+<%= commit "12-5", "iron-router-progress 패키지를 사용하여 페이징 기능을 더 보기좋게 만들었다." %>
 
 ### Post 열람페이지 접속
 
 우리는 현재 초기 설정값으로 첫 5개의 post를 보여주게 하고 있다. 그런데, 특정 post페이지로 브라우징하면 무슨 일이 일어날까?
 
-<%= screenshot "12-4", "An empty template." %>
+<%= screenshot "12-4", "빈 템플릿." %>
 
 해보면, 빈 post 템플릿으로 채워진 페이지를 보게 될 것이다. 이것은 말이 된다: 우리는 라우터에게 `postsList` 경로를 로드할 때 `posts` 발행을 구독하라고 했지만, `postPage` 경로에 대하여는 지시한 바가 없다.
 
@@ -467,6 +467,6 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "7~12,18~20" %>
 
-<%= commit "12-6","Use a single post subscription to ensure that we can always see the right post." %>
+<%= commit "12-6","항상 올바른 post를 열람하도록 단일 post 구독을 사용하였다." %>
 
 페이징이 구현되니 우리 앱은 이제 더 이상 확장성 문제로 어려움을 겪지 않는다. 그리고 사용자들은 전보다 더 많은 링크를 등록할 수 있다. 이제 이 링크에 순위를 매기는 것이 좋을까? 이것이 바로 다음 장의 주제, *투표*이다.

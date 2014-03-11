@@ -22,7 +22,7 @@ paragraphs: 36
 
 또 다른 유사한 용례로는 한 아이템의 전체 상세와 함께 도큐먼트의 규모가 큰 집합에 대한 *개요*를 발행하는 경우이다:
 
-<%= diagram "doublecollection", "Publishing a collection twice", "pull-center" %>
+<%= diagram "doublecollection", "컬렉션을 두 번 발행하기", "pull-center" %>
 
 ~~~js
 Meteor.publish('allPosts', function() {
@@ -61,7 +61,7 @@ Microscope에서 우리는 `posts` 발행에 여러 번 구독하지만, Iron Ro
 
 예를 들면, post의 최신 목록과 최고 목록을 동시에 로드하기를 원한다고 하자:
 
-<%= diagram "subscribetwice", "Subscribing twice to one publication", "pull-center" %>
+<%= diagram "subscribetwice", "하나의 발행에 두 번 구독하기", "pull-center" %>
 
 우리는 단일 발행을 설정한다:
 
@@ -99,7 +99,7 @@ Meteor.subscribe('posts', {baseScore: -1, submitted: -1, limit: 10});
 
 이를 독립된 댓글 발행으로 처리하기는 어려울 것이다. 특히 post 목록이 (말하자면, 최근 10개와 같이) 제한을 가지면 그렇다. 우리는 아래와 같은 발행을 작성해야 한다:
 
-<%= diagram "multiplecollections", "Two collections in one subscription", "pull-center" %>
+<%= diagram "multiplecollections", "단일 구독에서의 두 컬렉션", "pull-center" %>
 
 ~~~js
 Meteor.publish('topComments', function(topPostIds) {
@@ -156,7 +156,7 @@ Meteor.publish('topPosts', function(limit) {
 
 구독의 유연성에 대한 새로운 지식은 그 밖의 무엇을 줄까? 글쎄, `_publishCursor`를 사용하지 않는다면 서버의 소스 컬렉션이 클라이언트의 타겟 컬렉션과 동일한 이름을 가져야 한다는 제약을 따를 필요는 없다.
 
-<%= diagram "linkedcollections", "One collection for two subscriptions", "pull-center" %>
+<%= diagram "linkedcollections", "두 개의 구독에 대한 하나의 컬렉션", "pull-center" %>
 
 이를 하려는 한 가지 이유는 *Single Table Inheritance*이다.
 

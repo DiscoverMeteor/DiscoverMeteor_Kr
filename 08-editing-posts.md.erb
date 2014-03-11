@@ -172,9 +172,9 @@ Template.postItem.helpers({
 <%= caption "client/views/posts/post_item.js" %>
 <%= highlight "2~4" %>
 
-<%= screenshot "8-1", "Post edit form." %>
+<%= screenshot "8-1", "Post 수정폼." %>
 
-<%= commit "8-1", "Added edit posts form." %>
+<%= commit "8-1", "Post 수정폼을 추가했다." %>
 
 수정 폼은 좋아 보이지만, 실제로는 지금 바로 무엇을 수정할 수는 없을 것이다. 무엇이 문제인가?
 
@@ -210,7 +210,7 @@ Meteor.methods({
 <%= caption "collections/posts.js" %>
 <%= highlight "3~6" %>
 
-<%= commit "8-2", "Added basic permission to check the post's owner." %>
+<%= commit "8-2", "Post의 소유자를 검사하는 기본적인 접근권한 제어 기능을 추가했다." %>
 
 ### 수정 범위의 제한
 
@@ -236,7 +236,7 @@ Posts.deny({
 <%= caption "collections/posts.js" %>
 <%= highlight "8~13" %>
 
-<%= commit "8-3", "Only allow changing certain fields of posts." %>
+<%= commit "8-3", "Post의 특정 필드만 수정할 수 있게 허용한다." %>
 
 `fieldNames` 배열은 수정될 필드 목록을 담고 있다. 그리고  [Underscore](http://underscorejs.org/)의 `without()` 메서드를 사용하여 `url`이나 `title`이 *아닌* 필드들을 담은 부분 배열을 리턴한다.
 

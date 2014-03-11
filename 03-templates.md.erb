@@ -152,9 +152,9 @@ Template.postsList.helpers({
 
 코드가 올바로 작성되었다면 다음과 같는 모습을 브라우저에서 볼 수 있을 것이다:
 
-<%= screenshot "3-1", "Our first templates with static data" %>
+<%= screenshot "3-1", "정적 데이터로 작성한 첫 템플릿" %>
 
-<%= commit "3-1", "Added basic posts list template and static data." %>
+<%= commit "3-1", "기본적인 posts 목록 템플릿과 정적 데이터를 추가했다." %>
 
 우리는 여기서 두 가지 작업을 한다. 첫째, `postsData` 배열에 초기 데이터를 지정했다. 이 데이터는 보통은 데이터베이스에서 오지만, 그 방법을 아직 다루지 않았기 때문에(다음 장까지 기다려라) 정적 데이터로 "임시 처리"하고 있다.
 
@@ -190,11 +190,11 @@ Template.postItem.helpers({
 ~~~
 <%= caption "client/views/posts/post_item.js" %>
 
-<%= commit "3-2", "Setup a `domain` helper on the `postItem`." %>
+<%= commit "3-2", "`postItem`에 `domain` 헬퍼를 작성하였다." %>
 
 여기서 `domain` 헬퍼의 값은 배열이 아니고 익명의 함수이다. 이 패턴은 이전의 단순화된 더미데이터 예제보다는 훨씬 일반적이다(그리고 더 유용하다).
 
-<%= screenshot "3-2", "Displaying domains for each links." %>
+<%= screenshot "3-2", "개별 링크에 domain을 보여준다." %>
 
 `domain` 헬퍼는 URL을 가져와서 약간의 JavaScript 마술을 통해서 그 URL의 도메인 값을 리턴한다. 그런데, 이 URL은 처음에 어디서 왔을까?
 

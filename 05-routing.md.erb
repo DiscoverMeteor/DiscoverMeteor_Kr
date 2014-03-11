@@ -24,7 +24,7 @@ paragraphs: 72
 ~~~bash
 $ mrt add iron-router
 ~~~
-<%= caption "Terminal" %>
+<%= caption "터미널" %>
 
 이 명령어는 iron-router 패키지를 다운로드하여 앱에 설치하고, 사용할 수 있는 상태로 만든다. 때로 이 패키지를 사용하기 전에 앱을 재구동(｀ctrl+c｀로 프로세스를 삭제한 다음 ｀mrt`로 다시 구동한다)해야 할 수도 있다는 점에 유의하라.
 
@@ -57,7 +57,7 @@ Iron Router를 사용하면 HTML의 `<body>` 태그 내부에서 그려지는 �
 
 이 `{{yield}}` 헬퍼는 특별한 동적 영역을 정의하여 어떤 템플릿이 현재 경로(관습상, 이 특별한 템플릿을 지금부터 “route 템플릿”이라 부른다.)에 대응하던간에 자동으로 그려주도록 할 것이다:
 
-<%= diagram "router-diagram", "Layouts and templates.", "pull-center" %>
+<%= diagram "router-diagram", "레이아웃과 템플릿.", "pull-center" %>
 
 먼저, 레이아웃을 만들고 여기에 `{{yield}}` 헬퍼를 추가한다. `main.html` 파일에서 HTML `<body>` 태그를 삭제하고 레이아웃 코드를 자체 템플릿인 `layout.html` 파일로 옮긴다.
 
@@ -137,7 +137,7 @@ Router.map(function() {
 <%= caption "client/views/application/layout.html"%>
 <%= highlight "3" %>
 
-<%= commit "5-1", "Very basic routing." %>
+<%= commit "5-1", "매우 기본적인 라우팅." %>
 
 ### 데이터 기다리기(Wait on)
 
@@ -182,7 +182,7 @@ Router.map(function() {
 
 유의할 것은 `{{>spinner}}`이 `spin` 패키지에 포함된 일부라는 점이다. 이 부분이 앱의 “외부”에서 왔어도, 다른 템플릿과 마찬가지로 사용할 수 있다.
 
-<%= commit "5-2", "Wait on the post subscription." %>
+<%= commit "5-2", "Post 구독을 기다리다(waitOn)." %>
 
 <% note do %>
 
@@ -236,7 +236,7 @@ Router.map(function() {
 
 감사하게도, 라우터에는 영리하게 구축된 해법이 있다: 바로 템플릿의 **데이터 컨텍스트(data context)**를 지정하는 것이다. 데이터 컨텍스트(data context)란 템플릿과 레이아웃으로 만들어진 맛있는 케이크의 내부를 채우는 것과 비슷하다. 단순히 템플릿을 아래 내용으로 채우기만 하면 된다: 
 
-<%= diagram "router-diagram-2", "The data context.", "pull-center" %>
+<%= diagram "router-diagram-2", "데이터 컨텍스트.", "pull-center" %>
 
 위 예제에서, 우리는 URL에서 추출한 `_id`를 기반으로 post를 찾아서 적절한 데이터 컨텍스트를 얻는다:
 
@@ -306,7 +306,7 @@ Route에서의 `data` 함수 내부에서, `this`는 현재 일치한 route에 �
 ~~~
 <%= caption "client/views/posts/post_item.html"%>
 <%= highlight "6" %>
-<%= commit "5-3", "Routing to a single post page." %>
+<%= commit "5-3", "단일 post 페이지로 라우팅하기." %>
 
 그런데 잠깐, 라우터는 `/posts/xyz`에서 `xyz`부분을 구하는 방법을 어떻게 정확하게 알까? 어찌되었건, 우리는 어떤 `_id`도 전달하지 않는다.
 
@@ -318,7 +318,7 @@ Iron Router가 참으로 똑똑해서 스스로 그것을 알아낸다는 것이
 
 이것이 제대로 동작하는 지를 보려면, post 목록 페이지로 이동하여 'Discuss' 링크 중의 하나를 클릭하여, 그 결과가 아래와 같은 지를 보는 것이다:
 
-<%= screenshot "5-2", "A single post page." %>
+<%= screenshot "5-2", "단일 post 페이지." %>
 
 <% note do %>
 
