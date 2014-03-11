@@ -28,7 +28,7 @@ post A와 post B를 바꿔치기 위해서(상대적으로 p1, p2에 위치해 �
 
 아래 다이어그램은 위의 단계를 상세하게 설명해준다:
 
-<%= diagram "animation_diagram", "Swtiching two posts", "pull-center" %>
+<%= diagram "animation_diagram", "두 post 사이의 자리 바꾸기", "pull-center" %>
 
 3, 4단계는 A와 B를 *애니메이션*으로 처리하는 것이 아니라 순간적으로 "공간이동"시킨다. 이것이 순간적으로 일어나기 때문에 B가 삭제되지 않고 두 요소가 새 위치로 적절하게 자리하는 착각을 준다.
 
@@ -194,7 +194,7 @@ Template.postItem.events({
 <%= caption "/client/views/posts/post_item.js" %>
 <%= highlight "5~27" %>
 
-<%= commit "14-1", "Added post reordering animation." %>
+<%= commit "14-1", "Post 재정렬 애니메이션 기능을 추가했다." %>
 
 이전의 다이아그램으로 돌아가서 참조하면 계속 따라가는 것이 그리 어렵지만은 않을 것이다.
 
@@ -254,7 +254,7 @@ Template.postItem.events({
 <%= caption "/client/views/posts/post_item.js" %>
 <%= highlight "19~22,28" %>
 
-<%= commit "14-2", "Fade items in when they are drawn." %>
+<%= commit "14-2", "새로 추가되는 아이템의 페이드인 효과를 구현했다." %>
 
 `defer()` 함수에 추가한 `removeClass("invisible")`는 모든 렌더링에서 실행되는 것에 주목하라. 그러나 이것은 엘리먼트에 `.invisible` 클래스가 실제로 존재할 때에만 작동하는 데, 이 경우는 처음 렌더링될 때에만 true이다.
 

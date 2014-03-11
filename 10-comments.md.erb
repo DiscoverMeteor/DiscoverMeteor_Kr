@@ -101,7 +101,7 @@ Router.configure({
 <%= caption "lib/router.js" %>
 <%= highlight "4~6" %>
 
-<%= commit "10-1", "Added comments collection, pub/sub and fixtures." %>
+<%= commit "10-1", "Comments collection, 발행/구독, 초기화 데이터를 추가했다." %>
 
 위의 초기 설정 코드를 구동하려면, 데이터베이스를 초기화하는 `meteor reset`를 실행해야 한다는 점에 유의하라. 리셋 후에 새로 계정을 만들고 로그인하는 것도 잊지 말라!
 
@@ -205,11 +205,11 @@ Template.postItem.helpers({
 <%= caption "client/views/posts/post_item.js" %>
 <%= highlight "9,10,11" %>
 
-<%= commit "10-2", "Display comments on `postPage`." %>
+<%= commit "10-2", "`postPage`에 댓글 목록을 보인다." %>
 
 이제 댓글 목록을 보여주는 아래와 같은 화면을 볼 수 있을 것이다:
 
-<%= screenshot "10-1", "Displaying comments" %>
+<%= screenshot "10-1", "댓글 목록 보이기" %>
 
 ### 댓글 등록하기
 
@@ -258,7 +258,7 @@ Template.postItem.helpers({
 ~~~
 <%= caption "client/views/comments/comment_submit.html" %>
 
-<%= screenshot "10-2", "The comment submit form" %>
+<%= screenshot "10-2", "댓글 등록폼" %>
 
 댓글을 submit하기 위해서, `postSubmit` 매니저와 비슷한 방식으로 작동하는 `commentSubmit` 매니저에 있는 `comment` 메서드를 호출한다:
 
@@ -317,7 +317,7 @@ Meteor.methods({
 <%= caption "collections/comments.js" %>
 <%= highlight "3~25" %>
 
-<%= commit "10-3", "Created a form to submit comments." %>
+<%= commit "10-3", "댓글 등록폼을 만들었다." %>
 
 이것이 무슨 근사한 작업을 하는 것은 아니며, 사용자가 로그인했는 지를 확인하고, comment에 본문이 있는지 그리고 post에 연결되었는 지를 확인하는 것이다.
 
@@ -369,11 +369,11 @@ Meteor.publish('comments', function(postId) {
 <%= caption "server/publications.js" %>
 <%= highlight "5~7" %>
 
-<%= commit "10-4", "Made a simple publication/subscription for comments." %>
+<%= commit "10-4", "댓글에 대한 간결한 발행/구독을 만들었다." %>
 
 한 가지 문제가 있다: 홈페이지로 돌아가보면, 모든 댓글의 갯수가 0으로 나타난다:
 
-<%= screenshot "10-3", "Our comments are gone!" %>
+<%= screenshot "10-3", "댓글이 사라졌다!" %>
 
 ### 댓글 갯수 세기
 
@@ -431,7 +431,7 @@ return Comments.insert(comment);
 
 마지막으로, 이제 post에서 직접 필드 값을 읽어 올 수 있으므로 `client/views/posts/post_item.js`에서 `commentsCount` 헬퍼를 제거한다.
 
-<%= commit "10-5", "Denormalized the number of comments into the post." %>
+<%= commit "10-5", "Post에 댓글 갯수를 비정규화하여 넣었다." %>
 
 이제 사용자들은 서로 대화할 수 있게 되었다. 그들이 만약 새 댓글들을 놓친다면 부끄러운 일이 될 것이다. 그리고 다음 장에서 이런 일을 방지하기 위하여 알림 기능을 구현해 볼 것이다!
 

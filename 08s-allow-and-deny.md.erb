@@ -22,7 +22,7 @@ paragraphs: 16
 
 유사한 방식으로 하나 이상의 `deny` 콜백을 정의할 수 있다. 만약 이들 가운데 _어느 것_이라도 `true`를 리턴하면, 변경은 취소되고 `403`이 리턴된다. 이 로직은 성공적인 `insert`를 위해서는 하나 또는 그 이상의 `allow`와 모든 `deny` 콜백이 실행된다는 것을 의미한다.
 
-<%= diagram "allow_deny", "Note: n/e stands for Not Executed" %>
+<%= diagram "allow_deny", "주: n/e는 실행되지 않음을 의미한다." %>
 
 다시말하면, 미티어는 콜백 목록을 따라서 실행하면서 처음엔 `deny`로 시작하여 다음엔 `allow`, 그리고 모든 콜백을 그 중 하나가 `true`를 리턴할 때까지 실행한다.
 

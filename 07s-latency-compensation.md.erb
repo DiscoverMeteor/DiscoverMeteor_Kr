@@ -10,7 +10,7 @@ paragraphs: 28
 
 이전 장에서 우리는 미티어 세계의 새로운 개념인 **메서드(Method)**에 대하여 소개했다.
 
-<%= diagram "latency1", "Without latency compensation", "pull-right" %>
+<%= diagram "latency1", "대기시간 보정이 없을 때", "pull-right" %>
 
 미티어 Method는 서버에 있는 일련의 명령어들을 구조화된 방식으로 실행하는 수단이다. 이전 예제에서 Method를 사용한 이유는 새 post에 등록일시뿐 아니라 저자의 이름과 id를 함께 저장하기를 원했기 때문이다.
 
@@ -24,7 +24,7 @@ paragraphs: 28
 
 ### 대기시간 보정
 
-<%= diagram "latency2", "With latency compensation", "pull-right" %>
+<%= diagram "latency2", "대기시간 보정이 있을 때", "pull-right" %>
 
 이 문제점을 피하기 위하여, 미티어는 **대기시간 보정(Latency Compensation)**이라는 개념을 도입했다. 우리는 `post` Method를 정의하여 `collections/` 디렉토리에 있는 파일에 넣었다. 이렇게 하면 서버와 그리고 클라이언트 양쪽에서 이용할 수 있다 - 그리고 동시에 양쪽에서 구동될 수 있다!
 
@@ -106,15 +106,15 @@ Template.postSubmit.events({
 <%= caption "client/views/posts/post_submit.js" %>
 <%= highlight "15" %>
 
-<%= scommit "7-5-1", "Demonstrate the order that posts appear using a sleep." %>
+<%= scommit "7-5-1", "Sleep 기능을 사용하여 post 목록이 나타나는 순서를 보여준다." %>
 
 이제 새 post를 등록하면, 대기시간 보정을 명백하게 관찰할 수 있다. 우선 post는 제목(GitHub로 링크가 잡힌 목록의 첫 post)에 `(client)`이 추가되어 나타난다:
 
-<%= screenshot "s5-1", "Our post as first stored in the client collection" %>
+<%= screenshot "s5-1", "처음 클라이언트 컬렉션에 저장된 post" %>
 
 그리고, 5초가 지나면, 서버에 등록된 실제 도큐먼트로 대체된다:
 
-<%= screenshot "s5-2", "Our post once the client receives the update from the server collection" %>
+<%= screenshot "s5-2", "서버 컬렉션으로부터 수정본을 받은 후의 post" %>
 
 ### 클라이언트 컬렉션 Methods
 

@@ -29,7 +29,7 @@ paragraphs: 33
 ~~~js
 ❯ Session.set('pageTitle', 'A different title');
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 세션에서 값을 읽을 때는 `Session.get('mySessionProperty');`로 한다. 이것은 반응형 데이터 소스이다. 이 의미는 만약 헬퍼에 이것을 넣으면, 세션 변수가 변경될 때 헬퍼의 출력값이 반응형으로 변경된다는 것이다.
 
@@ -58,7 +58,7 @@ Template.layout.helpers({
 ~~~js
 ❯ Session.set('pageTitle', 'A brand new title');
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 세션은 전역에서 이용할 수 있으므로, 앱의 어디에서나 이렇게 바꿀 수 있다. 이는 큰 힘이 되지만, 너무 많이 사용하면 함정이 될 수도 있다.
 
@@ -92,7 +92,7 @@ helloWorld = function() {
 ❯ Deps.autorun( function() { console.log('Value is: ' + Session.get('pageTitle')); } );
 Value is: A brand new title
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 예상한대로, `autorun` 내부에 입력된 코드 블럭이 실행되고, 그 결과는 콘솔에 나타난다. 이제, 제목을 변경해보자:
 
@@ -100,7 +100,7 @@ Value is: A brand new title
 ❯ Session.set('pageTitle', 'Yet another value');
 Value is: Yet another value
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 마술같다! 세션값이 변경되니, `autorun`이 이를 인지하고 그 내부의 내용을 모두 재실행하여 그 출력을 콘솔로 내보냈다.
 
@@ -127,7 +127,7 @@ Microscope를 개발하는 동안, 우리는 개발 시간을 줄여주는 미�
 ❯ Session.get('pageTitle');
 'A brand new title'
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 만약 브라우저 창을 수동으로 리로드하면, 세션 변수는 자연적으로 소멸될 것이다(이렇게 하면 새로운 세션이 생성되기 때문이다). 반면에 hot code reload 기능을 구동하면 (예를들면, 소스파일의 일부를 저장하여), 페이지는 리로드되지만 세션변수는 여전히 값을 유지할 것이다. 지금 해보라!
 
@@ -135,7 +135,7 @@ Microscope를 개발하는 동안, 우리는 개발 시간을 줄여주는 미�
 ❯ Session.get('pageTitle');
 'A brand new title'
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 그러므로, 사용자가 하는 일을 정확하게 추적하는 데 세션 변수를 사용한다면, 사용자는 HCR을 거의 느끼지 못할 것이다. 왜냐면 이것은 모든 세션변수의 값을 보존할 것이기 때문이다. 따라서 우리는 미티어 앱의 새 버전의 제품을 배포할 때, 사용자에게 지장을 최소화할 것이라는 확신을 가진다.
 
@@ -147,7 +147,7 @@ Microscope를 개발하는 동안, 우리는 개발 시간을 줄여주는 미�
 ❯ Session.get('pageTitle');
 null
 ~~~
-<%= caption "Browser console" %>
+<%= caption "브라우저 콘솔" %>
 
 페이지가 리로드되면, 세션 정보는 사라진다. HCR의 경우, 미티어는 세션을 브라우저의 로컬 저장소에 저장하며, 리로드 후에 그것을 다시 읽어들인다. 그런데, 수동 리로드에서의 이 다른 행태는 이해가 된다: 사용자가 페이지를 리로드하면, 그것은 사용자가 동일한 URL로 브라우징을 다시 한 것으로 인식한다. 그래서 세션 정보는 사용자가 해당 URL을 방문할 때 보는 초기상태로 리셋된다.
 

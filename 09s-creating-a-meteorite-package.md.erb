@@ -90,7 +90,7 @@ $ rm client/helpers/errors.js
 $ rm client/views/includes/errors.html
 $ rm client/views/includes/errors.js
 ~~~
-<%= caption "removing old files on the bash console" %>
+<%= caption "bash 콘솔에서 예전 파일들을 삭제하기" %>
 
 한 가지 더 할 일은 올바른 API를 사용하도록 약간 수정을 하는 것이다:
 
@@ -122,7 +122,7 @@ Posts.update(currentPostId, {$set: postProperties}, function(error) {
 ~~~
 <%= caption "client/views/posts/post_edit.js" %>
 
-<%= scommit "9-5-1", "Created basic errors package and linked it in." %>
+<%= scommit "9-5-1", "기본적인 오류 패키지를 만들고 이를 연동했다." %>
 
 이 수정작업이 완료되고 나면, 패키지 이전의 상태로 되돌려야 한다.
 
@@ -180,16 +180,16 @@ Package.on_test(function(api) {
 ~~~
 <%= caption "packages/errors/package.js" %>
 
-<%= scommit "9-5-2", "Added tests to the package." %>
+<%= scommit "9-5-2", "패키지에 테스트 기능을 추가했다." %>
 
 그러면 다음 명령어로 테스트를 실행할 수 있다:
 
 ~~~bash
 $ meteor test-packages errors
 ~~~
-<%= caption "Terminal" %>
+<%= caption "터미널" %>
 
-<%= screenshot "s7-1", "Passing all tests" %>
+<%= screenshot "s7-1", "모든 테스트 통과" %>
 
 ### 패키지 릴리즈
 
@@ -211,7 +211,7 @@ $ meteor test-packages errors
 ~~~
 <%= caption "packages/errors/smart.json" %>
 
-<%= scommit "9-5-3", "Added a smart.json" %>
+<%= scommit "9-5-3", "smart.json 파일을 추가했다." %>
 
 그 패키지에 대한 정보를 제공하기 위하여 몇 가지 기본적인 메타데이터를 넣는다. 여기에는 이것의 주요 기능, 호스트 git 주소, 그리고 초기 버전 정보가 포함된다. 만약 이 패키지가 다른 Atmosphere 패키지에 의존한다면, 그 의존성 정보를 기술하는 `"packages"` 섹션을 추가한다.
 
@@ -228,7 +228,7 @@ $ git push origin master
 $ mrt release .
 Done!
 ~~~
-<%= caption "Terminal (run from within `packages/errors`)" %>
+<%= caption "터미널 (`packages/errors` 내에서 실행한다)" %>
 
 주: 패키지 이름은 유일해야 한다. 위의 내용을 문자 그대로 따라하여 동일한 패키지 이름을 사용하면, 충돌이 발생해서 작동하지 않게 될 것이다. 미래에 Atmosphere는 저자에 따른 네임스페이스를 가지게 될 것이므로, 이 이름이 바뀔 수 있다는 점을 감안하기 바란다.
 
@@ -240,8 +240,8 @@ Done!
 $ rm -r packages/errors
 $ mrt add errors
 ~~~
-<%= caption "Terminal (run from the top level of the app)" %>
+<%= caption "터미널 (앱의 루트 경로에서 실행한다)" %>
 
-<%= scommit "9-5-4", "Removed package from development tree." %>
+<%= scommit "9-5-4", "개발 트리에서 패키지를 삭제했다." %>
 
 이제 Meteorite에서 패키지를 다운로드하는 것을 처음으로 볼 수 있을 것이다. 잘했다!

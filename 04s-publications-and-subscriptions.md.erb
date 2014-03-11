@@ -31,7 +31,7 @@ paragraphs: 52
 
 이에 비하여 무엇이 미티어를 그렇게 특별하게 만드는 지를 살펴보도록 하자. 우리가 본 바와 같이, 미티어의 혁신의 핵심은 Rails 앱이 **서버에서만** 동작하는 반면에, 미티어 앱은 클라이언트(브라우저)에서 동작하는 클라이언트쪽 컴포넌트도 포함한다는 것이다.
 
-<%= diagram "client-server", "Pushing a subset of the database to the client.", "pull-right" %>
+<%= diagram "client-server", "클라이언트에 데이터베이스의 부분집합을 보내기.", "pull-right" %>
 
 이것은 마치 서점 점원이 책을 찾아줄 뿐 아니라, 독자를 집에까지 따라와서 밤에 그 책을 읽어주는 것(약간 소름끼치는 소리로 받아들일 수 있지만)과 같다.
 
@@ -47,13 +47,13 @@ paragraphs: 52
 
 Microscope로 돌아가보자. 아래는 데이터베이스에 있는 앱의 post 목록 전체이다:
 
-<%= diagram "collections-1", "All the posts contained in our database.", "pull-center" %>
+<%= diagram "collections-1", "데이터베이스에 들어있는 post 목록 전체.", "pull-center" %>
 
 Microscope에 이 기능은 확실히 실제로 존재하지는 않지만, 이 post들의 일부가 욕설이 담긴 내용으로 표시가 되어 있다고 상상하자. 우리는 이들을 데이터베이스에 담아두기는 하지만, 사용자들이 이용할 수(즉, 클라이언트로 보내지는 경우)는 없어야 한다.
 
 우리의 첫 과제는 미티어에게 클라이언트쪽에 전송한 데이터를 알려주는 일이 될 것이다. 우리는 미티어에게 표시가 없는 post들만을 **발행(publish)**하도록 할 것이다.
 
-<%= diagram "collections-2", "Excluding flagged posts.", "pull-center" %>
+<%= diagram "collections-2", "표시된 post를 제외함.", "pull-center" %>
 
 아래가 그 대응하는 코드로 서버에 위치한다:
 
@@ -84,7 +84,7 @@ Meteor.publish('posts', function() {
 
 예를 들면, 우리가 현재 Bob Smith의 프로필 페이지를 열람중이고 *그가 등록한* post만을 보기를 원한다고 해보자.
 
-<%= diagram "collections-3", "Subscribing to Bob's posts will mirror them on the client.", "pull-center" %>
+<%= diagram "collections-3", "Bob의 post를 구독하면 클라이언트에 미러링된다.", "pull-center" %>
 
 우선, 우리는 발행을 매개변수를 받도록 수정한다:
 
@@ -108,7 +108,7 @@ Meteor.subscribe('posts', 'bob-smith');
 
 이제 Bob의 post들이 다양한 카테고리에 걸쳐서 있다고 하자(예를 들면, “JavaScript”, “Ruby”, 그리고 “Python”). 우리가 여전히 Bob의 모든 post를 메모리에 로드하기를 원하지만, 이제 그 중에서 “JavaScript” 카테고리에 있는 것들만을 보여주기를 원한다고 하자. 여기서 “찾기”가 도입된다.
 
-<%= diagram "collections-4", "Selecting a subset of documents on the client.", "pull-center" %>
+<%= diagram "collections-4", "클라이언트에서 도큐먼트의 일부만 선택하기.", "pull-center" %>
 
 서버에서 한 것과 마찬가지로, 우리는 `Posts.find()` 함수를 사용하여 데이터의 부분집합을 선택한다:
 
@@ -147,7 +147,7 @@ Meteor.publish('allPosts', function(){
 });
 ~~~
 
-<%= diagram "fullcollection", "Publishing a full collection", "pull-center" %>
+<%= diagram "fullcollection", "컬렉션 전체를 발행하기", "pull-center" %>
 
 여전히 컬렉션 전체를 발행하지만, 이제는 최소한 어떤 컬렉션을 발행할 것인지 아닌지를 통제할 수는 있게 되었다. 이 경우에 우리는 `Posts` 컬렉션은 발행하지만 `Comments`는 하지 않는다.
 
@@ -161,7 +161,7 @@ Meteor.publish('somePosts', function(){
 });
 ~~~
 
-<%= diagram "partialcollection", "Publishing a partial collection", "pull-center" %>
+<%= diagram "partialcollection", "컬렉션 일부를 발행하기", "pull-center" %>
 
 <% note do %>
 
@@ -197,7 +197,7 @@ Meteor.publish('allPosts', function(){
 });
 ~~~
 
-<%= diagram "partialproperties", "Publishing partial properties", "pull-center" %>
+<%= diagram "partialproperties", "일부 속성만 발행하기", "pull-center" %>
 
 물론 이 두 가지를 결합할 수도 있다. 예를 들면, Tom이 작성한 모든 글에서 그 날짜는 제외하고 리턴하고 싶다면 다음과 같이 작성한다:
 
