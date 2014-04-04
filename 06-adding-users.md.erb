@@ -27,7 +27,7 @@ $ mrt add accounts-password
 ~~~
 <%= caption "터미널" %>
 
-위의 두 명령어는 특별한 accounts 템플릿을 제공한다; 우리는 이들을 사이트에서 `{{loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{loginButtons align="right"}}`).
+위의 두 명령어는 특별한 accounts 템플릿을 제공한다; 우리는 이들을 사이트에서 `{{> loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{> loginButtons align="right"}}`).
 
 헤더에 버튼을 추가한다. 그리고 헤더가 좀 커질 수 있으므로, 템플릿에 공간을 좀 더 주도록 하자(이것을 `client/views/includes/`에 넣는다). 또한 일부 추가 마크업과 Bootstrap 클래스를 사용하여 외관을 멋지게 마무리한다:
 

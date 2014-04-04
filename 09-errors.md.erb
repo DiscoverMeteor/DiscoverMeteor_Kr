@@ -48,7 +48,7 @@ throwError = function(message) {
     {{> header}}
     {{> errors}}
     <div id="main" class="row-fluid">
-      {{yield}}
+      {{> yield}}
     </div>
   </div>
 </template>
@@ -171,8 +171,8 @@ clearErrors = function() {
 ~~~js
 // ...
 
-Router.before(requireLogin, {only: 'postSubmit'})
-Router.before(function() { clearErrors() });
+Router.onBeforeAction(requireLogin, {only: 'postSubmit'})
+Router.onBeforeAction(function() { clearErrors() });
 ~~~
 <%= caption "lib/router.js" %>
 <%= highlight "4" %>
