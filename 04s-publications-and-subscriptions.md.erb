@@ -169,7 +169,7 @@ Meteor.publish('somePosts', function(){
 
 [Meteor publication documentation](http://docs.meteor.com/#publishandsubscribe)을 읽었다면, 아마도 클라이언트에서 레코드의 속성을 지정하기 위해 `added()`와 `ready()`를 사용하는 글에 압박을 받을 것이다. 그리고 그 글과 그런 메서드를 전혀 사용하지 않는 미티어 앱과 맞추어보느라 고생할 것이다.
 
-그 이유는 미티어가 매우 중요한 편의를 제공하기 때문이다: 바로 `_publishCursor()` 메서드이다. 이것이 사용된 것을 본 적은 없다, 그렇지? 아마도 직접적으로는 아니겠지만, publish 함수에서 [커서](/chapter/meteor-vocabulary/)를 리턴한다면(즉, `Posts.find({'author':'Tom'})`), 이것이 바로 미티어가 사용하는 곳이다.
+그 이유는 미티어가 매우 중요한 편의를 제공하기 때문이다: 바로 `_publishCursor()` 메서드이다. 이것이 사용된 것을 본 적은 없다, 그렇지? 아마도 직접적으로는 아니겠지만, publish 함수에서 [커서](/chapters/meteor-vocabulary/)를 리턴한다면(즉, `Posts.find({'author':'Tom'})`), 이것이 바로 미티어가 사용하는 곳이다.
 
 미티어에서 `somePosts` 라는 발행 함수가 커서를 리턴할 때, 미티어는 커서를 자동적으로 발행하기 위해서 `_publishCursor()`를 - 예상한 대로 - 호출한다.
 
