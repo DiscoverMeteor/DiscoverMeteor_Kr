@@ -3,21 +3,33 @@ title: 애니메이션
 slug: animations
 date: 0014/01/01
 number: 14
-contents: 미티어가 두 DOM 엘리먼트를 자리바꿀 때, 내부에서 일어나는 일을 살펴본다.|Post 목록의 재정렬을 애니메이션하는 방법을 배운다.|새로운 post의 삽입을 애니메이션하는 방법을 배운다.
+contents: 미티어가 두 DOM 엘리먼트의 위치를 바꿀 때 내부에서 일어나는 일을 살펴본다.|Post 목록의 재정렬을 애니메이션하는 방법을 배운다.|새로운 post의 삽입을 애니메이션하는 방법을 배운다.
 paragraphs: 58
 ---
 
-이제 실시간 투표, 점수 계산, 순위 지정을 하는 기능이 구현되었다. 그런데, 홈페이지에서 post가 점프하여 이동하는 사용자 경험이 거슬리고, 이상하다. 이를 애니메이션으로 부드럽게 처리하려고 한다.
+이제 실시간 투표, 점수 계산, 순위 지정을 하는 기능이 구현되었다. 그런데, 홈페이지에서 post가 점프하여 이동하는 모양이 거슬리고, 이상한 사용자 경험을 준다. 이를 애니메이션으로 부드럽게 처리하려고 한다.
 
 ### 미티어와 DOM
 
-흥미로운 분야(움직이는 세계)로 나가기에 앞서 미티어가 DOM(Document Object Model – 페이지를 구성하는 HTML 엘리먼트들의 컬렉션)과 어떻게 상호작용을 하는 지 이해할 필요가 있다.
+우리가 (화면이 움직이는) 신나는 부분으로 들어가기 전에, 미티어가 DOM(Document Object Model – 페이지를 구성하는 HTML 엘리먼트들의 컬렉션)과 어떻게 상호작용을 하는지 이해할 필요가 있다.
 
-명심해야 할 결정적인 포인트는 엘리먼트들은 *이동할 수 없다*는 것이다. 이들은 삭제되거나 생성(이것은 DOM의 한계이지 미티어의 한계가 아니다)될 수만 있다. 그러므로, A와 B가 자리를 바꾸는 모양을 만들어 내기 위해서, 미티어는 실제로는 B를 제거하고 B의 새 복제물을 A앞에 삽입하는 것이다.
+기억해 둘 중요한 포인트는 DOM의 엘리먼트들은 실제로는 “움직일 수 없다”는 것이다; 이들은 삭제되거나 생성될 수만 있다(이것은 DOM의 한계이지 미티어의 한계가 아니다). 그러므로, A와 B가 자리를 바꾸는 착시 효과를 주기 위해서, 미티어는 실제로는 B를 제거하고 새 복제물(B')을 A앞에 삽입하는 것이다.
 
-이런 기교를 부리는 것은, B를 새 위치로 애니메이션하여 이동하지 못하기 때문이다. B는 미티어가 페이지를 다시 그리는 순간(이것은 반응성 덕분에 순간적으로 일어난다) 사라진다. 대신 새로 생성된 B가 원래 위치에서 A의 앞에 이동하는 것이다.
+이것은 애니메이션을 약간 어렵게 한다. 우리가 B를 새 위치로 이동하는 것을 애니메이션 방식으로 구현하지 못하는 이유는, 미티어가 페이지를 다시 그리는 순간(이것은 반응성 덕분에 순간적으로 일어난다) B가 사라질 것이기 때문이다. 하지만, 걱정마라, 방법은 있으니까.
 
-post A와 post B를 바꿔치기 위해서(상대적으로 p1, p2에 위치해 있다고 하면), 다음 단계를 따라갈 것이다:
+### 소련의 육상 선수
+
+그 해는 냉전의 한창일 때인 1980년이었다. 올림픽이 모스코바에서 열리고 있었고, 소련은 무슨 수를 써서라도 100미터 달리기에서 우승하기로 결심했다. 그래서 소련의 뛰어난 과학자 그룹이 그 육상 선수중의 한 선수에게 순간이동기를 입혔다. 총소리가 들리자마자 그 선수는 피니시라인으로 순간적으로 옮겨졌다. 
+
+다행히도 경기 심판들이 즉시 그 위반을 인지했고, 그 선수는 선택의 여지가 없이 출발점으로 순간이동해서 돌아와서, 다른 선수들과 함께 경주에 참가하여 달리기를 해야 했다.
+
+이 역사적 자료는 그리 그럴듯하게 들리지 않으니 어느 정도 감안해서 듣기 바란다. 하지만, 이 "소련의 순간이동기를 가진 달리기 선수" 이야기는 이 장 내내 기억하기 바란다.
+
+### 차근차근 살펴보기
+
+미티어가 업데이트 알림을 받고 DOM을 반응형 방식으로 수정할 때, post는 순간적으로 그 최종 위치로 소련의 육상선수처럼 이동할 것이다. 그러나 올림픽에서든 우리 앱에서든 순간이동기 같은 수단을 가질 수는 없다. 그래서 우리는 엘리먼트를 “출발점”으로 재이동시키고, 피니시 라인까지 “달리기”(다시 말하면, 애니메이션 시키기)를 하도록 한다.
+
+그래서 post A와 B(각각 p1, p2에 있다고 하자)를 위치를 바꾸려면, 우리는 다음과 같은 단계를 진행할 것이다:
 
 1. B를 삭제한다
 2. DOM에서 A 앞에 B'를 생성한다
@@ -26,36 +38,35 @@ post A와 post B를 바꿔치기 위해서(상대적으로 p1, p2에 위치해 �
 5. A를 p2로 애니메이션 처리한다
 6. B'를 p1으로 애니메이션 처리한다
 
-아래 다이어그램은 위의 단계를 상세하게 설명해준다:
+아래 다이어그램은 이 단계를 보다 상세하게 보여준다:
 
 <%= diagram "animation_diagram", "두 post 사이의 자리 바꾸기", "pull-center" %>
 
-3, 4단계는 A와 B를 *애니메이션*으로 처리하는 것이 아니라 순간적으로 "공간이동"시킨다. 이것이 순간적으로 일어나기 때문에 B가 삭제되지 않고 두 요소가 새 위치로 적절하게 자리하는 착각을 준다.
+3단계와 4단계는 A와 B를 *애니메이션*으로 처리하는 것이 아니라 순간적으로 “공간이동”시킨다. 이것이 순간적으로 일어나기 때문에 B가 삭제되지 않고 두 요소가 새 위치로 적절하게 자리하는 착각을 준다.
 
-다행히, 미티어가 1, 2단계는 알아서 한다. 그래서 우리는 3단계에서 6단계까지만 걱정하면 된다.
+다행히, 미티어가 1과 2단계는 알아서 한다. 그래서 우리는 3단계에서 6단계까지만 걱정하면 된다.
 
-더욱이, 5, 6단계에서 우리가 할 일은 그 요소들을 적절한 자리로 이동시키는 것이다. 그러므로 우리가 정말로 걱정할 부분은 3, 4단계로 요소들을 에니메이션의 시작위치로 보내는 것 뿐이다.
-
+더군다나, 5단계와 6단계에서 우리가 할 일은 그 요소들을 적절한 자리로 이동시키는 것이다. 그러므로 우리가 정말로 걱정할 부분은 3, 4단계로 요소들을 에니메이션의 시작위치로 보내는 것 뿐이다.
 
 ### 적절한 타이밍
 
-지금까지 우리는 post를 애니메이션 하는 *방법*에 대하여 논의를 했을 뿐 *시간*에 대하여는 논의하지 않았다.
+지금까지 우리는 post를 애니메이션 하는 *방법*에 대하여 논의를 했을 뿐 애니메이션하는 *시점*에 대하여는 논의하지 않았다.
 
-3, 4단계에 대하여는 해법은 `post_item.js` 매니저에 있는 미티어의 `rendered` 템플릿 콜백에 있다. 이 콜백은 post의 속성(우리의 경우 순위)이 변하면 어느 때나 구동된다.
+3단계와 4단계의 경우, 그 시점은 post의 `_rank` 속성(순서가 여기에 따라 달라진다)이 변경될 때이다.
 
-5와 6단계는 다소 기교를 부려야 한다. 이런 방식으로 생각해보자: 완벽하게 논리적인 로붓에게 북쪽으로 5분간 달린 다음, 다시 남쪽으로 5분간 달리라고 지시하면, 로봇은 추론을 하기를 결국 같은 자리에 있게 되니까 에너지를 아껴 그냥 달리지 않을 것이다.
+5와 6단계는 약간 더 기교를 부려야 한다. 이런 방식으로 생각해보자: 완벽하게 논리적인 로붓에게 북쪽으로 5분간 달린 다음, 다시 남쪽으로 5분간 달리라고 지시하면, 로봇은 추론을 하기를 결국 같은 자리에 있게 되니까 에너지를 아껴 그냥 달리지 않을 것이다.
 
 그래서 만약 로봇이 10분간을 달리도록 하려면, 처음 5분을 달리기가 완료될 때까지 기다려야 한다. 그리고 달렸으면 다시 돌아오라고 지시해야 한다.
 
-브라우저도 비슷하게 작동한다: 만약 두 지시를 동시에 하면 새 좌표는 단지 옛 좌표를 바꿔치기 할 뿐 아무 일도 일어나지 않는다. 다른 말로 표현하면, 브라우저는 위치의 변경을 시간상에서 다른 점에서 등록해야 한다. 그렇지 않으면 애니메이션이 일어나지 않는다.
+브라우저도 비슷하게 작동한다: 만약 두 지시를 동시에 하면 새 좌표는 단지 옛 좌표를 바꿔치기 할 뿐 아무 일도 일어나지 않는다. 다시 말하면, 브라우저는 위치의 변경을 시간상의 다른 시점으로 등록해야 한다. 그렇지 않으면 애니메이션이 일어나지 않는다.
 
-미티어는 `justAfterRendered` 콜백을 제공하지 않는다. 하지만, 우리는 `Meteor.defer()`를 이용하여 이를 속일 수 있는데, 이 함수는 완전히 다른 이벤트로 등록하기 충분할 정도로 실행을 연기한다.
+미티어는 이에 대한 빌트인 콜백을 제공하지 않지만, 우리는 'Meteor.setTimeout()`을 이용하여 속일 수 있는데, 이것은 단순 함수로 수 밀리초 정도를 실행을 지연시킨다.
 
 ### CSS 위치 지정
 
-Post 목록이 페이지 내에서 재정렬되는 것을 애니메이션으로 처리하기 위해서는 CSS 영역에 도전해야 한다. CSS 위치 지정에 대한 빠른 훑어보기가 다음 순서다.
+Post 목록이 페이지 내에서 재정렬되는 것을 애니메이션으로 처리하기 위해서는 CSS 영역에 도전해야 한다. 다음 순서는 CSS 위치 지정에 대하여 빠르게 훑어볼 시점이다.
 
-페이지에서 엘리먼트는 초기값으로 **static** position으로 설정되어 있다. Static position 상태의 엘리먼트는 페이지의 흐름에 맞춘다. 화면에서 그 좌표는 변경되거나 애니메이션이 될 수 없다.
+페이지에서 엘리먼트는 초기값으로 **static** position으로 설정되어 있다. Static position 상태의 엘리먼트는 페이지의 흐름에 맞추며, 화면에서 그 좌표는 변경되거나 애니메이션이 될 수 없다.
 
 한 편, **relative** position은 엘리먼트 페이지 흐름에 맞추지만, 그 *원래 위치에 상대적으로* 자리한다.
 
@@ -71,9 +82,9 @@ Post의 애니메이션에는 relative position을 사용할 것이다. 이미 C
 ~~~
 <%= caption "client/stylesheets/style.css" %>
 
-이렇게 하면 5와 6단계는 매우 쉽게 구현된다: 우리가 할 일은 `top`을 `0px`로 지정(초기 설정값이다)하면 post들은 그 "normal" 위치로 미끄러져 되돌아 갈 것이다.
+이렇게 하면 5와 6단계는 매우 쉽게 구현된다: 우리가 `top`을 `0px`(초기 설정값)으로 리셋하면 post들은 그 "normal" 위치로 미끄러져 되돌아 갈 것이다.
 
-우리에게 유일한 도전과제는 애니메이션을 구동할 위치(3, 4단계)를 *새 위치에 상대적인 좌표로* 지정하는 것이다. 다른 말로 표현하면, 그들의 위치를 얼마나 변이(offset)시키는 가이다. 하지만, 이것이 아주 어려운 것은 아니다: 올바른 위치 이동폭은 단순히 post의 이전 위치에서 새 위치를 빼면 된다.
+그러므로 기본적으로, 우리의 유일한 도전과제는 애니메이션을 구동할 위치(3, 4단계)를 *새 위치에 상대적인 좌표로* 지정하는 것이다. 다른 말로 표현하면, 그들의 위치를 얼마나 변이(offset)시키는 가이다. 하지만, 이것이 아주 어려운 것은 아니다: 올바른 위치 이동폭은 단순히 post의 이전 위치에서 새 위치를 빼면 된다.
 
 <% note do %>
 
@@ -89,19 +100,13 @@ Post의 애니메이션에는 relative position을 사용할 것이다. 이미 C
 
 아직 한 가지 문제가 더 남았다. DOM에서 엘리먼트 A는 저장되어 그 이전의 위치를 "기억"하고 있는 반면, 엘리먼트 B는 새로 만들어져서 B'로 돌아왔기에 그 기억은 완전히 지워진 상태가 된다.
 
-다행히 미티어는 `rendered` 콜백에서 **템플릿 인스턴스** 객체에 대한 접근이 가능하다. 이에 대한 [미티어 문서](http://docs.meteor.com/#template_rendered)에는 다음과 같은 내용이 있다:
-
-> 콜백 내부에서, `this`는 템플릿의 구동에 유일하고 다시 렌더링과정에서도 유지되는 템플릿 인스턴스 객체이다.
-
-그러므로 우리가 할 일은 페이지에서 post의 현재 위치를 찾는 것이다. 그리고 찾은 다음에 템플릿 인스턴스 객체에 그 위치를 저장한다. 이 방법을 사용하여 post가 삭제되거나 새로 만들어진다 해도 우리는 애미메이션을 시작할 위치를 알 수 있게 된다.
-
-템플릿 인스턴스에서는 `data` 속성을 이용하여 컬렉션 데이터에 접근할 수 있다. 이것으로 post의 순위를 다루게 될 것이다.
+그러므로 우리가 할 일은 페이지에서 post의 현재 위치를 찾는 것이다. 그리고 그 위치를 **로컬 컬렉션**에 저장한다. 로컬 컬렉션은 정규 미티어 컬렉션처럼 작동한다. 다만, 브라우저의 *메모리에서만* 존재한다(즉, 서버에는 존재하지 않는다). 이 방법으로, post가 삭제되거나 새로 만들어진다 해도, 우리는 애니메이션을 시작할 위치를 알 수 있게 된다.
 
 ### Post 순위 매기기
 
-그 동안 post의 순위에 대하여 이야기해왔는데 이 "순위"는 post의 속성으로 실제 존재하는 것은 아니다. 이것은 단지 컬렉션에서 post목록이 정렬되는 것의 결과일 뿐이다. 이 순위에 따라서 post 목록을 애니메이션 처리하려고 한다면, 얇은 틈에서 이 속성을 만들어내어야 할 것이다.
+그 동안 post의 순위에 대하여 이야기해왔는데, 이 "순위"는 post의 속성으로 실제 존재하는 것이 아닌, 단지 컬렉션에서 post목록이 정렬된 결과일 뿐이다. 이 순위에 따라서 post 목록을 애니메이션 처리하려고 한다면, 이 속성을 불쑥 마술이라도 부려서 만들어내어야 할 것이다.
 
-유의할 사항은 데이터베이스에 이 `rank` 속성을 넣을 수 없다는 것이다. 왜냐면, 이것은 post 목록을 정렬하는 방법(즉, post는 처음에는 날짜에 의해 순위가 정해지지만, 세 번째에는 포인트에 의해서 정렬된다)에 의존하는 상대적 속성이기 때문이다.
+유의할 사항은 이 `rank` 속성을 데이터베이스에는 넣을 수 없다는 것이다. 왜냐면, 이것은 post 목록을 정렬하는 방법(즉, post는 처음에는 날짜에 의해 순위가 정해지지만, 세 번째에는 포인트에 의해서 정렬된다)에 의존하는 상대적 속성이기 때문이다.
 
 이상적으로는 `newPosts`와 `topPosts` 컬렉션에 그 속성을 넣는 것이지만, 미티어는 아직은 이 부분에 대한 쉬운 방법을 제공하지 않는다.
 
@@ -120,6 +125,7 @@ Template.postsList.helpers({
 ~~~
 <%= caption "/client/views/posts/posts_list.js" %>
 <%= highlight "2~8" %>
+
 
 단순히 이전의 `posts` 헬퍼와 같은 커서인 `Posts.find({}, {sort: {submitted: -1}, limit: postsHandle.limit()})`을 리턴하는 대신에 `postsWithRank`는 커서로부터 각 도큐먼트에 `_rank` 속성을 추가한다.
 
@@ -146,125 +152,171 @@ Template.postsList.helpers({
 
 ### 친절한 Rewind
 
-미티어는 가장 유망한 첨단의 웹 프레임워크중 하나다. 하지만 이 기능 중의 하나는 VCR과 비디오 카세트 녹음기의 시대로 되돌아가는 듯한 느낌을 주는 이름의 rewind() 함수이다.
+미티어는 가장 유망한 첨단의 웹 프레임워크중 하나다. 그렇지만 이 기능 중의 하나로 VCR과 비디오 카세트 녹음기의 시대로 되돌아가는 듯한 느낌을 주는 이름의 rewind() 함수가 있다.
 
-`forEach()`, `map()`, 또는 `fetch()`로 커서를 사용할 때면, 이것이 다시 사용하기 전에 커서를 rewind할 필요가 있다.
+`forEach()`, `map()`, 또는 `fetch()`로 커서를 사용할 때마다, 이 커서를 다시 사용하기 전에 rewind할 필요가 있을 것이다.
 
-그리고 경우에 따라서, 안전한 방향으로 선택하고 버그의 위험보다는 예방적으로 커서를 `rewind()`하는 것이 낫다.
+그러므로 때에 따라서, 안전한 쪽으로 선택하여 버그를 만드는 위험을 감수하기 보다는 예방적으로 커서를 `rewind()`하는 것이 낫다.
 
 <% end %>
 
 ### 모두 모아서
 
-이제 애니메이션 로직에 대하여 `post_item.js` 매니저의 `rendered` 템플릿 콜백을 사용하여 모두 모아서 구현한다:
+애니메이션이 DOM 엘리먼트의 CSS 속성과 클래스에 영향을 주므로, 우리는 동적 헬퍼 `{{attributes}}`를 `postItem` 템플릿에 추가한다:
+
+```html
+<template name="postItem">
+  <div class="post" {{attributes}}>
+
+  //..
+
+</template>
+```
+<%= caption "/client/views/posts/post_item.html" %>
+<%= highlight "2" %>
+
+`{{attributes}}`헬퍼를 이런 방식으로 사용함으로써, 우리는 Spacebars의 숨겨진 기능을 푼다: 리턴되는 `attributes`객체의 어떤 속성이라도 DOM 엘리먼트의 HTML 속성(`class`, `style`, 등과 같은)으로 매핑될 것이다. 
+
+`attributes`헬퍼를 만들어 이 모두를 모으자:
 
 ~~~js
+var POST_HEIGHT = 80;
+var Positions = new Meteor.Collection(null);
+
 Template.postItem.helpers({
-  //...
-});
 
-Template.postItem.rendered = function(){
-  // animate post from previous position to new position
-  var instance = this;
-  var rank = instance.data._rank;
-  var $this = $(this.firstNode);
-  var postHeight = 80;
-  var newPosition = rank * postHeight;
- 
-  // if element has a currentPosition (i.e. it's not the first ever render)
-  if (typeof(instance.currentPosition) !== 'undefined') {
-    var previousPosition = instance.currentPosition;
-    // calculate difference between old position and new position and send element there
-    var delta = previousPosition - newPosition;
-    $this.css("top", delta + "px");
+  //..
+
+  attributes: function() {
+    var post = _.extend({}, Positions.findOne({postId: this._id}), this);
+    var newPosition = post._rank * POST_HEIGHT;
+    var attributes = {};
+    
+    if (! _.isUndefined(post.position)) {
+      var offset = post.position - newPosition;      
+      attributes.style = "top: " + offset + "px";
+      if (offset === 0)
+        attributes.class = "post animate"
+    }
+    
+    Meteor.setTimeout(function() {
+      Positions.upsert({postId: post._id}, {$set: {position: newPosition}})
+    });
+    
+    return attributes;
   }
-  
-  // let it draw in the old position, then..
-  Meteor.defer(function() {
-    instance.currentPosition = newPosition;
-    // bring element back to its new original position
-    $this.css("top",  "0px");
-  }); 
-};
-
-Template.postItem.events({
-  //...
 });
+
+//..
 ~~~
 <%= caption "/client/views/posts/post_item.js" %>
-<%= highlight "5~27" %>
+<%= highlight "1~2, 8~25" %>
 
-<%= commit "14-1", "Post 재정렬 애니메이션 기능을 추가했다." %>
+우리는 도큐먼트의 최상단에 각 DOM 엘리먼트의 높이, 다시 말하면 `.post` div의 높이를 지정하고 있다. 이로 인해서 이 높이가 변경되면 (예를 들면, post의 제목이 두 줄로 표현되는 경우) 애니메이션 로직이 깨지는 명백한 문제점이 발생한다. 하지만 문제를 단순하게 하기 위해 지금은 모든 post의 높이가 정확하게 80 픽셀이라고 가정할 것이다.
 
-이전의 다이아그램으로 돌아가서 참조하면 계속 따라가는 것이 그리 어렵지만은 않을 것이다.
+다음, 우리는 `Positions` 라는 이름의 로컬 컬렉션을 선언하고 있다. 매개변수로 `null`값을 전달하면 이것이 로컬(클라이언트에서만 동작하는) 컬렉션이라고 미티어에게 알리는 것이다.
 
-`defer` 콜백에서 템플릿 인스턴스의 `currentPosition` 속성을 지정했으므로, 이 속성은 템플릿 조각의 첫 번째 렌더링에는 존재하지 않을 거라는 의미가 된다. 그러나 이것이 문제는 아닌것이 우리는 어쨋거나 그 첫 번째 렌더링을 애니메이션 하는 것에는 관심이 없기 때문이다.
+이제 `attributes` 헬퍼를 구축할 준비가 되었다.
 
-이제 사이트를 열고 투표를 해보자. post 목록이 우아한 발레처럼 부드럽게 움직이는 것을 볼 것이다!
+<% note do %>
 
-### 새 Post에 애니메이션 적용하기
+### 실행 일정
 
-이제 Post 목록은 적절하게 재정렬한다. 그러나 우리는 아직 "새 post"에 대한 애니메이션은 적용하지 않았다. 새 post가 목록의 상단에 단순하게 확 나타나는 대신에 서서히 나타나게 해보자.
+일부 반응형 코드가 정확하게 언제 실행되는 지를 알아내는 것은 종종 어려운 일이다. 그러므로 `attributes` 헬퍼에 대하여 좀 더 깊이있게 살펴보도록 하자.
 
-이것은 생각보다는 더 복잡하다. 문제는 미티어의 `rendered` 콜백이 실제로는 두 가지 경우에 구동된다는 점이다:
+모든 헬퍼와 같이, 이것은 템플릿이 처음 그려질 때 한 번 실행될 것이다. 이것이 `_rank` 속성에 의존성을 가지기 때문에, 이것은 post의 순위가 변경되는 때마다 재실행될 것이다. 그리고 `Positions` 컬렉션에 대한 의존성으로 해당 아이템이 수정될 때마다 재실행될 것이다.
 
-1. 새로운 템플릿이 DOM에 삽입될 때
-2. 템플릿의 데이터가 변경될 때
+이 의미는 헬퍼는 한 줄에 두 번 또는 세 번 실행될 수 있다는 것이다. 처음 보기에는 이것이 낭비적으로 보일 지 모르지만, 이것이 반응형 동작의 방식이다. 여기에 익숙해지면, 코드에 대하여 이런 방식도 있을 수 있구나 하고 생각하게 될 것이다.
 
-만약 사용자 인터페이스가 데이터가 변경될 때마다 크리스마스 트리처럼 반짝이기를 원하지 않는다면, 첫 번째 경우에만 애니메이션이 일어난다.
+<% end %>
 
-그러므로 데이터가 변경되어서 새로 렌더링되는 경우가 아니라, 실제로 새 post일 때에 한하여 애니메이션을 적용하기로 하자. 우리는 이미 instance 변수(이것은 첫 번째 렌더링 후에만 설정된다)의 존재를 테스트하고 있다. 그러므로 `rendered` 콜백으로 돌아가서 else 블록을 추가한다:
+### Attributes 헬퍼
+
+우선, 우리는 `Positions` 컬렉션에 있는 post의 위치를 살펴보고, (헬퍼 내부에서 현 post에 대응하는) `this`를 쿼리 결과와 함께 extend한다. 그리고는 `_rank` 속성을 사용하여 DOM 엘리먼트의 페이지 상단의 상대적인 위치 값을 새로 알아낸다.
+
+우리는 이제 두 가지 경우를 처리해야 한다: 헬퍼가 템플릿이 그려지기 때문에 실행되는 경우 (A), 혹은 속성이 변경되었기 때문에 반응형으로 실행되는 경우(B).
+
+We only want to animate the element in case B, which is why we make sure that `post.position` is defined (we'll see *how* it's defined shortly).
+
+우리는 B 경우의 엘리먼트만을 애니메이션하기를 원하는 데, 이를 위해서 `post.position`이 정의되는 지를 확인하는 것이다. (우리는 이를 간단히 *정의하는 방법*을 보게 될 것이다).  
+
+더욱이, B 경우는 두 가지 상세 경우 B1, B2를 생각할 수 있다: 우리가 DOM 엘리먼트를 “출발점” (이전 위치를 말한다)으로 *순간이동*시키거나 또는 우리가 이것을 이전 위치에서 새 위치로 *애니메이션* 시키거나 하는 경우를 말한다.
+
+여기에 `offset` 변수가 등장한다. 우리가 *상대적* 위치를 사용하기 때문에, 우리는 엘리먼트를 이동시킬 현재 위치의 *상대적* 좌표를 알아야 한다. 이 의미는 이전 좌표에서 새 좌표를 빼는 것이다.
+
+우리가 B1의 경우인지 B2의 경우인지를 알기 위해서는, 우리는 단순히 `offset`을 본다: 만약 `offset`이 0이 아니면, 이것은 원위치에서 엘리먼트를 *이동시킨다*는 것을 의미한다. 다른 한 편, 만약 `offset`이 0이라면, 이것은 우리가 원 좌표로 엘리먼트를 *애니메이션*시킨다는 것을 의미하고, `animate` 클래스를 그 엘리먼트에 추가하여 그 이동이 느리게 일어나도록 한다.
+
+### 타임 아웃
+
+이 세 가지 상황 (A, B1, 그리고 B2)은 모두 특정한 속성이 변경될 때 반응형으로 구동된다. 이 경우, `setTimeout` 함수를 사용하여 `Positions` 컬렉션을 수정하는 것으로 반응형 컨텍스트의 재평가를 구동한다.
+
+그러므로 사용자가 처음 페이지를 로딩할 때, 전체 반응형의 진행은 다음과 같은 형태가 될 것이다:
+
+- `attributes` 헬퍼가 처음 실행된다.
+- `post.position`은 정의되지 않는다 **(A)**.
+- `setTimeout`이 실행되어 `post.position`을 정의한다.
+- `attributes` 헬퍼는 반응형으로 재실행된다.
+- 이동은 일어나지 않는다. 그러므로 `offset`은 0에서 0으로 이동한다 (눈에 보이는 애니메이션은 일어나지 않는다). **(B2)**.
+
+그리고 upvote가 감지될 때 일어나는 것은 다음과 같다:
+
+- `_rank`가 수정되고, attributes` 헬퍼의 재평가가 구동된다.
+- `post.position`이 정의된다 **(B)**.
+- `offset`은 0이 아니다. 그러므로 애니메이션은 일어나지 않는다 **(B1)**.
+- `setTimeout`이 실행되고, `post.position`를 재정의한다.
+- `attributes` 헬퍼가 반응형으로 재실행된다.
+- `offset`은 (애니메이션을 일으키며) 0으로 되돌아간다 **(B2)**.
+
+이제 사이트를 열고 upvote을 시작하라. 그러면 post가 발레와 같은 우아함으로 부드럽게 위, 아래로 움직이는 것을 볼 수 있을 것이다!
+
+<%= commit "14-1", "Added post reordering animation." %>
+
+### 새 post 등록 애니메이션
+
+이제 post들은 적절하게 순위 변경이 일어나지만, 우리는 아직 "새 post"의 애니메이션을 실제 구현하지는 않았다. 새 post를 목록의 상단에 단순하게 나타나게 하는 대신, 페이드 인 형태로 나타나도록 해보자.
 
 ~~~js
-Template.postItem.helpers({
-  //...
-});
+//..
 
-Template.postItem.rendered = function(){
-  // animate post from previous position to new position
-  var instance = this;
-  var rank = instance.data._rank;
-  var $this = $(this.firstNode);
-  var postHeight = 80;
-  var newPosition = rank * postHeight;
+attributes: function() {
+  var post = _.extend({}, Positions.findOne({postId: this._id}), this);
+  var newPosition = post._rank * POST_HEIGHT;
+  var attributes = {};
   
-  // if element has a currentPosition (i.e. it's not the first ever render)
-  if (typeof(instance.currentPosition) !== 'undefined') {
-    var previousPosition = instance.currentPosition;
-    // calculate difference between old position and new position and send element there
-    var delta = previousPosition - newPosition;
-    $this.css("top", delta + "px");
+  if (_.isUndefined(post.position)) {
+    attributes.class = 'post invisible';
   } else {
-    // it's the first ever render, so hide element
-    $this.addClass("invisible");
+    var delta = post.position - newPosition;      
+    attributes.style = "top: " + delta + "px";
+    if (delta === 0)
+      attributes.class = "post animate"
   }
   
-  // let it draw in the old position, then..
-  Meteor.defer(function() {
-    instance.currentPosition = newPosition;
-    // bring element back to its new original position
-    $this.css("top",  "0px").removeClass("invisible");
-  }); 
-};
+  Meteor.setTimeout(function() {
+    Positions.upsert({postId: post._id}, {$set: {position: newPosition}})
+  });
+  
+  return attributes;
+}
 
-Template.postItem.events({
-  //...
-});
+//..
 ~~~
 <%= caption "/client/views/posts/post_item.js" %>
-<%= highlight "19~22,28" %>
+<%= highlight "8~10" %>
 
-<%= commit "14-2", "새로 추가되는 아이템의 페이드인 효과를 구현했다." %>
-
-`defer()` 함수에 추가한 `removeClass("invisible")`는 모든 렌더링에서 실행되는 것에 주목하라. 그러나 이것은 엘리먼트에 `.invisible` 클래스가 실제로 존재할 때에만 작동하는 데, 이 경우는 처음 렌더링될 때에만 true이다.
+우리가 여기서 하려는 작업은 **(A)** 경우를 분리하여 엘리먼트에 `invisible` CSS 클래스를 추가하는 것이다. 헬퍼가 다음에 반응형으로 재실행되고 그 엘리먼트에 `animate` 클래스가 적용될 때, 불투명도의 차이가 애니메이션되면서 페이드 인 효과를 가지면서 엘리먼트가 나타날 것이다.
+ 
+<%= commit "14-2", "Fade items in when they are drawn." %>
 
 <% note do %>
 
 ### CSS와 JavaScript
 
-우리는 `top`에 대하여 했던 것처럼 CSS `opacity` 속성을 직접 애니메이션 적용하는 대신에 애니메이션을 구동하기 위해 `.invisible` CSS 클래스를 사용하고 있다. `top`의 경우에는 인스턴스 데이터에 의존하는 특정한 값을 속성에 애니메이션으로 적용해야 했기 때문이다.
+우리가 `top`에서 했던 것처럼 CSS `opacity` 속성을 직접 애니메이션하는 대신에 `.invisible` CSS 클래스를 사용하여 애니메이션을 구동하는 것을 주목하였을 지 모르겠다. 이것은 `top`의 경우 우리가 속성값을 인스턴스 데이터에 의존하는 특정한 값이 될 때까지 애니메이션 시켜야 하기 때문이다.
 
-다른 한 편, 여기서는 그 데이터에 무관하게 엘리먼트를 보이거나 감추기만을 원한다. 가능한 많이 JavaScript를 CSS에서 배제하는 것이 바람직하므로, 우리는 여기서 클래스를 추가하거나 제거하기만 하며 애니메이션의 상세 내용은 스타일 시트에 지정한다.
+한 편, 여기서 우리는 엘리먼트를 그 데이터와 무관하게 보여주거나 감추기를 원한다. CSS를 가능한 JavaScript와 분리하는 것이 좋으므로, 우리는 여기에서 클래스를 추가하거나 제거하기만 하고 애니메이션의 세부적인 지정은 스타일 시트에서 하도록 할 것이다.
+
 <% end %>
 
-우리는 마침내 우리가 원하는 애니메이션을 모두 구현했다. 앱을 구동하여 시도해보라! 그리고 다른 transition을 해보고 싶다면 `.post`와 `.post.invisible` 클래스로 이런 저런 시도를 해 볼 수 있다. 힌트: [CSS easing functions](http://matthewlein.com/ceaser/)이 좋은 출발점이다!
+우리는 마침내 우리가 원하는 애니메이션을 구현할 수 있게 될 것이다. 앱을 로드하여 직접 시도해 보기 바란다! 독자여러분은 또한 `.post.animated` 클래스를 다루면서 다른 변이 방식도 적용해 볼 수 있을 것이다. 힌트: [CSS easing functions](http://matthewlein.com/ceaser/)가 좋은 출발점이다!
+

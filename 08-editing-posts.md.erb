@@ -13,7 +13,9 @@ paragraphs: 29
 
 ~~~js
 Router.configure({
-  layoutTemplate: 'layout'
+  layoutTemplate: 'layout',
+  loadingTemplate: 'loading',
+  waitOn: function() { return Meteor.subscribe('posts'); }
 });
 
 Router.map(function() {
@@ -48,7 +50,7 @@ var requireLogin = function() {
 Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "12~15" %>
+<%= highlight "14~17" %>
 
 ### Post 수정 템플릿
 
