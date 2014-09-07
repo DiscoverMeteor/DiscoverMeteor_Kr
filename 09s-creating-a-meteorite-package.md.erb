@@ -1,6 +1,6 @@
 ---
-title: Meteorite 패키지 만들기
-slug: creating-a-meteorite-package
+title: Meteor 패키지 만들기
+slug: creating-a-meteor-package
 date: 0009/01/02
 number: 9.5
 sidebar: true
@@ -10,7 +10,7 @@ paragraphs: 22
 
 오류에 대한 재사용 가능한 패턴을 구축했는데, 이를 묶어 스마트 패키지를 만들고 이를 미티어 커뮤니티에서 공유하도록 하면 어떨까?
 
-첫째, 이 패키지의 구조를 만들어야 한다. 우리는 이 패키지를 `packages/errors` 라는 이름의 디렉토리에 넣는다. 이렇게 하면 자동으로 사용되는 커스텀 패키지가 된다(Meteorite가 `packages/` 디렉토리 에 symlink로 패키지를 설치한다는 사실을 알지 모르겠다). 
+첫째, 이 패키지의 구조를 만들어야 한다. 우리는 이 패키지를 `packages/errors` 라는 이름의 디렉토리에 넣는다. 이렇게 하면 자동으로 사용되는 커스텀 패키지가 된다(Meteor가 `packages/` 디렉토리 에 symlink로 패키지를 설치한다는 사실을 알지 모르겠다). 
 
 
 둘째, 그 폴더에 `package.js`를 만든다. 이 파일은 미티어에게 해당 패키지를 사용하는 방법과 그 패키지가 내보내는 symbol들을 알려준다.
@@ -172,7 +172,7 @@ Tinytest.addAsync("Errors template works", function(test, done) {
 
 ~~~js
 Package.on_test(function(api) {
-  api.use('errors', 'client');
+  api.use('tmeasday:errors', 'client');
   api.use(['tinytest', 'test-helpers'], 'client');  
   
   api.add_files('errors_tests.js', 'client');
@@ -185,7 +185,7 @@ Package.on_test(function(api) {
 그러면 다음 명령어로 테스트를 실행할 수 있다:
 
 ~~~bash
-$ meteor test-packages errors
+$ meteor test-packages tmeasday:errors
 ~~~
 <%= caption "터미널" %>
 
@@ -195,7 +195,7 @@ $ meteor test-packages errors
 
 이제, 패키지를 릴리즈하여 모두가 이를 이용할 수 있게 하려고 한다. 그렇게 하려면 Atmosphere에 올리면 된다.
 
-우선, `smart.json`을 추가하여 Meteorite와 Atmosphere에 그 패키지에 대한 중요한 상세 내용을 알린다:
+우선, `smart.json`을 추가하여 Meteor와 Atmosphere에 그 패키지에 대한 중요한 상세 내용을 알린다:
 
 ~~~json
 {
@@ -217,7 +217,7 @@ $ meteor test-packages errors
 
 이 모두가 마무리되면 릴리즈는 쉽다. git 저장소를 만들고 원격 git 서버로 올리고, `smart.json`에 그 주소에 대한 연결정보를 추가한다.
 
-[GitHub](http://github.com)에서 이 작업을 하려면, 우선 새 저장소를 만든 다음, 그 저장소에서 패키지의 코드를 얻는 일반적인 과정을 따른다. 그리고, `mrt release` 명령어를 사용하여 게재한다:
+[GitHub](http://github.com)에서 이 작업을 하려면, 우선 새 저장소를 만든 다음, 그 저장소에서 패키지의 코드를 얻는 일반적인 과정을 따른다. 그리고, `meteor release` 명령어를 사용하여 게재한다:
 
 ~~~bash
 $ git init
@@ -225,23 +225,23 @@ $ git add -A
 $ git commit -m "Created Errors Package"
 $ git remote add origin https://github.com/tmeasday/meteor-errors.git
 $ git push origin master
-$ mrt release .
+$ meteor release .
 Done!
 ~~~
 <%= caption "터미널 (`packages/errors` 내에서 실행한다)" %>
 
 주: 패키지 이름은 유일해야 한다. 위의 내용을 문자 그대로 따라하여 동일한 패키지 이름을 사용하면, 충돌이 발생해서 작동하지 않게 될 것이다. 미래에 Atmosphere는 저자에 따른 네임스페이스를 가지게 될 것이므로, 이 이름이 바뀔 수 있다는 점을 감안하기 바란다.
 
-두 번째 주:  http://atmosphere.meteor.com에 로그인하여 `mrt release`를 호출할 때 커맨드 라인에서 입력할 username과 비밀번호를 만들어야 한다.
+두 번째 주:  http://atmosphere.meteor.com에 로그인하여 `meteor release`를 호출할 때 커맨드 라인에서 입력할 username과 비밀번호를 만들어야 한다.
 
-이제 패키지가 릴리즈되면, 프로젝트에서 그것을 제거하고 Meteorite를 이용하여 그것을 직접 복원한다:
+이제 패키지가 릴리즈되면, 프로젝트에서 그것을 제거하고 그것을 직접 추가하여 복원한다:
 
 ~~~bash
 $ rm -r packages/errors
-$ mrt add errors
+$ meteor add errors
 ~~~
 <%= caption "터미널 (앱의 루트 경로에서 실행한다)" %>
 
 <%= scommit "9-5-4", "개발 트리에서 패키지를 삭제했다." %>
 
-이제 Meteorite에서 패키지를 다운로드하는 것을 처음으로 볼 수 있을 것이다. 잘했다!
+이제 Meteor에서 패키지를 다운로드하는 것을 처음으로 볼 수 있을 것이다. 잘했다!
