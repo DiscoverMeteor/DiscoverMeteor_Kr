@@ -43,7 +43,6 @@ $ meteor create microscope
 microscope.css  
 microscope.html 
 microscope.js   
-smart.json 
 ~~~
 
 미티어가 만든 이 앱은 몇 가지 단순한 패턴을 보여주는 간단한 보일러플레이트 애플리케이션이다.
@@ -246,6 +245,10 @@ body {
 .load-more:hover {
     text-decoration: none;
     background: rgba(0, 0, 0, 0.1);
+}
+.posts .spinner-container{
+    position: relative;
+    height: 100px;
 }
 ~~~
 <%= caption "client/stylesheets/style.css" %>
