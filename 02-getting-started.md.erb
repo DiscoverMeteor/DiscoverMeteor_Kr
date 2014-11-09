@@ -12,7 +12,7 @@ paragraphs: 49
 먼저, 터미널 윈도우를 열고 다음과 같이 입력하여 미티어를 설치한다:
 
 ~~~bash
-$ curl https://install.meteor.com | sh
+curl https://install.meteor.com | sh
 ~~~
 
 이것으로 `meteor` 실행파일이 시스템에 설치되고, 미티어를 사용할 준비가 된 것이다.
@@ -34,7 +34,7 @@ Nitrous.io는 앱을 실행하거나 브라우저에서 바로 코드를 편집�
 이제 Meteor를 설치하였으니, 앱을 만들어보자. Meteor의 명령어 도구인 `meteor`를 사용한다:
 
 ~~~bash
-$ meteor create microscope
+meteor create microscope
 ~~~
 
 이 명령어는 미티어를 다운로드하고, 기본적인 설정을 수행한 다음, 미티어 프로젝트를 사용할 수 있는 상태로 만든다. 실행이 완료되면, `microscope/` 디렉토리에서 아래 파일들을 볼 수 있다:
@@ -51,8 +51,8 @@ smart.json
 이 앱이 기능은 별로 없어도, 실행할 수는 있다. 이 앱을 실행하려면 터미널에서 다음을 입력하면 된다:
 
 ~~~bash
-$ cd microscope
-$ meteor
+cd microscope
+meteor
 ~~~
 
 이제 브라우저에서 `http://localhost:3000/` (또는 `http://0.0.0.0:3000/`)을 입력하면 다음과 같은 화면을 볼 수 있다:
@@ -69,7 +69,7 @@ $ meteor
 
 ### Meteorite여 안녕
 
-한 때, Meteor가 Meteorite라는 이름을 가지는 외부 패키지 관리자에 의존하던 때가 있었다. Meteor 버전 0.9.0 이후로 Meteorite는 Meteor 본체로 흡수되어 더 이상 존속하지 않게 되었다.
+한 때, 미티어가 Meteorite라는 이름을 가지는 외부 패키지 관리자에 의존하던 때가 있었다. Meteor 버전 0.9.0 이후로 Meteorite는 Meteor 본체로 흡수되어 더 이상 존속하지 않게 되었다.
 
 그러므로 이 책에서나 또는 미티어 관련 자료를 찾아보다가 Meteorite의 `mrt` 명령어 도구에 대한 언급이 있다면, 이를 `meteor`로 바꾸면 된다.
 
@@ -77,13 +77,28 @@ $ meteor
 
 ### 패키지 추가
 
-이번에는 Meteor를 이용하여 프로젝트에 [Bootstrap](http://getbootstrap.com/)을 삽입하는 스마트 패키지를 추가한다:
+이번에는 미티어의 패키지 시스템을 이용하여 프로젝트에 [Bootstrap](http://getbootstrap.com/) 프레임워크를 추가할 것이다.
+
+이것은 직접 CSS와 JavaScript 파일을 직접 추가하는 보통의 방법과 다를 것이 없지만, 미티어 커뮤니티의 한 사람인 [Andrew Mao](https://github.com/mizzao)의 도움을 받아 항상 최신 상태로 유지한다 (`mizzao:bootstrap-3`의 “mizzao”는 패키지 제작자의 username이다). 
+
+또한 [Underscore](http://underscorejs.org/) 패키지도 추가한다. Underscore는 JavaScript 유틸리티 라이브러리로 JavaScript 데이터 구조를 다룰 때 매우 유용하다.
+
+이 글을 쓸 때까지는, `underscore` 패키지는 여전히 "공식" 미티어 패키지의 일부이어서, 제작자가 없다.
 
 ~~~bash
-$ meteor add bootstrap
+meteor add mizzao:bootstrap-3
+meteor add underscore
 ~~~
 
-<%= commit "2-2", "Bootstrap 패키지를 추가했다." %>
+Bootstrap **3**를 추가하는 것에 유의하기 바란다. 이 책의 일부 화면은 Bootstrap **2**를 적용했던 Microscope의 이전 버전에서 가져온 것으로 다소 다르게 보일 수 있다. 
+
+<%= commit "2-2", "Bootstrap과 underscore 패키지를 추가했다." %>
+
+Bootstrap 패키지를 추가하자마자 앱의 외형이 바뀌는 것을 볼 수 있을 것이다:
+
+<%= screenshot "2-1b", "Bootstrap 적용 후" %>
+
+외부 자원을 포함하는 “전통적인” 방식과는 달리, 어떤 CSS 파일이나 JavaScript 파일을 링크시킬 필요는 없다. 왜냐면 미티어는 모든 것을 알아서 해주기 때문이다. 이것은 미티어 패키지의 많은 잇점 중의 하나일 뿐이다.
 
 <% note do %>
 
@@ -92,9 +107,10 @@ $ meteor add bootstrap
 미티어에서 패키지에 대하여 언급할 때는, 보다 구체적으로 지칭한다. 미티어에서는 다섯가지 형식의 패키지를 사용한다:
 
 - 미티어 core는 여러 개의 **코어 패키지**들로 나누어진다. 이들은 모든 미티어 앱에 포함된다. 여기는 신경쓸 것 없다.
-- 미티어 **스마트 패키지**는 [약 37개의 패키지 그룹](http://docs.meteor.com/#packages)(전체 목록은 `meteor list` 명령으로 구한다)으로 미티어에 번들로 포함되어 있으며, `meteor add packagename` 명령어를 이용하여 앱에 선택적으로 포함시킬 수 있다.
-- **로컬 패키지**는 독자가 직접 만든 패키지로 `/packages` 디렉토리에 넣는다.
-- **Atmosphere 스마트 패키지**는 서드파티 미티어 패키지이다. 이들은 [Atmosphere](http://atmosphere.meteor.com)에 등록되어 있다.
+- 정규 미티어 패키지는 (이들이 클라이언트와 서버 양쪽에서 동작한다는 의미로) “**isopacks**” 또는 동형 패키지(isomorphic packages)라 부른다.
+`accounts-ui`나 `appcache`와 같은 **퍼스트파티 패키지**는 미티어 코어팀에서 담당하며 [미티어에 포함되어 있다](http://docs.meteor.com/#packages).
+- **써드파티 패키지**는 다른 사용자들이 개발한 isopack으로서 미티어 패키지 서버에 업로드되어 있는 것을 가리킨다. 이들은 [Atmosphere](http://atmosphere.meteor.com)나 또는 `meteor search` 명령어로 찾아볼 수 있다.
+- **로컬 패키지**는 여러분이 직접 작성한 패키지로 `/packages` 디렉토리에 넣는다.
 - **NPM 패키지**(Node Packaged Modules)는 Node.js 패키지이다. 이들은 미티어에서 단독으로 작동하지는 않지만, 위의 네 가지 형식의 패키지 내부에서 *사용될 수 있다*.
 
 <% end %>
@@ -103,16 +119,22 @@ $ meteor add bootstrap
 
 코딩을 시작하기에 앞서, 프로젝트를 적절하게 구성해야 한다. 깔끔한 빌드를 위해 `microscope` 디렉토리에서 `microscope.html`, `microscope.js`, 그리고 `microscope.css`를 삭제하라.
 
-다음, `/microscope` 디렉토리의 하위에 5개의 서브 디렉토리를 생성하라: `/client`, `/server`, `/public`, `/lib`, `/collections`. 그리고 빈 파일 `main.html`과 `main.js`파일을 `/client` 디렉토리에 만든다. 지금 앱이 동작하지 않는 것은 걱정할 것 없다. 다음 장에서 이 파일들의 내부를 채울 것이다.
+다음, `/microscope` 디렉토리의 하위에 5개의 서브 디렉토리를 생성하라: `/client`, `/server`, `/public`, 그리고 `/lib`. 
 
-이 디렉토리 중의 몇 개는 특별하다. 파일에 대하여 이야기하자면, 미티어에는 다음과 같은 규칙이 있다:
+그 다음엔, 빈 파일 `main.html`과 `main.js`파일을 `/client` 디렉토리에 만든다. 지금 앱이 동작하지 않는 것은 걱정할 것 없다. 다음 장에서 이 파일들의 내부를 채울 것이다.
 
-- `/server` 디렉토리에 있는 코드는 서버에서만 실행된다.
-- `/client` 디렉토리에 있는 코드는 클라이언트에서만 실행된다
-- 그 밖의 모든 것은 양쪽 모두에서 실행된다.
-- `/lib`에 있는 파일들은 가장 먼저 로드된다.
-- 모든 `main.*` 파일은 가장 나중에 로드된다.
+이 디렉토리 중의 몇 개는 특별하다. 코드의 실행에 대하여 이야기하자면, 미티어에는 다음과 같은 규칙이 있다:
+
+- 서버에서만 실행되는 코드는 `/server` 디렉토리에 넣는다.
+- 클라이언트에서만 실행되는 코드는 `/client` 디렉토리에 넣는다.
+- 그 밖의 모든 것은 클라이언트와 서버 양쪽 모두에서 실행된다.
 - 정적 자원들(fonts, images, 등)은 `/public` 디렉토리에 넣는다.
+
+그리고 미티어가 파일을 로드하는 순서를 알아두면 또한 유용할 것이다:
+
+- `/lib` 디렉토리에 있는 파일들은 그 밖의 다른 모든 파일들 보다 *먼저* 로드된다.  
+- `main.*`의 이름을 가진 파일들은 그 밖의 다른 모든 파일들 보다 *나중에* 로드된다.
+- 그 밖의 모든 파일들은 파일명의 알파벳 순으로 로드된다.
 
 미티어에 위와 같은 규칙이 있지만, 원하지 않으면 앱의 구성에서 미리 정해진 파일구조를 사용하도록 강제하는 것은 아니다. 우리가 제안하는 구조는 우리의 방식일 뿐, 공식적으로 채택된 규정은 아니다.
 
@@ -154,98 +176,168 @@ Ruby on Rails 같은 프레임워크에서 미티어로 옮겨왔다면, 미티�
 
 ~~~css
 .grid-block, .main, .post, .comments li, .comment-form {
-    background: #fff;
-    border-radius: 3px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-}
+  background: #fff;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 10px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15); }
+
 body {
-    background: #eee;
-    color: #666666;
-}
-.navbar { margin-bottom: 10px }
-.navbar .navbar-inner {
-    border-radius: 0px 0px 3px 3px;
-}
-#spinner { height: 300px }
+  background: #eee;
+  color: #666666; }
+
+.navbar {
+  margin-bottom: 10px; }
+  /* line 32, ../sass/style.scss */
+  .navbar .navbar-inner {
+    -webkit-border-radius: 0px 0px 3px 3px;
+    -moz-border-radius: 0px 0px 3px 3px;
+    -ms-border-radius: 0px 0px 3px 3px;
+    -o-border-radius: 0px 0px 3px 3px;
+    border-radius: 0px 0px 3px 3px; }
+
+#spinner {
+  height: 300px; }
+
 .post {
-    *zoom: 1;
+  /* For modern browsers */
+  /* For IE 6/7 (trigger hasLayout) */
+  *zoom: 1;
+  position: relative;
+  opacity: 1; }
+  .post:before, .post:after {
+    content: "";
+    display: table; }
+  .post:after {
+    clear: both; }
+  .post.invisible {
+    opacity: 0; }
+  .post.instant {
+    -webkit-transition: none;
+    -moz-transition: none;
+    -o-transition: none;
+    transition: none; }
+  .post.animate{
     -webkit-transition: all 300ms 0ms;
     -webkit-transition-delay: ease-in;
     -moz-transition: all 300ms 0ms ease-in;
     -o-transition: all 300ms 0ms ease-in;
-    transition: all 300ms 0ms ease-in;
-    position: relative;
-    opacity: 1;
-}
-.post:before, .post:after {
-    content: "";
-    display: table;
-}
-.post:after { clear: both }
-.post.invisible { opacity: 0 }
-.post .upvote {
+    transition: all 300ms 0ms ease-in; }
+  .post .upvote {
     display: block;
     margin: 7px 12px 0 0;
-    float: left;
-}
-.post .post-content { float: left }
-.post .post-content h3 {
-    margin: 0;
-    line-height: 1.4;
-    font-size: 18px;
-}
-.post .post-content h3 a {
-    display: inline-block;
-    margin-right: 5px;
-}
-.post .post-content h3 span {
-    font-weight: normal;
-    font-size: 14px;
-    display: inline-block;
-    color: #aaaaaa;
-}
-.post .post-content p { margin: 0 }
-.post .discuss {
+    float: left; }
+  .post .post-content {
+    float: left; }
+    .post .post-content h3 {
+      margin: 0;
+      line-height: 1.4;
+      font-size: 18px; }
+      .post .post-content h3 a {
+        display: inline-block;
+        margin-right: 5px; }
+      .post .post-content h3 span {
+        font-weight: normal;
+        font-size: 14px;
+        display: inline-block;
+        color: #aaaaaa; }
+    .post .post-content p {
+      margin: 0; }
+  .post .discuss {
     display: block;
     float: right;
-    margin-top: 7px;
-}
+    margin-top: 7px; }
+
 .comments {
-    list-style-type: none;
-    margin: 0;
-}
-.comments li h4 {
+  list-style-type: none;
+  margin: 0; }
+  .comments li h4 {
     font-size: 16px;
-    margin: 0;
-}
-.comments li h4 .date {
-    font-size: 12px;
-    font-weight: normal;
-}
-.comments li h4 a { font-size: 12px }
-.comments li p:last-child { margin-bottom: 0 }
+    margin: 0; }
+    .comments li h4 .date {
+      font-size: 12px;
+      font-weight: normal; }
+    .comments li h4 a {
+      font-size: 12px; }
+  .comments li p:last-child {
+    margin-bottom: 0; }
+
 .dropdown-menu span {
-    display: block;
-    padding: 3px 20px;
-    clear: both;
-    line-height: 20px;
-    color: #bbb;
-    white-space: nowrap;
-}
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  line-height: 20px;
+  color: #bbb;
+  white-space: nowrap; }
+
 .load-more {
-    display: block;
-    border-radius: 3px;
-    background: rgba(0, 0, 0, 0.05);
-    text-align: center;
-    height: 60px;
-    line-height: 60px;
-    margin-bottom: 10px;
-}
-.load-more:hover {
+  display: block;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  text-align: center;
+  height: 60px;
+  line-height: 60px;
+  margin-bottom: 10px; }
+  .load-more:hover {
     text-decoration: none;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.1); }
+
+.posts .spinner-container{
+  position: relative;
+  height: 100px;
+}
+
+.jumbotron{
+  text-align: center;
+}
+.jumbotron h2{
+  font-size: 60px;
+  font-weight: 100;
+}
+
+@-webkit-keyframes fadeOut {
+  0% {opacity: 0;}
+  10% {opacity: 1;}
+  90% {opacity: 1;}
+  100% {opacity: 0;}
+}
+
+@keyframes fadeOut {
+  0% {opacity: 0;}
+  10% {opacity: 1;}
+  90% {opacity: 1;}
+  100% {opacity: 0;}
+}
+
+.errors{
+  position: fixed;
+  z-index: 10000;
+  padding: 10px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  pointer-events: none;
+}
+.alert {
+          animation: fadeOut 2700ms ease-in 0s 1 forwards;
+  -webkit-animation: fadeOut 2700ms ease-in 0s 1 forwards;
+     -moz-animation: fadeOut 2700ms ease-in 0s 1 forwards;
+  width: 250px;
+  float: right;
+  clear: both;
+  margin-bottom: 5px;
+  pointer-events: auto;
 }
 ~~~
 <%= caption "client/stylesheets/style.css" %>
