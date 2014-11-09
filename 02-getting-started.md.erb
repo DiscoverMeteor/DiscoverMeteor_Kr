@@ -23,7 +23,7 @@ curl https://install.meteor.com | sh
 
 미티어를 독자의 컴퓨터에 설치할 수 없다면(혹은 설치를 원하지 않으면), [Nitrous.io](http://nitrous.io)를 방문하여 살펴보기를 권한다.
 
-Nitrous.io는 앱을 실행하거나 브라우저에서 바로 코드를 편집하게 하는 서비스이다. 우리는 독자가 설치하는데 도움이 되는 [간단한 안내서](https://www.discovermeteor.com/2013/10/04/meteor-nitrous/)를 작성하여 제공한다.
+Nitrous.io는 앱을 실행하거나 브라우저에서 바로 코드를 편집하게 하는 서비스이다. 우리는 독자가 설치하는데 도움이 되는 [간단한 안내서](https://www.discovermeteor.com/blog/meteor-nitrous/)를 작성하여 제공한다.
 
 이 안내서의 “Installing Meteor” 섹션까지 읽은 다음, 이 장의 “간단한 앱 만들기” 섹션에서 시작하여 이 책을 다시 따라가면 된다.
 
@@ -43,7 +43,6 @@ meteor create microscope
 microscope.css  
 microscope.html 
 microscope.js   
-smart.json 
 ~~~
 
 미티어가 만든 이 앱은 몇 가지 단순한 패턴을 보여주는 간단한 보일러플레이트 애플리케이션이다.
@@ -338,6 +337,10 @@ body {
   clear: both;
   margin-bottom: 5px;
   pointer-events: auto;
+}
+.posts .spinner-container{
+    position: relative;
+    height: 100px;
 }
 ~~~
 <%= caption "client/stylesheets/style.css" %>

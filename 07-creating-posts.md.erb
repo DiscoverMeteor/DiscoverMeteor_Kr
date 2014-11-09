@@ -38,9 +38,7 @@ Router.map(function() {
 Router.onBeforeAction('loading');
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "13~15" %>
-
-우리는 라우터의 `data` 함수를 사용하여 `postPage` 템플릿의 데이터 컨텍스트를 설정한다. 데이터 컨텍스트에 무엇을 넣든지 템플릿 헬퍼에서 `this`를 이용하여 처리할 수 있다는 점을 기억하기 바란다.
+<%= highlight "15~17" %>
 
 ### 헤더에 링크 추가하기
 
@@ -233,7 +231,7 @@ Router.onBeforeAction('loading');
 Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "19~26,28" %>
+<%= highlight "19~26,29" %>
 
 접근 거부 페이지를 위한 템플릿도 만든다:
 
@@ -404,7 +402,7 @@ Meteor의 `Error` 클래스는 3개의 매개변수를 가진다. 첫째(`error`
 
 위 예에서는, 이 세 번째 매개변수로 발견된 post의 ID를 전달한다. 스포일러 알림: 나중에 우리는 이를 기존 post로 리다이렉트하는 데 사용한다.
 
-이 모든 검사 단계를 통과하면, 우리는 삽입할 필드(브라우저 콘솔에서 이 메서드를 호출하여 데이터베이스에 가짜 데이터를 넣지 못하게 할 필드)를 모은 다음, 현재 시간을 포함하여 등록에 필요한 추가 정보를 포함한다.
+이 모든 검사 단계를 통과하면, 우리는 [Underscore](http://underscorejs.org/)의 [pick](http://underscorejs.org/#pick)을 이용하여 삽입할 필드(브라우저 콘솔에서 이 메서드를 호출하여 데이터베이스에 가짜 데이터를 넣지 못하게 할 필드)를 모은 다음, [extend](http://underscorejs.org/#extend)를 이용하여 -- 현재 시간뿐 아니라 -- 등록에 필요한 추가 정보를 포함한다.
 
 마지막으로, post를 등록하고, 새로 등록한 post의 `id`를 사용자에게 리턴한다.
 

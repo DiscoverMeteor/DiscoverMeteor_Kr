@@ -161,6 +161,8 @@ Meteor.publish('posts', function(sort, limit) {
 
 ~~~js
 Router.map(function() {
+  //..
+  
   this.route('postsList', {
     path: '/:postsLimit?',
     waitOn: function() {
@@ -174,12 +176,10 @@ Router.map(function() {
       };
     }
   });
-  
-  //..
 });
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "8~13" %>
+<%= highlight "10~15" %>
 
 라우터 수준에서 데이터 컨텍스트를 지정하였으므로, 우리는 `posts_list.js` 파일 내에 있는 `posts` 템플릿 헬퍼를 안전하게 제거할 수 있다. 그리고 우리가 데이터 컨텍스트를 `posts`라고 (헬퍼와 동일한 이름으로) 명명하였으므로 `postsList` 템플릿을 건들 필요도 없다!
 
@@ -315,7 +315,7 @@ PostsListController = RouteController.extend({
     return Posts.find({}, this.findOptions());
   },
   data: function() {
-    var hasMore = this.posts().fetch().length === this.limit();
+    var hasMore = this.posts().count() === this.limit();
     var nextPath = this.route.path({postsLimit: this.limit() + this.increment});
     return {
       posts: this.posts(),
@@ -325,7 +325,7 @@ PostsListController = RouteController.extend({
 });
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "16~23" %>
+<%= highlight "13~15,17~22" %>
 
 이 마술같은 라우터를 깊이있게 들여다보자. (현재 작동하는 `PostsListController controller`에서 상속받을) `postsList` route는 매개변수 `postsLimit`를 가진다는 점을 기억하기 바란다.
 
@@ -337,7 +337,7 @@ PostsListController = RouteController.extend({
 
 `this.limit()`는 우리가 보여주려는 post의 현재 갯수를 리턴하는데 이 값은 현재 URL에 있는 값이거나 또는 URL에 매개변수가 없을 경우의 초기 설정값 (5)이다.
 
-한 편, `this.posts`는 현재 커서를 가리키므로, `this.posts.fetch().length`는 커서에 실제로 존재하는 posts의 갯수를 가리킨다.
+한 편, `this.posts`는 현재 커서를 가리키므로, `this.posts.count()`는 커서에 실제로 존재하는 posts의 갯수를 가리킨다.
 
 그러므로 여기서 우리가 말하려는 것은 `n`개의 post를 요구하면 `n`개를 얻고, 계속 “load more” 버튼을 보여준다. 그러나 `n`개를 요구했는데 `n`개보다 *적은* 갯수를 얻게되면, 한계에 온 것을 의미하고 버튼을 보여주는 것을 중단하라는 것이다.
 
@@ -369,14 +369,6 @@ Post 목록 화면은 다음과 같이 보일 것이다:
 
 <%= commit "12-4", "Controller에 nextPath()을 추가하고 이를 post의 페이지 이동을 구현했다." %>
 
-<% note do %>
-
-### Count 대 Length
-
-this.posts.count()를 사용하지 않고 this.posts.fetch().length을 사용하는 것에 궁금해 할 지 모르겠다. 이것은 현재의 미티어에 존재하는 [버그](https://github.com/meteor/meteor/issues/654)를 피하기 위한 임시 방편이다. 이 버그가 빠른 시일에 해소되기를 바란다!
-
-<% end %>
-
 ### 더 나은 프로그레스 바
 
 페이징은 현재 잘 작동하지만, 한 가지 짜증나는 일이 있다: “load more” 버튼을 누를 때마다 라우터는 더 많은 post를 요구하고 새로운 데이터를 받을 때까지 loading 템플릿이 구동된다. 이 결과로 로딩될 때마다 페이지의 탑으로 이동해서 아랫쪽으로 스크롤해야 하는 사태가 일어난다.
@@ -386,7 +378,7 @@ this.posts.count()를 사용하지 않고 this.posts.fetch().length을 사용하
 iOS의 사파리나 Medium과 유튜브같은 사이트와 유사하게, `iron-router-progress`는 얇은 로딩바를 화면의 상단에 추가한다. 이를 구현하는 것은 앱에 패키지를 추가하는 것처럼 쉽다:
 
 ~~~bash
-mrt add iron-router-progress
+meteor add mrt:iron-router-progress
 ~~~
 <%= caption "bash console" %>
 

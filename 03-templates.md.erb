@@ -3,7 +3,7 @@ title: 템플릿(Template)
 slug: templates
 date: 0003/01/01
 number: 3
-contents: 미티어의 템플릿 언어인 Handlebars에 대하여 배운다.|첫 세 개의 템플릿을 만들어 본다.|미티어 매니저가 어떻게 작동하는 지를 배운다.|정적 데이터를 처리하는 기본 프로토타입을 만들어 본다.
+contents: 미티어의 템플릿 언어인 Spacebars에 대하여 배운다.|첫 세 개의 템플릿을 만들어 본다.|미티어 매니저가 어떻게 작동하는 지를 배운다.|정적 데이터를 처리하는 기본 프로토타입을 만들어 본다.
 paragraphs: 46
 ---
 
@@ -78,8 +78,12 @@ paragraphs: 46
 
 템플릿 엘리먼트의 속성인 `name="postsList"`에 주목하라. 이것은 미티어가 템플릿의 위치를 추적하는 데 사용된다 (실제 *파일*의 이름은 상관없다).
 
+<<<<<<< HEAD
 이제 미티어의 템플릿 시스템인 **Spacebars**를 소개할 차례다. Spacebars는 단순 HTML에 세 가지가 추가된 형태이다:
 (“partials”이라고 부르기도 하는) *inclusions*, *expressions*, 그리고 *block helpers*가 있다.
+=======
+이제 미티어의 템플릿 시스템인 Spacebars를 소개할 차례다. Spacebars는 단순 HTML에 세 가지가 추가된 형태이다:*partials*, *expressions*, *block helpers*.
+>>>>>>> FETCH_HEAD
 
 *Inclusions*는 `{{> templateName}}`의 문법을 사용하는 데, 미티어에게 해당 위치에 같은 이름의 템플릿으로 대체하라는 의미이다(예제의 경우, `postItem`).
 
@@ -91,7 +95,11 @@ paragraphs: 46
 
 ### 더 깊이있게
 
+<<<<<<< HEAD
 Spacebars에 대하여 더 상세한 공부를 원하면 [Spacebars 문서](https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md)를 참조하라.
+=======
+Spacebars에 대하여 더 상세한 공부를 원하면 [Spacebars 문서](https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md)를 참조하기 바란다.
+>>>>>>> FETCH_HEAD
 
 <% end %>
 
@@ -108,6 +116,8 @@ Spacebars에 대하여 더 상세한 공부를 원하면 [Spacebars 문서](http
 지금까지 우리는 Spacebars에 대하여 알아보았는데, 이것은 이것은 몇 개의 태그를 가진 HTML과 다를 게 없다. PHP(또는 Javascript를 포함하는 정규 HTML페이지)와 같은 다른 언어와는 달리, 미티어에서는 템플릿과 그 로직이 분리되어 있으며, 템플릿 자체는 아무 일도 하지 않는다.
 
 템플릿이 제 기능을 하려면 **헬퍼**가 있어야 한다. 헬퍼는 요리사에 비유할 수 있는데 요리사는 원재료(데이터)를 가져와서, 이를 가공하고, 완성된 요리가 담긴 접시를 웨이터(템플릿)에게 전달하고 웨이터는 그것을 고객에게 제공한다.
+
+지금까지 Spacebars로 작업을 해 왔는데, 이것은 몇 개의 태그를 가진 HTML과 다를 게 없다. PHP(또는 Javascript를 포함하는 정규 HTML페이지)와 같은 다른 언어와는 달리, 미티어에서는 템플릿과 그 로직이 분리되어 있으며, 템플릿 자체는 아무 일도 하지 않는다.
 
 바꾸어 말하면, 템플릿의 역할이 변수의 값을 보여주거나, 루프를 도는 것이라면, 헬퍼는 실제로 각 변수에 값을 들고 날라 지정하는 일을 한다.
 

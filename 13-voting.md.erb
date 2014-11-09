@@ -269,7 +269,7 @@ Template.postItem.events({
 다음, 투표수가 1인 post는 "1 vote**s**"라고 표시되는 것을 볼 수 있다. 이 부분을 적절하게 복수처리를 하도록 하자. 복수처리는 복잡한 프로세스가 될 수 있지만, 우리는 매우 단순한 방법으로 할 것이다. 어디에서나 사용할 수 있는 일반적인 Handlebars helper를 만든다:
 
 ~~~js
-Handlebars.registerHelper('pluralize', function(n, thing) {
+UI.registerHelper('pluralize', function(n, thing) {
   // fairly stupid pluralizer
   if (n === 1) {
     return '1 ' + thing;
@@ -396,7 +396,7 @@ PostsListController = RouteController.extend({
     return Posts.find({}, this.findOptions());
   },
   data: function() {
-    var hasMore = this.posts().fetch().length === this.limit();
+    var hasMore = this.posts().count() === this.limit();
     return {
       posts: this.posts(),
       nextPath: hasMore ? this.nextPath() : null
@@ -437,13 +437,23 @@ Router.map(function() {
 });
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "8,16,21~34,36~49" %>
+<%= highlight "8,20,25~37,40~53" %>
 
 이제 route가 하나 이상이 되었으므로, `nextPath` 로직을 `PostsListController`의 외부로 뽑아내어 `NewPostsListController`와 `BestPostsListController`의 내부로 넣는다. 이 각각의 경로가 다르기 때문이다.
 
 추가적으로, `votes`로 정렬을 할 때, 정렬이 올바르게 처리되도록 두 번째 정렬 조건에 시간을 넣는다.
 
-그리고 header에도 링크를 추가한다:
+새 컨트롤러를 넣었으면, 우리는 이제 이전의 `postsList` route를 안전하게 제거할 수 있다. 다음 코드를 삭제하면 된다:
+
+```
+ this.route('postsList', {
+  path: '/:postsLimit?',
+  controller: PostsListController
+ })
+```
+<%= caption "lib/router.js" %>
+
+그리고 header에 링크를 추가한다:
 
 ~~~html
 <template name="header">
@@ -481,9 +491,25 @@ Router.map(function() {
 </template>
 ~~~
 <%= caption "client/views/include/header.html" %>
-<%= highlight "9, 15~21" %>
+<%= highlight "9, 12~17" %>
 
-이 모두가 완료되면 최고 post 목록은 다음과 같다:
+또한 post를 삭제하는 이벤트 핸들러를 수정한다:
+
+~~~html
+  'click .delete': function(e) {
+    e.preventDefault();
+    
+    if (confirm("Delete this post?")) {
+      var currentPostId = this._id;
+      Posts.remove(currentPostId);
+      Router.go('home');
+    }
+  }
+~~~
+<%= caption "client/views/posts_edit.js" %>
+<%= highlight "7" %>
+
+이 모두가 완료되면 베스트 post 목록은 다음과 같다:
 
 <%= screenshot "13-4", "포인트에 의한 순위" %>
 

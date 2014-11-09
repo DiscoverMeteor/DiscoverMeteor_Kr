@@ -19,11 +19,11 @@ UI가 데이터의 변경에 어떻게 반응하는 지도 보았고, 추가되�
 
 다행히, 미티어가 대신해준다. 미티어 패키지가 서버(Javascript)와 클라이언트(JavaScript, HTML, 그리고 CSS) 양쪽에서 작동하는 덕분에 계정 시스템이 거의 공짜로 구현된다.
 
-우리는 미티어의 계정에 대한 빌트인 UI(`mrt add accounts-ui` 명령으로)를 사용하면 되는데, 현재 앱을 Bootstrap으로 구현하고 있으므로, 대신에 `accounts-ui-bootstrap-dropdown` 패키지(걱정마라. 다른 점은 오로지 스타일뿐이다)로 구현한다. 커맨드 라인에서 다음과 같이 입력한다:
+우리는 미티어의 계정에 대한 빌트인 UI(`meteor add accounts-ui` 명령으로)를 사용하면 되는데, 현재 앱을 Bootstrap으로 구현하고 있으므로, 대신에 `accounts-ui-bootstrap-dropdown` 패키지(걱정마라. 다른 점은 오로지 스타일뿐이다)로 구현한다. 커맨드 라인에서 다음과 같이 입력한다:
 
 ~~~bash
-$ mrt add accounts-ui-bootstrap-dropdown
-$ mrt add accounts-password
+$ meteor add mrt:accounts-ui-bootstrap-dropdown
+$ meteor add accounts-password
 ~~~
 <%= caption "터미널" %>
 
@@ -36,7 +36,7 @@ $ mrt add accounts-password
   <div class="container">
     {{>header}}
     <div id="main" class="row-fluid">
-      {{yield}}
+      {{>yield}}
     </div>
   </div>
 </template>
@@ -56,7 +56,7 @@ $ mrt add accounts-password
       <a class="brand" href="{{pathFor 'postsList'}}">Microscope</a>
       <div class="nav-collapse collapse">
         <ul class="nav pull-right">
-          <li>{{loginButtons}}</li>
+          <li>{{>loginButtons}}</li>
         </ul>
       </div>
     </div>

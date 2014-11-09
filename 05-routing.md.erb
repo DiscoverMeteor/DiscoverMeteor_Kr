@@ -22,13 +22,11 @@ paragraphs: 72
 먼저, 이 패키지를 Atmosphere로부터 설치한다:
 
 ~~~bash
-$ mrt add iron-router
+$ meteor add iron:router
 ~~~
 <%= caption "터미널" %>
 
-이 명령어는 iron-router 패키지를 다운로드하여 앱에 설치하고, 사용할 수 있는 상태로 만든다. 때로 이 패키지를 사용하기 전에 앱을 재구동(｀ctrl+c｀로 프로세스를 삭제한 다음 ｀mrt`로 다시 구동한다)해야 할 수도 있다는 점에 유의하라.
-
-유의할 사항은 Iron Router는 서드파티 패키지이므로, 이를 설치하려면 Meteorite를 이용해야 한다(`meteor add iron-router` 명령은 작동하지 않는다).
+이 명령어는 Iron Router 패키지를 다운로드하여 앱에 설치하고, 사용할 수 있는 상태로 만든다. 때로 이 패키지를 사용하기 전에 앱을 재구동(｀ctrl+c｀로 프로세스를 삭제한 다음 ｀meteor`로 다시 구동한다)해야 할 수도 있다는 점에 유의하라.
 
 <% note do %>
 
@@ -75,14 +73,14 @@ Iron Router를 사용하면 HTML의 `<body>` 태그 내부에서 그려지는 �
 ~~~html
 <template name="layout">
   <div class="container">
-  <header class="navbar">
-    <div class="navbar-inner">
-      <a class="brand" href="/">Microscope</a>
+    <header class="navbar">
+      <div class="navbar-inner">
+        <a class="brand" href="/">Microscope</a>
+      </div>
+    </header>
+    <div id="main" class="row-fluid">
+      {{> yield}}
     </div>
-  </header>
-  <div id="main" class="row-fluid">
-    {{> yield}}
-  </div>
   </div>
 </template>
 ~~~
@@ -173,7 +171,7 @@ Router.onBeforeAction('loading');
 
 구독을 기다리도록 하는 것은 좋은 아이디어이다. 사용자 체험 측면에서 뿐 아니라, 데이터를 템플릿 내부에서 항상 이용할 수 있다고 생각할 수 있다는 점에서도 그렇다. 이렇게 함으로써 데이터를 받기 전에 템플릿이 화면을 그리도록 - 종종 기교를 부려야 한다 - 해야 할 필요가 없게 된다. 
 
-마지막 단계는 바로 `loadingTemplate`이다. 우리는 `spin` 패키지를 사용하여 멋진 애니메이션이 되는 스피너를 만든다. `mrt add spin`명령어로 추가한 다음, 아래 코드로 `loading` 템플릿을 만든다:
+마지막 단계는 바로 `loadingTemplate`이다. 우리는 `spin` 패키지를 사용하여 멋진 애니메이션이 되는 스피너를 만든다. `meteor add sacha:spin`명령어로 추가한 다음, 아래 코드로 `loading` 템플릿을 만든다:
 
 ~~~html
 <template name="loading">
