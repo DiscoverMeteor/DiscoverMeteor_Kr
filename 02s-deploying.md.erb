@@ -31,12 +31,14 @@ paragraphs: 46
 미티어에 배포하는 것은 매우 간단하다. 터미널을 열고, 앱 디렉토리로 이동하여, 다음을 입력하면 된다:
 
 ~~~bash
-$ meteor deploy myapp.meteor.com
+meteor deploy myapp.meteor.com
 ~~~
 
-물론, "myapp" 은 독자가 정한 이름으로 바꾸되, 이미 사용되지 않은 이름이어야 할 것이다. 처음 앱을 배포하는 경우에는 Metero 계정을 만들라는 메시지가 나타날 것이다. 그리고 모든 것이 잘 진행되면, 잠시 후면 `http://myapp.meteor.com` 에서 앱에 접속할 수 있다.
+물론, "myapp" 은 독자가 정한 이름으로 바꾸되, 이미 사용되지 않은 이름이어야 할 것이다. 
 
-이 호스트 인스턴스의 데이터베이스에 직접 접속하거나 앱의 도메인을 커스텀 도메인으로 설정하는 것 같은 일에, 더 자세히 알고 싶다면 [Meteor 공식 문서](http://docs.meteor.com/#deploying)를 참조하기 바란다.
+처음 앱을 배포하는 경우에는 Metero 계정을 만들라는 메시지가 나타날 것이다. 그리고 모든 것이 잘 진행되면, 잠시 후면 `http://myapp.meteor.com` 에서 앱에 접속할 수 있다.
+
+이 호스트 인스턴스의 데이터베이스에 직접 접속하거나 앱의 도메인을 커스텀 도메인으로 설정하는 것 같은 일에, 더 자세히 알고 싶다면 [미티어 공식 문서](http://docs.meteor.com/#deploying)를 참조하기 바란다.
 
 ### Modulus에 배포
 
@@ -53,19 +55,19 @@ Modulus는 미티어 앱을 표준 Node.js 앱으로 변환시켜주는 도구 [
 먼저 [계정을 생성](https://modulus.io/register)하자. Modulus에 앱을 배포하려면 Modulus 명령어 도구를 설치하여야 한다:
 
 ~~~bash
-$ npm install -g modulus
+npm install -g modulus
 ~~~
 
 그리고 인증을 통과한다:
 
 ~~~bash
-$ modulus login
+modulus login
 ~~~
 
 이제 Modulus 프로젝트를 생성한다 (이 작업은 Modulus의 웹 대시보드에서도 할 수 있다):
 
 ~~~bash
-$ modulus project create
+modulus project create
 ~~~
 
 그 다음 단계는 앱에서 접속할 MongoDB 데이터베이스를 생성하는 것이다. [Modulus 자체](https://modulus.io/codex/database/getting_started)의 [MongoHQ](https://www.mongohq.com/)를 이용하거나 다른 클라우드 MongoDB 프로바이더의 것을 이용하여 MongoDB 데이터베이스를 만든다.
@@ -73,13 +75,13 @@ $ modulus project create
 MongoDB 데이터베이스를 만들었으면, Modulus의 웹 인터페이스(Dashboard > Databases > Select your database > Administration)에서 데이터베이스에 대한 `MONGO_URL`을 얻는다. 그리고 이를 사용하여 앱 설정을 다음과 같이 한다:
 
 ~~~bash
-$ modulus env set MONGO_URL "mongodb://<user>:<pass>@mongo.onmodulus.net:27017/<database_name>"
+modulus env set MONGO_URL "mongodb://<user>:<pass>@mongo.onmodulus.net:27017/<database_name>"
 ~~~
 
 이제 앱을 배포하면 된다. 다음과 같이 입력한다:
 
 ~~~bash
-$ modulus deploy
+modulus deploy
 ~~~
 
 이제 Modulus에 앱을 성공적으로 배포하였다. 로그 접속, 커스텀 도메인 설정, 그리고 SSL에 대한 더 많은 정보가 필요하면 [the Modulus documentation](https://modulus.io/codex/projects)을 참조하기 바란다.
@@ -99,7 +101,7 @@ $ modulus deploy
 시작하려면, Meteor Up을 `npm`을 통해서 다음과 같이 설치해야 한다:
 
 ~~~bash
-$ npm install -g mup
+npm install -g mup
 ~~~
 
 그리고 특별한 별도의 디렉토리를 생성하여 특정한 배포에 대한 Meteor Up 설정을 유지한다. 별도의 디렉토리를 사용하는 이유는 두 가지이다: 첫째, Git 저장소에 비밀번호 같은 것을 포함하는 것을 피하는 방법으로 가장 좋은데, 특히 저장소가 공개저장소일 때 그렇다.
@@ -109,9 +111,9 @@ $ npm install -g mup
 그러므로, 새로운 디렉토리를 생성하고, 이를 사용하여 새로운 Meteor Up 프로젝트를 초기화한다:
 
 ~~~bash
-$ mkdir ~/microscope-deploy
-$ cd ~/microscope-deploy
-$ mup init
+mkdir ~/microscope-deploy
+cd ~/microscope-deploy
+mup init
 ~~~
 
 <% note do %>
@@ -182,13 +184,13 @@ Meteor Up 설정이 다른 디렉토리에 존재하므로, `app` 속성으로 �
 배포하기 전에 서버를 설정하여 미티어 앱을 호스트할 수 있는 상태로 준비해야 한다. Meteor Up은 이 복잡한 과정을 단일 명령어로 해결하는 마술을 부린다!
 
 ~~~bash
-$ mup setup
+mup setup
 ~~~
 
 이 명령어는 서버의 성능과 네트워크의 연결 상태에 따라 수 분정도가 걸릴 것이다. 설정이 성공하면, 마침내 앱을 배포할 수 있다:
 
 ~~~bash
-$ mup deploy
+mup deploy
 ~~~
 
 이 명령어는 앱을 bundle로 만들고, 방금 설정한 서버에 배포를 수행한다.
@@ -198,7 +200,7 @@ $ mup deploy
 로그는 매우 중요하다. Meteor Up은 로그를 tail -f 명령어를 모방하여 처리하는 매우 쉬운 방법을 제공한다. 다음을 입력하라:
 
 ~~~bash
-$ mup logs -f
+mup logs -f
 ~~~
 
 이것으로 Meteor Up의 기능의 개요를 둘러보았다. 더 많은 정보를 원하면 [Meteor Up의 GitHub repository](https://github.com/arunoda/meteor-up)를 방문하기를 권한다.
