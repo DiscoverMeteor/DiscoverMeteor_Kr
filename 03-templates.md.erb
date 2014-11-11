@@ -44,7 +44,7 @@ paragraphs: 46
 
 ### 파일 찾기
 
-미티어는 파일을 잘 찾는다. `/clien`t 디렉토리의 어디에 넣든지 미티어는 이를 찾아서 컴파일한다. 이것은 Javascript나 CSS 파일 경로를 직접 입력할 필요가 없다는 것을 의미한다.
+미티어는 파일을 잘 찾는다. `/client` 디렉토리의 어디에 넣든지 미티어는 이를 찾아서 컴파일한다. 이것은 Javascript나 CSS 파일 경로를 직접 입력할 필요가 없다는 것을 의미한다.
 
 이것은 동일한 디렉토리에 모든 파일을 넣을 수도 있고, 하나의 파일에 모든 코드를 넣을 수도 있다는 의미이기도 하다. 그러나 미티어가 모든 것을 컴파일하여 하나의 최적화된 파일로 만드니, 전체를 잘 구조화하고 보기 좋은 파일 구조를 사용하기 바란다.
 
@@ -78,12 +78,8 @@ paragraphs: 46
 
 템플릿 엘리먼트의 속성인 `name="postsList"`에 주목하라. 이것은 미티어가 템플릿의 위치를 추적하는 데 사용된다 (실제 *파일*의 이름은 상관없다).
 
-<<<<<<< HEAD
 이제 미티어의 템플릿 시스템인 **Spacebars**를 소개할 차례다. Spacebars는 단순 HTML에 세 가지가 추가된 형태이다:
 (“partials”이라고 부르기도 하는) *inclusions*, *expressions*, 그리고 *block helpers*가 있다.
-=======
-이제 미티어의 템플릿 시스템인 Spacebars를 소개할 차례다. Spacebars는 단순 HTML에 세 가지가 추가된 형태이다:*partials*, *expressions*, *block helpers*.
->>>>>>> FETCH_HEAD
 
 *Inclusions*는 `{{> templateName}}`의 문법을 사용하는 데, 미티어에게 해당 위치에 같은 이름의 템플릿으로 대체하라는 의미이다(예제의 경우, `postItem`).
 
@@ -95,11 +91,7 @@ paragraphs: 46
 
 ### 더 깊이있게
 
-<<<<<<< HEAD
-Spacebars에 대하여 더 상세한 공부를 원하면 [Spacebars 문서](https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md)를 참조하라.
-=======
 Spacebars에 대하여 더 상세한 공부를 원하면 [Spacebars 문서](https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md)를 참조하기 바란다.
->>>>>>> FETCH_HEAD
 
 <% end %>
 
@@ -196,7 +188,7 @@ Template.postItem.helpers({
 ~~~
 <%= caption "client/views/posts/post_item.js" %>
 
-이 경우 `domain` 헬퍼의 값은 배열이 아니고, 익명 함수이다. 이러한 패턴은 훨씬 흔히 나타난다. 그리고 이전의 단순화된 더미 데이터 예제에 비교해서 훨씬 일반적이다 (그리고 더 유용하다).
+이 경우 `domain` 헬퍼의 값은 배열이 아니고, 익명 함수이다. 이러한 패턴은 매우 흔히 나타난다. 그리고 이전의 단순화된 더미 데이터 예제에 비교해서 훨씬 일반적이다 (그리고 더 유용하다).
 
 <%= screenshot "3-2", "Displaying domains for each links." %>
 
