@@ -89,13 +89,15 @@ Template.postsList.helpers({
 
 ### 컴퓨테이션 설정
 
-컴퓨테이션의 배경 이론을 이해하면, 실제로 이를 설정하는 것은 매우 쉽다. 컴퓨테이션의 코드 블럭을 감싸고 이를 반응형으로 만들기 위해서는 단순히 `Deps.autorun` 함수를 사용하면 된다:
+컴퓨테이션의 배경 이론을 이해하면, 실제로 이를 설정하는 것은 매우 쉽다. 컴퓨테이션의 코드 블럭을 감싸고 이를 반응형으로 만들기 위해서는 단순히 `Tracker.autorun` 함수를 사용하면 된다:
 
 ~~~js
-Deps.autorun(function() {
+Tracker.autorun(function() {
   console.log('There are ' + Posts.find().count() + ' posts');
 });
 ~~~
+
+`Tracker` 블록을 `Meteor.startup()` 블록 내부에 두어야 한다는 점에 유의하기 바란다. 이것은 미티어가 `Posts` 컬렉션 로딩을 끝낸 후에 한 번만 실행하도록 하기 위함이다.
 
 보이지 않는 내부에서, `autorun`은 컴퓨테이션을 만들고, 연계된 데이터소스가 변경될 때마다 재계산한다. 우리는 콘솔에 post의 숫자를 로그로 출력하는 간단한 컴퓨테이션을 설정했다. 이것은 `Posts.find()`가 반응형 데이터 소스이므로 post 갯수가 변경될 때마다 재계산하도록 컴퓨테이션에게 지시할 것이다.
 

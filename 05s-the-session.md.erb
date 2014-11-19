@@ -42,14 +42,14 @@ paragraphs: 33
   </div>
 </header>
 ~~~
-<%= caption "client/views/application/layout.html"%>
+<%= caption "client/templates/application/layout.html"%>
 
 ~~~js
 Template.layout.helpers({
   pageTitle: function() { return Session.get('pageTitle'); }
 });
 ~~~
-<%= caption "client/views/application/layout.js"%>
+<%= caption "client/templates/application/layout.js"%>
 
 미티어의 (“hot code reload” 또는 HCR로 알려진) 자동 리로드는 세션 변수를 보존한다. 따라서, nav bar에서 “A different title”이 보일 것이다. 만약 보이지 않으면, 이전의 명령어인 `Session.set()`을 다시 한 번 입력하면 된다.
 
@@ -61,6 +61,8 @@ Template.layout.helpers({
 <%= caption "브라우저 콘솔" %>
 
 세션은 전역에서 이용할 수 있으므로, 앱의 어디에서나 이렇게 바꿀 수 있다. 이는 큰 힘이 되지만, 너무 많이 사용하면 함정이 될 수도 있다.
+
+그런데, Session 객체가 이용자 사이에, 또는 심지어 브라우저의 탭사이에서 조차 공유되지 *않는다는* 점을 유의하는 것이 중요하다. 그래서 새로운 탭에서 앱을 열면, 사이트 타이틀이 빈 이유가 바로 여기에 있다.
 
 <% note do %>
 
@@ -84,12 +86,12 @@ helloWorld = function() {
 
 우리가 세션변수를 호출한다 해도, 이를 호출하는 *컨텍스트*는 반응형이 아니다. 이는 변수를 변경할 때마다 새로운 alert가 구동되는 것은 아니라는 의미이다.
 
-여기에서 [Autorun](http://docs.meteor.com/#deps_autorun)이 등장한다. 그 이름에서 의미하는 바와 같이, autorun 블럭의 내부의 코드는 자동적으로 실행이 되고 그 안에서 사용된 반응형 데이터 소스가 변경될 때마다 계속 실행된다.
+여기에서 [Autorun](http://docs.meteor.com/#Tracker_autorun)이 등장한다. 그 이름에서 의미하는 바와 같이, autorun 블럭의 내부의 코드는 자동적으로 실행이 되고 그 안에서 사용된 반응형 데이터 소스가 변경될 때마다 계속 실행된다.
 
 아래 코드를 브라우저 콘솔에서 입력해보자:
 
 ~~~js
-❯ Deps.autorun( function() { console.log('Value is: ' + Session.get('pageTitle')); } );
+❯ Tracker.autorun( function() { console.log('Value is: ' + Session.get('pageTitle')); } );
 Value is: A brand new title
 ~~~
 <%= caption "브라우저 콘솔" %>
@@ -107,7 +109,7 @@ Value is: Yet another value
 따라서 이전 예제로 돌아가서, 세션변수가 변경될 때마다 경고가 구동되게 하려면, 우리가 할 일은 코드를 `autorun` 블럭에 넣는 것이다:
 
 ~~~js
-Deps.autorun(function() {
+Tracker.autorun(function() {
   alert(Session.get('message'));
 });
 ~~~
