@@ -19,51 +19,54 @@ UI가 데이터의 변경에 어떻게 반응하는 지도 보았고, 추가되�
 
 다행히, 미티어가 대신해준다. 미티어 패키지가 서버(Javascript)와 클라이언트(JavaScript, HTML, 그리고 CSS) 양쪽에서 작동하는 덕분에 계정 시스템이 거의 공짜로 구현된다.
 
-우리는 미티어의 계정에 대한 빌트인 UI(`meteor add accounts-ui` 명령으로)를 사용하면 되는데, 현재 앱을 Bootstrap으로 구현하고 있으므로, 대신에 `accounts-ui-bootstrap-dropdown` 패키지(걱정마라. 다른 점은 오로지 스타일뿐이다)로 구현한다. 커맨드 라인에서 다음과 같이 입력한다:
+우리는 미티어의 계정에 대한 빌트인 UI(`meteor add accounts-ui` 명령으로)를 사용하면 되는데, 현재 앱을 Bootstrap으로 구현하고 있으므로, 대신에 `ian:accounts-ui-bootstrap-3` 패키지(걱정마라. 다른 점은 오로지 스타일뿐이다)로 구현한다. 커맨드 라인에서 다음과 같이 입력한다:
 
 ~~~bash
-$ meteor add mrt:accounts-ui-bootstrap-dropdown
-$ meteor add accounts-password
+meteor add ian:accounts-ui-bootstrap-3
+meteor add accounts-password
 ~~~
 <%= caption "터미널" %>
 
-위의 두 명령어는 특별한 accounts 템플릿을 제공한다; 우리는 이들을 사이트에서 `{{> loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{> loginButtons align="right"}}`).
+위의 두 명령어는 특별한 accounts 템플릿을 제공하며, 우리는 이들을 사이트에서 `{{> loginButtons}}` 헬퍼를 사용하여 적용한다. 도움이 되는 팁: 로그인 드롭다운 박스에 대한 정렬은 `align` 속성으로 구현한다(예를 들면, `{{> loginButtons align="right"}}`).
 
-헤더에 버튼을 추가한다. 그리고 헤더가 좀 커질 수 있으므로, 템플릿에 공간을 좀 더 주도록 하자(이것을 `client/views/includes/`에 넣는다). 또한 일부 추가 마크업과 Bootstrap 클래스를 사용하여 외관을 멋지게 마무리한다:
+헤더에 버튼을 추가한다. 그리고 헤더가 좀 커질 수 있으므로, 템플릿에 공간을 좀 더 주도록 하자(이것을 `client/templates/includes/`에 넣는다). 또한 일부 추가 마크업과 Bootstrap 클래스를 사용하여 외관을 멋지게 마무리한다:
 
 ~~~html
 <template name="layout">
   <div class="container">
-    {{>header}}
+    {{> header}}
     <div id="main" class="row-fluid">
-      {{>yield}}
+      {{> yield}}
     </div>
   </div>
 </template>
 ~~~
-<%= caption "client/views/application/layout.html" %>
-<%= highlight "6" %>
+<%= caption "client/templates/application/layout.html" %>
+<%= highlight "3~6" %>
 
 ~~~html
 <template name="header">
-  <header class="navbar">
-    <div class="navbar-inner">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="{{pathFor 'postsList'}}">Microscope</a>
-      <div class="nav-collapse collapse">
-        <ul class="nav pull-right">
-          <li>{{>loginButtons}}</li>
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{pathFor 'postsList'}}">Microscope</a>
+      </div>
+      <div class="collapse navbar-collapse" id="navigation">
+        <ul class="nav navbar-nav navbar-right">
+          {{> loginButtons}}
         </ul>
       </div>
     </div>
-  </header>
+  </nav>
 </template>
 ~~~
-<%= caption "client/views/includes/header.html" %>
+<%= caption "client/templates/includes/header.html" %>
 
 이제, 브라우저로 앱을 열면, 사이트의 우상단에 계정 로그인 버튼을 볼 수 있다.
 
