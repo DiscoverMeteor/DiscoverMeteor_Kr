@@ -57,7 +57,7 @@ Iron Router를 사용하면 HTML의 `<body>` 태그 내부에서 그려지는 �
 
 <%= diagram "router-diagram", "레이아웃과 템플릿.", "pull-center" %>
 
-먼저, 레이아웃을 만들고 여기에 `{{> yield}}` 헬퍼를 추가한다. `main.html` 파일에서 HTML `<body>` 태그를 삭제하고 레이아웃 코드를 자체 템플릿인  `layout.html` 파일로 옮긴다 (이 파일은 새로 `client/views/application` 디렉토리를 만들고 이 내부에 둔다).
+먼저, 레이아웃을 만들고 여기에 `{{> yield}}` 헬퍼를 추가한다. `main.html` 파일에서 HTML `<body>` 태그를 삭제하고 레이아웃 코드를 자체 템플릿인  `layout.html` 파일로 옮긴다 (이 파일은 새로 `client/templates/application` 디렉토리를 만들고 이 내부에 둔다).
 
 Iron Router는 이 레이아웃을 확 줄어든 `main.html` 템플릿에 넣는다. 그 형태는 다음과 같다:
 
@@ -325,7 +325,7 @@ Route에서의 `data` 함수 내부에서, `this`는 현재 일치한 route에 �
   </div>
 </template>
 ~~~
-<%= caption "client/views/posts/post_item.html"%>
+<%= caption "client/templates/posts/post_item.html"%>
 <%= highlight "6" %>
 <%= commit "5-3", "단일 post 페이지로 라우팅하기." %>
 

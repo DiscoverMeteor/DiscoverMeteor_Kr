@@ -19,26 +19,23 @@ Posts.insert 데이터베이스 호출을 사용하여 콘솔에서 post를 등�
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
+  notFoundTemplate: 'notFound',
   waitOn: function() { return Meteor.subscribe('posts'); }
 });
 
-Router.map(function() {
-  this.route('postsList', {path: '/'});
-  
-  this.route('postPage', {
-    path: '/posts/:_id',
-    data: function() { return Posts.findOne(this.params._id); }
-  });
-  
-  this.route('postSubmit', {
-    path: '/submit'
-  });
+Router.route('/', {name: 'postsList'});
+
+Router.route('/posts/:_id', {
+  name: 'postPage',
+  data: function() { return Posts.findOne(this.params._id); }
 });
 
-Router.onBeforeAction('loading');
+Router.route('/submit', {name: 'postSubmit'});
+
+Router.onBeforeAction('dataNotFound', {only: 'postPage'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "15~17" %>
+<%= highlight "15" %>
 
 ### 헤더에 링크 추가하기
 
@@ -46,65 +43,54 @@ Route를 정의했으니, 이제 헤더에 등록 페이지에 대한 링크를 
 
 ~~~html
 <template name="header">
-  <header class="navbar">
-    <div class="navbar-inner">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="{{pathFor 'postsList'}}">Microscope</a>
-      <div class="nav-collapse collapse">
-        <ul class="nav">
-          <li><a href="{{pathFor 'postSubmit'}}">New</a></li>
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{pathFor 'postsList'}}">Microscope</a>
+      </div>
+      <div class="collapse navbar-collapse" id="navigation">
+        <ul class="nav navbar-nav">
+          <li><a href="{{pathFor 'postSubmit'}}">Submit Post</a></li>
         </ul>
-        <ul class="nav pull-right">
-          <li>{{> loginButtons}}</li>
+        <ul class="nav navbar-nav navbar-right">
+          {{> loginButtons}}
         </ul>
       </div>
     </div>
-  </header>
+  </nav>
 </template>
 ~~~
-<%= caption "client/views/includes/header.html" %>
-<%= highlight "11~16" %>
+<%= caption "client/templates/includes/header.html" %>
+<%= highlight "14~16" %>
 
 Route를 설정했다는 것은 사용자가 브라우저에서 `/submit` URL을 요청하면, 미티어가 `postSubmit` 템플릿을 화면에 보여준다는 의미이다. 그러므로 아래와 같이 템플릿을 작성한다:
 
 ~~~html
 <template name="postSubmit">
-  <form class="main">
-    <div class="control-group">
-        <label class="control-label" for="url">URL</label>
-        <div class="controls">
-            <input name="url" type="text" value="" placeholder="Your URL"/>
-        </div>
+  <form class="main form">
+    <div class="form-group">
+      <label class="control-label" for="url">URL</label>
+      <div class="controls">
+          <input name="url" id="url" type="text" value="" placeholder="Your URL" class="form-control"/>
+      </div>
     </div>
-
-    <div class="control-group">
-        <label class="control-label" for="title">Title</label>
-        <div class="controls">
-            <input name="title" type="text" value="" placeholder="Name your post"/>
-        </div>
+    <div class="form-group">
+      <label class="control-label" for="title">Title</label>
+      <div class="controls">
+          <input name="title" id="title" type="text" value="" placeholder="Name your post" class="form-control"/>
+      </div>
     </div>
-
-    <div class="control-group">
-        <label class="control-label" for="message">Message</label>
-        <div class="controls">
-            <textarea name="message" type="text" value=""></textarea>
-        </div>
-    </div> 
-
-    <div class="control-group">
-        <div class="controls">
-            <input type="submit" value="Submit" class="btn btn-primary"/>
-        </div>
-    </div>
+    <input type="submit" value="Submit" class="btn btn-primary"/>
   </form>
 </template>
-
 ~~~
-<%= caption "client/views/posts/post_submit.html" %>
+<%= caption "client/templates/posts/post_submit.html" %>
 
 주: 많은 마크업이 있지만, 이들은 단순히 Twitter Bootstrap에서 온 것이다. form 엘리먼트들만이 필수적이고, 나머지 마크업은 앱을 다소 보기좋게 해 줄 뿐이다. 이것은 아래와 같이 보일 것이다:
 
@@ -123,16 +109,15 @@ Template.postSubmit.events({
     
     var post = {
       url: $(e.target).find('[name=url]').val(),
-      title: $(e.target).find('[name=title]').val(),
-      message: $(e.target).find('[name=message]').val()
-    }
+      title: $(e.target).find('[name=title]').val()
+    };
     
     post._id = Posts.insert(post);
     Router.go('postPage', post);
   }
 });
 ~~~
-<%= caption "client/views/posts/post_submit.js" %>
+<%= caption "client/templates/posts/post_submit.js" %>
 
 <%= commit "7-1", "Post 등록 페이지를 추가하고 헤더에 이 페이지로의 링크를 추가했다." %>
 
@@ -162,7 +147,7 @@ $ meteor remove insecure
 등록폼이 다시 동작하도록 클라이언트 쪽에서 post 등록을 허용하는 방법을 알아보자. 나중에 알게되지만, 우리는 결국에는 다른 기술을 사용할 것이다. 하지만, 지금은 아래 방법으로 하면 쉽게 동작하게 할 수 있다:
 
 ~~~js
-Posts = new Meteor.Collection('posts');
+Posts = new Mongo.Collection('posts');
 
 Posts.allow({
   insert: function(userId, doc) {
@@ -171,7 +156,7 @@ Posts.allow({
   }
 });
 ~~~
-<%= caption "collections/posts.js" %>
+<%= caption "lib/collections/posts.js" %>
 <%= highlight "3~8" %>
 
 <%= commit "7-2", "패키지 insecure를 삭제하고 post에 쓰기를 허용했다." %>
@@ -204,43 +189,44 @@ Hook이란 라우팅 과정을 가로채서 라우터가 수행하는 작업을 
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
+  notFoundTemplate: 'notFound',
   waitOn: function() { return Meteor.subscribe('posts'); }
 });
 
-Router.map(function() {
-  this.route('postsList', {path: '/'});
-  
-  this.route('postPage', {
-    path: '/posts/:_id',
-    data: function() { return Posts.findOne(this.params._id); }
-  });
-  
-  this.route('postSubmit', {
-    path: '/submit'
-  });
+Router.route('/', {name: 'postsList'});
+
+Router.route('/posts/:_id', {
+  name: 'postPage',
+  data: function() { return Posts.findOne(this.params._id); }
 });
 
-var requireLogin = function(pause) {
+Router.route('/submit', {name: 'postSubmit'});
+
+var requireLogin = function() {
   if (! Meteor.user()) {
     this.render('accessDenied');
-    pause();
+  } else {
+    this.next();
   }
 }
 
-Router.onBeforeAction('loading');
+Router.onBeforeAction('dataNotFound', {only: 'postPage'});
 Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "19~26,29" %>
+<%= highlight "17~23,26" %>
 
 접근 거부 페이지를 위한 템플릿도 만든다:
 
 ~~~html
 <template name="accessDenied">
-  <div class="alert alert-error">You can't get here! Please log in.</div>
+  <div class="access-denied jumbotron">
+    <h2>Access Denied</h2>
+    <p>You can't get here! Please log in.</p>
+  </div>
 </template>
 ~~~
-<%= caption "client/views/includes/access_denied.html" %>
+<%= caption "client/templates/includes/access_denied.html" %>
 
 <%= commit "7-3", "로그인 상태가 아닐 때 post 등록 페이지로의 접근을 거절했다." %>
 
@@ -248,7 +234,7 @@ Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 
 <%= screenshot "7-3", "Access denied 템플릿" %>
 
-이러한 라우팅 hook의 좋은 점은 이것이 _반응형_이라는 점이다. 이 의미는 우리가 선언적일 수 있으며, 사용자가 로그인할 때, 콜백이나 그 비슷한 것을 생각할 필요가 없다는 것이다. 사용자의 로그인 상태가 변할 때, 라우터의 페이지 템플릿은 `accessDenied`에서 `postSubmit`로 순간적으로 변하는 데, 이 과정에 이를 다루는 어떤 명시적 코드도 작성할 필요가 없다.
+이러한 라우팅 hook의 좋은 점은 이것도 *반응형*이라는 점이다. 이 의미는 사용자가 로그인할 때, 콜백이나 그 비슷한 것을 생각할 필요가 없다는 것이다. 사용자의 로그인 상태가 변할 때, 라우터의 페이지 템플릿은 `accessDenied`에서 `postSubmit`로 순간적으로 변하는 데, 이 과정에 이를 다루는 어떤 명시적 코드도 작성할 필요가 없다 (그리고, 이것은 다른 브라우저 탭에서도 일어난다).
 
 로그인한 다음, 해당 페이지를 새로고침해보자. 접근거절 템플릿이 짧은 순간에 새 글쓰기 페이지로 바뀌어 나타나는 것을 보게 될 것이다. 이렇게 되는 이유는 미티어가 템플릿 렌더링을 가능한 신속하게 수행하기 때문인데, 이 시점은 서버와 통신하기 전이며, 해당 사용자가 현재(브라우저의 로컬 저장소에 저장되어) 존재하는 지를 체크하기도 전이다.
 
@@ -259,35 +245,25 @@ Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 그래서 우리는 hook 처리 부분을 변경하여, `Meteor.loggingIn()`이 `true`인 동안 로딩중 템플릿을 사용한다:
 
 ~~~js
-Router.map(function() {
-  this.route('postsList', {path: '/'});
-  
-  this.route('postPage', {
-    path: '/posts/:_id',
-    data: function() { return Posts.findOne(this.params._id); }
-  });
-  
-  this.route('postSubmit', {
-    path: '/submit'
-  });
-});
+//...
 
-var requireLogin = function(pause) {
+var requireLogin = function() {
   if (! Meteor.user()) {
-    if (Meteor.loggingIn())
+    if (Meteor.loggingIn()) {
       this.render(this.loadingTemplate);
-    else
+    } else {
       this.render('accessDenied');
-    
-    pause();
+    }
+  } else {
+    this.next();
   }
 }
 
-Router.onBeforeAction('loading');
-Router.before(requireLogin, {only: 'postSubmit'});
+Router.onBeforeAction('dataNotFound', {only: 'postPage'});
+Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "16~19" %>
+<%= highlight "5~10" %>
 
 <%= commit "7-4", "로그인을 기다리는 동안 로딩중 화면을 보인다." %>
 
@@ -296,11 +272,16 @@ Router.before(requireLogin, {only: 'postSubmit'});
 사용자가 로그아웃 상태에서 이 페이지에 실수로 접근하는 것을 방지하는 가장 쉬운 방법은 해당 링크를 숨기는 것이다. 이것은 매우 쉽다:
 
 ~~~html
-<ul class="nav">
+//...
+
+<ul class="nav navbar-nav">
   {{#if currentUser}}<li><a href="{{pathFor 'postSubmit'}}">Submit Post</a></li>{{/if}}
 </ul>
+
+//...
 ~~~
-<%= caption "client/views/includes/header.html" %>
+<%= caption "client/templates/includes/header.html" %>
+<%= highlight "3~5" %>
 
 <%= commit "7-5", "로그인 상태인 경우만 post 등록 링크를 보인다." %>
 
@@ -333,82 +314,163 @@ Template.postSubmit.events({
     
     var post = {
       url: $(e.target).find('[name=url]').val(),
-      title: $(e.target).find('[name=title]').val(),
-      message: $(e.target).find('[name=message]').val()
-    }
+      title: $(e.target).find('[name=title]').val()
+    };
     
-    Meteor.call('post', post, function(error, id) {
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
       if (error)
         return alert(error.reason);
-        
-      Router.go('postPage', {_id: id});
+      
+      Router.go('postPage', {_id: result._id});  
     });
   }
 });
 ~~~
-<%= caption "client/views/posts/post_submit.js" %>
+<%= caption "client/templates/posts/post_submit.js" %>
+<%= highlight "10~16" %>
 
-`Meteor.call` 함수의 첫 매개변수에는 메서드 이름을 넣는다. 이 함수를 호출할 때, 여러 매개변수를 전달(이 경우, 입력 폼에서 구성한 `post`객체)할 수 있다. 그리고 마지막에 콜백함수를 추가하는데 이 함수는 서버쪽의 메서드가 수행된 다음에 실행된다. 만약 문제가 있으면 사용자에게 경고 메시지를 보내고, 아니면 새로 등록된 post의 토론 페이지로 리다이렉트한다.
+`Meteor.call` 함수의 첫 매개변수에는 메서드 이름을 넣는다. 이 함수를 호출할 때, 여러 매개변수를 전달(이 경우, 입력 폼에서 구성한 `post`객체)할 수 있다. 그리고 마지막에 콜백함수를 추가하는데 이 함수는 서버쪽의 메서드가 수행된 다음에 실행된다. 
 
-그 다음, `collections/posts.js` 파일에 메서드를 정의한다. 'posts.js' 파일에서는 'allow()' 블록을 제거하는 데, 이는 미티어 메서드가 이것들을 건너뛰기 때문이다. 메서드가 서버에서 실행되기 때문에 미티어는 이들을 신뢰한다는 점을 기억해두기 바란다.
+Meteor method 콜백은 항상 2개의 매개변수 `error`와 `result`를 가진다. 어떤 이유로든 `error` 매개변수가 있으면, 사용자에게 (콜백을 취소하기 위하여 `return`을 통해서) 경고를 보낸다. 만약 모든 것이 잘 돌아가면, 사용자를 새로 만든 post 토론 페이지로 redirect한다.
+
+### 보안 검사
+
+이 기회에 우리는 [`audit-argument-checks`](http://docs.meteor.com/#auditargumentchecks) 패키지를 이용하여 method에 보안을 추가하려고 한다.
+
+이 패키지는 미리 정의된 패턴에 따라서 JavaScript 객체를 검사한다. 예제에서 우리는 이를 이용하여 method를 호출하는 사용자가 제대로 로그인된 상태인지를 (`Meteor.userId()`가 `String`인지를 확인하여) 검사한다. 그리고 매개변수로 전달되는 `postAttributes` 객체의 `title`과 `url`이 문자열인지도 검사한다. 그래서 데이터베이스에 아무 데이터나 들어가지 않도록 한다.
+
+이제 `collections/posts.js` 파일에 `postInsert` 메서드를 정의하자. `posts.js`에서 `allow()` 블럭은 삭제하는데, 이것은 Meteor Method는 이것들을 건너뛰기 때문이다.
+
+그 다음엔 `postAttributes` 객체를 `확장`하여 3개의 속성값을 추가한다: 사용자의 `_id`, `username`, 그리고 post가 `등록`된 시간이다. 
+이것을 데이터베이스이 입력하여 리턴되는 `_id`값을 JavaScript 객체 형태로 리턴하여 클라이언트( 이 method를 호출한 사용자)에 전달한다.
 
 ~~~js
-Posts = new Meteor.Collection('posts');
+Posts = new Mongo.Collection('posts');
 
 Meteor.methods({
-  post: function(postAttributes) {
-    var user = Meteor.user(),
-      postWithSameLink = Posts.findOne({url: postAttributes.url});
+  postInsert: function(postAttributes) {
+    check(Meteor.userId(), String);
+    check(postAttributes, {
+      title: String,
+      url: String
+    });
     
-    // ensure the user is logged in
-    if (!user)
-      throw new Meteor.Error(401, "You need to login to post new stories");
-    
-    // ensure the post has a title
-    if (!postAttributes.title)
-      throw new Meteor.Error(422, 'Please fill in a headline');
-    
-    // check that there are no previous posts with the same link
-    if (postAttributes.url && postWithSameLink) {
-      throw new Meteor.Error(302, 
-        'This link has already been posted', 
-        postWithSameLink._id);
-    }
-    
-    // pick out the whitelisted keys
-    var post = _.extend(_.pick(postAttributes, 'url', 'title', 'message'), {
+    var user = Meteor.user();
+    var post = _.extend(postAttributes, {
       userId: user._id, 
       author: user.username, 
-      submitted: new Date().getTime()
+      submitted: new Date()
     });
     
     var postId = Posts.insert(post);
     
-    return postId;
+    return {
+      _id: postId
+    };
   }
 });
 ~~~
 <%= caption "collections/posts.js" %>
+<%= highlight "3~24" %>
+
+`_.extend()`는 [Underscore](http://underscorejs.org) 라이브러리의 method로서, 단순히 하나의 객체에 속성을 추가하여 “확장”하는 기능을 한다.
 
 <%= commit "7-6", "메서드를 사용하여 post를 등록한다." %>
 
-이 메서드는 약간 복잡하지만, 충분히 따라갈 수 있을 것이다.
+<% note do %>
 
-첫째, 변수 `user`를 정의하고 동일한 링크를 가지는 글이 이미 존재하는 지를 검사한다. 다음, 사용자가 로그인 상태인 지 검사하고, 그렇지 않으면 오류를 던진다(이 오류는 결국 브라우저에 의해서 `alert` 형태로 보여진다). 또한 post 객체에 대한 제목이 있는 지를 확인하는 간단한 유효성 검사를 수행한다.
+### Allow/Deny여 바이 바이
 
-다음, 동일한 URL을 가진 또 다른 글이 있으면, `302`번 오류를 던지고(리다이렉트된다) 사용자를 이미 등록된 글로 이동시킨다.
+Meteor Method는 서버에서 실행된다. 그러므로 Meteor는 이것을 신뢰할 수 있다고 본다. 그래서 Meteor method는 allow/deny 콜백을 건너뛴다.
 
-Meteor의 `Error` 클래스는 3개의 매개변수를 가진다. 첫째(`error`)는 숫자 코드 `302`이며, 둘째(`reason`)는 오류에 대한 짧은 설명문이고 마지막(`details`)은 유용한 추가 정보를 넣을 수 있다.
+*서버에서도* 모든 `insert`, `update`, 또는 `remove` 앞에 임의의 코드를 실행시키고 싶다면, [collection-hooks](https://github.com/matb33/meteor-collection-hooks) 패키지를 검토해보길 권한다.
 
-위 예에서는, 이 세 번째 매개변수로 발견된 post의 ID를 전달한다. 스포일러 알림: 나중에 우리는 이를 기존 post로 리다이렉트하는 데 사용한다.
+<% end %>
 
-이 모든 검사 단계를 통과하면, 우리는 [Underscore](http://underscorejs.org/)의 [pick](http://underscorejs.org/#pick)을 이용하여 삽입할 필드(브라우저 콘솔에서 이 메서드를 호출하여 데이터베이스에 가짜 데이터를 넣지 못하게 할 필드)를 모은 다음, [extend](http://underscorejs.org/#extend)를 이용하여 -- 현재 시간뿐 아니라 -- 등록에 필요한 추가 정보를 포함한다.
+### 이중 등록 방지
 
-마지막으로, post를 등록하고, 새로 등록한 post의 `id`를 사용자에게 리턴한다.
+Method를 마무리하기 전에 한 가지만 더 지적하고자 한다. 어떤 post가 이미 등록된 것과 같은 URL을 가지는 경우, 우리는 이를 추가하지 않고 대신에 기존의 post로 사용자를 redirect할 것이다.
+
+~~~js
+Meteor.methods({
+  postInsert: function(postAttributes) {
+    check(this.userId, String);
+    check(postAttributes, {
+      title: String,
+      url: String
+    });
+    
+    var postWithSameLink = Posts.findOne({url: postAttributes.url});
+    if (postWithSameLink) {
+      return {
+        postExists: true,
+        _id: postWithSameLink._id
+      }
+    }
+    
+    var user = Meteor.user();
+    var post = _.extend(postAttributes, {
+      userId: user._id, 
+      author: user.username, 
+      submitted: new Date()
+    });
+    
+    var postId = Posts.insert(post);
+    
+    return {
+      _id: postId
+    };
+  }
+});
+~~~
+<%= caption "collections/posts.js" %>
+<%= highlight "9~15" %>
+
+We're searching our database for any posts with the same URL. If any are found, we `return` that post's `_id` along with a `postExists: true` flag to let the client know about this special situation.
+
+And since we're triggering a `return` call, the method stops at that point without executing the `insert` statement, thus elegantly preventing any duplicates. 
+
+All that's left is to use this new `postExists` information in our client-side event helper to show a warning message:
+
+데이터베이스에서 동일한 URL을 가지는 post를 검색한다. 하나라도 발견되면, 해당 post의 `_id`와 함께 `postExists: true` 플래그를 추가하여 `리턴`함으로써 클라이언트가 이 특별한 상황을 알도록 한다.
+
+그리고 `return`을 호출하였으므로, method는 `insert` 문을 실행하지 않고 우아하게 이중 등록을 방지하면서 실행을 마치게 된다.
+
+이제 남은 할 일은 `postExists` 정보를 사용하여 클라이언트 쪽에서 이벤트 핸들러를 통해서 경고 메시지를 보여주는 것이다:
+
+~~~js
+Template.postSubmit.events({
+  'submit form': function(e) {
+    e.preventDefault();
+    
+    var post = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    };
+    
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
+      if (error)
+        return alert(error.reason);
+      
+      // show this result but route anyway
+      if (result.postExists)
+        alert('This link has already been posted');
+    
+      Router.go('postPage', {_id: result._id});  
+    });
+  }
+});
+~~~
+<%= caption "client/templates/posts/post_submit.js" %>
+<%= highlight "15~17" %>
+
+<%= commit "7-7", "post URL의 유일함을 구현한다." %>
 
 ### Post 정렬
 
-이제 `post`에 등록일시가 생겼는데, 이 속성을 이용하여 post 목록을 정렬할 수 있게 되었다. 정렬을 하기 위해, 우리는 Mongo의 `sort` 연산자를 사용하는데, 이를 위해서는 정렬의 기준이 되는 키와 오름차순인지 내림차순인지를 가리키는 기호가 필요하다.
+Post의 등록 일시가 있으므로, 이 속성을 아용하여 정렬을 구현할 수 있다. 이를 위해서, 우리는 Mongo의 `sort` 연산자를 사용하는데, 이것은 해당 키와 오름, 내림 차순 지정 기호로 정렬기능을 수행한다.
 
 ~~~js
 Template.postsList.helpers({
@@ -417,11 +479,11 @@ Template.postsList.helpers({
   }
 });
 ~~~
-<%= caption "client/views/posts/posts_list.js" %>
+<%= caption "client/templates/posts/posts_list.js" %>
 <%= highlight "3" %>
 
-<%= commit "7-7", "등록일시로 post목록을 정렬한다." %>
+<%= commit "7-8", "등록일시로 post목록을 정렬한다." %>
 
-다소의 작업이 있었지만, 마침내 우리는 앱에 콘텐츠를 안전하게 입력하는 사용자 인터페이스를 구축했다!
+약간의 작업이 들었지만, 마침내 우리는 앱에 사용자들이 콘텐츠를 안전하게 등록시키는 사용자 인터페이스를 구현했다!
 
-그렇지만 콘텐츠를 생성하는 사용자들에게 이를 편집하거나 삭제하는 기능도 제공해야 한다. 이제 Post 편집에 대한 내용이 이어질 것이다.
+하지만, 사용자가 콘텐츠를 등록하게 하는 어떤 앱이든 편집하고 삭제하는 기능도 구현해주어야 한다. 이것은 다음 장에서 다룰 것이다.

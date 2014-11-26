@@ -47,64 +47,113 @@ Method를 호출하는 순간, 클라이언트는 그 요청을 서버에 보내
 그러므로, 우리는 미티어에게 이 코드가 클라이언트에서 실행되는 지를 묻는다. 만약 그렇다면, 문자열 `(client)`을 글 제목의 끝부분에 추가하고, 그렇지 않으면 문자열 `(server)`을 추가한다:
 
 ~~~js
+Posts = new Mongo.Collection('posts');
+
 Meteor.methods({
-  post: function(postAttributes) {
-    // […]
+  postInsert: function(postAttributes) {
+    check(this.userId, String);
+    check(postAttributes, {
+      title: String,
+      url: String
+    });
+
+    if (Meteor.isServer) {
+      postAttributes.title += "(server)";
+      // wait for 5 seconds
+      Meteor._sleepForMs(5000);
+    } else {
+      postAttributes.title += "(client)";
+    }
+
+    var postWithSameLink = Posts.findOne({url: postAttributes.url});
+    if (postWithSameLink) {
+      return {
+        postExists: true,
+        _id: postWithSameLink._id
+      }
+    }
     
-    // pick out the whitelisted keys
-    var post = _.extend(_.pick(postAttributes, 'url', 'message'), {
-      title: postAttributes.title + (this.isSimulation ? '(client)' : '(server)'),
+    var user = Meteor.user();
+    var post = _.extend(postAttributes, {
       userId: user._id, 
       author: user.username, 
-      submitted: new Date().getTime()
+      submitted: new Date()
     });
-    
-    // wait for 5 seconds
-    if (! this.isSimulation) {
-      var Future = Npm.require('fibers/future');
-      var future = new Future();
-      Meteor.setTimeout(function() {
-        future.return();
-      }, 5 * 1000);
-      future.wait();
-    }
     
     var postId = Posts.insert(post);
     
-    return postId;
+    return {
+      _id: postId
+    };
   }
 });
 ~~~
 <%= caption "collections/posts.js" %>
-<%= highlight "6, 7, 13~22" %>
+<%= highlight "9~15" %>
 
-주의: `this.isSimulation`에 있는 `this`는 다양한 유용한 변수에 접근할 수 있는 [Method 구동 객체](http://docs.meteor.com/#meteor_methods)이다.
+우리가 여기서 멈춘다면, 이 시연에서 결정적인 모습은 보이지 않을 것이다. 이 시점에서, post 등록폼은 사용자에게 redirect하기 전에 5초간 쉬었다가 post 목록으로 되돌아가는 것일 뿐 별다른 일이 일어나지 않는다.
 
-[Futures](https://npmjs.org/package/future)의 작동 원리는 이 책의 범위를 벗어나지만, 우리는 단순하게 서버 컬렉션에 등록하기 전에 5초를 기다리도록 하는데 사용하였다.
-
-또한 등록 후 post 목록으로 바로 리다이렉트하도록 하였다:
+그 이유를 이해하기 위해서, post 등록 이벤트 핸들러로 되돌아가보자:
 
 ~~~js
 Template.postSubmit.events({
-  'submit form': function(event) {
-    event.preventDefault();
+  'submit form': function(e) {
+    e.preventDefault();
     
     var post = {
-      url: $(event.target).find('[name=url]').val(),
-      title: $(event.target).find('[name=title]').val(),
-      message: $(event.target).find('[name=message]').val()
-    }
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    };
     
-    Meteor.call('post', post, function(error, id) {
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
       if (error)
         return alert(error.reason);
+      
+      // show this result but route anyway
+      if (result.postExists)
+        alert('This link has already been posted');
+    
+      Router.go('postPage', {_id: result._id});  
     });
-    Router.go('postsList');
   }
 });
 ~~~
-<%= caption "client/views/posts/post_submit.js" %>
-<%= highlight "15" %>
+<%= caption "client/templates/posts/post_submit.js" %>
+
+우리는 `Router.go()`를 method 호출의 콜백 내부에서 호출하였다. 이것은 폼이 redirect하기 전에 method의 성공을 기다리는 것을 의미한다.
+
+이것은 올바른 작동이 구현되는 과정이다. 결론은 그 post 등록의 결과가 유효한지 아닌지를 알기 전에 사용자를 redirect 시킬 수 없다는 사실이다. 왜냐하면, 한 번 redirect했다가 몇 초 안에 데이터를 수정하도록 다시 원래의 post 등록폼 페이지로 되돌린다면 매우 혼란스러울 것이기 때문이다.
+
+그러나, 이 예제에서 우리는 그 등록 결과를 즉시 보기를 원한다. 그러므로 우리는 라우팅 호출을 `postsList` 루트로 redirect하도록 바꾸고 (우리는 post로 루트를 지정하지는 못한다. 왜냐하면 그 method 외부에서는 `_id`값을 알 수 없기 때문이다.) 콜백에서 꺼내어 무슨 일이 일어나는 지 보려고 한다:
+
+~~~js
+Template.postSubmit.events({
+  'submit form': function(e) {
+    e.preventDefault();
+    
+    var post = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    };
+    
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
+      if (error)
+        return alert(error.reason);
+      
+      // show this result but route anyway
+      if (result.postExists)
+        alert('This link has already been posted');
+    });
+
+    Router.go('postsList');  
+
+  }
+});
+~~~
+<%= caption "client/templates/posts/post_submit.js" %>
+<%= highlight "20" %>
 
 <%= scommit "7-5-1", "Sleep 기능을 사용하여 post 목록이 나타나는 순서를 보여준다." %>
 
