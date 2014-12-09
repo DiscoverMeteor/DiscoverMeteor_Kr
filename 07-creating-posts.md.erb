@@ -427,12 +427,6 @@ Meteor.methods({
 <%= caption "lib/collections/posts.js" %>
 <%= highlight "9~15" %>
 
-We're searching our database for any posts with the same URL. If any are found, we `return` that post's `_id` along with a `postExists: true` flag to let the client know about this special situation.
-
-And since we're triggering a `return` call, the method stops at that point without executing the `insert` statement, thus elegantly preventing any duplicates. 
-
-All that's left is to use this new `postExists` information in our client-side event helper to show a warning message:
-
 데이터베이스에서 동일한 URL을 가지는 post를 검색한다. 하나라도 발견되면, 해당 post의 `_id`와 함께 `postExists: true` 플래그를 추가하여 `리턴`함으로써 클라이언트가 이 특별한 상황을 알도록 한다.
 
 그리고 `return`을 호출하였으므로, method는 `insert` 문을 실행하지 않고 우아하게 이중 등록을 방지하면서 실행을 마치게 된다.
