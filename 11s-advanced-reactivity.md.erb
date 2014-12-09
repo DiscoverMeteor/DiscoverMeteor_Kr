@@ -8,7 +8,7 @@ contents: 미티어에서 반응형 데이터 소스를 만드는 방법을 배�
 paragraphs: 29
 ---
 
-의존성 추적 코드를 직접 작성하는 경우는 거의 없지만, 의존성 분석의 흐름이 진행되는 경로를 추적하는데는 이것을 이해하는 것이 확실히 도움이 된다.
+의존성 추적 코드를 직접 작성하는 경우는 거의 없지만, 의존성 해소가 진행되는 경로를 추적하는데는 반응성을 이해하는 것이 확실히 도움이 된다.
 
 현재 사용자의 페이스북 친구들 중에서 몇 명이 Microscope의 각 post에 "좋아요"를 눌렀는 지를 추적한다고 상상해보자. 사용자를 페이스북으로 인증하고, 적절한 API를 호출하고, 필요한 데이터를 파싱하는 작업은 이미 구현했다고 가정하자. 이제 우리는 좋아요의 숫자를 리턴하는 클라이언트 쪽의 비동기 함수 `getFacebookLikeCount(user, url, callback)`를 가지고 있다.
 
@@ -21,7 +21,7 @@ currentLikeCount = 0;
 Meteor.setInterval(function() {
   var postId;
   if (Meteor.user() && postId = Session.get('currentPostId')) {
-    getFacebookLikeCount(Meteor.user(), Posts.find(postId), 
+    getFacebookLikeCount(Meteor.user(), Posts.find(postId).url, 
       function(err, count) {
         if (!err)
           currentLikeCount = count;
@@ -54,7 +54,7 @@ Template.postItem.likeCount = function() {
 
 ~~~js
 var _currentLikeCount = 0;
-var _currentLikeCountListeners = new Deps.Dependency();
+var _currentLikeCountListeners = new Tracker.Dependency();
 
 currentLikeCount = function() {
   _currentLikeCountListeners.depend();
@@ -80,7 +80,34 @@ Meteor.setInterval(function() {
 
 이 컴퓨테이션들은 진행하면서 각 케이스별로 그 변경 사항을 처리한다.
 
-### Deps와 Angular 비교
+이것이 간단한 반응형 데이터소스를 위한 전형으로 보였다면, 제대로 본 것이다. 미티어는 이 과정을 보다 쉽게 할 수 있는 (직접 컴퓨테이션을 사용해야 할 필요없이, 단지 autorun을 사용하면 되도록) 빌트인 도구를 제공한다. 플랫폼 패키지에 `reactive-var`라는 이름의 패키지가 있는데 이것이 바로 `currentLikeCount()` 함수가 하는 작업을 처리한다. 이것을 다음과 추가한다:
+
+~~~bash
+meteor add reactive-var
+~~~
+
+그리고 이것으로 우리 코드를 다소 단순화할 수 있다:
+
+~~~js
+var currentLikeCount = new ReactiveVar();
+
+Meteor.setInterval(function() {
+  var postId;
+  if (Meteor.user() && postId = Session.get('currentPostId')) {
+    getFacebookLikeCount(Meteor.user(), Posts.find(postId), 
+      function(err, count) {
+        if (!err) {
+          currentLikeCount.set(count);
+        }
+      });
+  }
+}, 5 * 1000);
+~~~
+<%= highlight "1,9" %>
+
+이제 헬퍼에서 `currentLikeCount.get()`를 호출해보면, 이전과 같이 작동할 것이다. 그리고 또 다른 패키지 `reactive-dict`가 있는데, 이것은 (`Session`과 거의 같은) 반응형의 키-밸류 저장소를 제공하는 데, 이것 역시 매우 유용할 것이다.
+
+### Tracker와 Angular 비교
 
 [Angular](http://angularjs.org/)는 구글의 직원들이 개발한 클라이언트 쪽의 반응형 렌더링 라이브러리이다. 미티어의 의존성 추적에 의한 접근 방식을 Angular와 비교해보면 이것의 접근 방식은 완전히 다르다.
 

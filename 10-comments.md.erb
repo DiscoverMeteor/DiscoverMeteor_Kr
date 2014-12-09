@@ -13,15 +13,15 @@ paragraphs: 34
 출발점은 댓글을 저장할 새로운 컬렉션을 만들고 여기에 기본적인 데이터 구조를 추가하는 것이다.
 
 ~~~js
-Comments = new Meteor.Collection('comments');
+Comments = new Mongo.Collection('comments');
 ~~~
-<%= caption "collections/comments.js" %>
+<%= caption "lib/collections/comments.js" %>
 
 ~~~js
-// Fixture data 
+// Fixture data
 if (Posts.find().count() === 0) {
   var now = new Date().getTime();
-  
+
   // create two users
   var tomId = Meteor.users.insert({
     profile: { name: 'Tom Coleman' }
@@ -31,45 +31,45 @@ if (Posts.find().count() === 0) {
     profile: { name: 'Sacha Greif' }
   });
   var sacha = Meteor.users.findOne(sachaId);
-  
+
   var telescopeId = Posts.insert({
     title: 'Introducing Telescope',
     userId: sacha._id,
     author: sacha.profile.name,
     url: 'http://sachagreif.com/introducing-telescope/',
-    submitted: now - 7 * 3600 * 1000
+    submitted: new Date(now - 7 * 3600 * 1000)
   });
-  
+
   Comments.insert({
     postId: telescopeId,
     userId: tom._id,
     author: tom.profile.name,
-    submitted: now - 5 * 3600 * 1000,
+    submitted: new Date(now - 5 * 3600 * 1000),
     body: 'Interesting project Sacha, can I get involved?'
   });
-  
+
   Comments.insert({
     postId: telescopeId,
     userId: sacha._id,
     author: sacha.profile.name,
-    submitted: now - 3 * 3600 * 1000,
+    submitted: new Date(now - 3 * 3600 * 1000),
     body: 'You sure can Tom!'
   });
-  
+
   Posts.insert({
     title: 'Meteor',
     userId: tom._id,
     author: tom.profile.name,
     url: 'http://meteor.com',
-    submitted: now - 10 * 3600 * 1000
+    submitted: new Date(now - 10 * 3600 * 1000)
   });
-  
+
   Posts.insert({
     title: 'The Meteor Book',
     userId: tom._id,
     author: tom.profile.name,
     url: 'http://themeteorbook.com',
-    submitted: now - 12 * 3600 * 1000
+    submitted: new Date(now - 12 * 3600 * 1000)
   });
 }
 ~~~
@@ -93,19 +93,20 @@ Meteor.publish('comments', function() {
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
-  waitOn: function() { 
+  notFoundTemplate: 'notFound',
+  waitOn: function() {
     return [Meteor.subscribe('posts'), Meteor.subscribe('comments')];
   }
 });
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "4~6" %>
+<%= highlight "5~7" %>
 
-<%= commit "10-1", "Comments collection, 발행/구독, 초기화 데이터를 추가했다." %>
+<%= commit "10-1", "Comments 컬렉션, 발행/구독, 초기화 데이터를 추가했다." %>
 
 위의 초기 설정 코드를 구동하려면, 데이터베이스를 초기화하는 `meteor reset`를 실행해야 한다는 점에 유의하라. 리셋 후에 새로 계정을 만들고 로그인하는 것도 잊지 말라!
 
-우선, 우리는 두 개의 사용자 계정(완전히 가짜인)을 만들고, 이들을 데이터베이스에 넣고, `id`를 이용하여 나중에 데이터베이스에서 추출한다. 그리고 우리는 첫 번째 post에 각 사용자 명의로 댓글을 추가한다. 이 때 댓글을 post와 (`postId`로) 연결하고 사용자와 (`userId`로) 연결한다. 또한 등록일시와 댓글 내용을 정규화하지 않은 `author`와 함께 각 댓글에 추가한다.
+우선, 우리는 (완전히 가짜인) 두 개의 사용자 계정을 만들고, 이들을 데이터베이스에 넣고, `id`를 이용하여 나중에 데이터베이스에서 추출한다. 그리고 우리는 첫 번째 post에 각 사용자 명의로 댓글을 추가한다. 이 때 댓글을 post와 (`postId`로) 연결하고 사용자와 (`userId`로) 연결한다. 또한 등록일시와 댓글 내용을 정규화하지 않은 `author`와 함께 각 댓글에 추가한다.
 
 또한 라우터에게 comment와 post를 기다리는 코드를 추가했다.
 
@@ -119,12 +120,12 @@ Router.configure({
 
   <ul class="comments">
     {{#each comments}}
-      {{> comment}}
+      {{> commentItem}}
     {{/each}}
   </ul>
 </template>
 ~~~
-<%= caption "client/views/posts/post_page.html" %>
+<%= caption "client/templates/posts/post_page.html" %>
 <%= highlight "3~7" %>
 
 ~~~js
@@ -134,15 +135,15 @@ Template.postPage.helpers({
   }
 });
 ~~~
-<%= caption "client/views/posts/post_page.js" %>
+<%= caption "client/templates/posts/post_page.js" %>
 <%= highlight "2~4" %>
 
 `{{#each comments}}` 블록은 post 템플릿 내부에 넣는다. 여기서 `this`는 `comments` 헬퍼 안에 있는 post를 가리킨다. 적절한 댓글 목록을 찾기 위해서는 `postId` 속성으로 post에 연결된 것들을 검색한다.
 
-헬퍼와 handlebars에 대하여 배운 것에 의하면, 댓글을 화면에 그리는 것은 바로 알 수 있다. 댓글 정보를 저장하기 위해서 `views` 디렉토리에 `comments` 디렉토리를 만든다:
+헬퍼와 Spacebars에 대하여 배운 바에 따르면, 댓글을 화면에 그리는 것은 바로 알 수 있다. 댓글 정보를 저장하기 위해서 `templates` 디렉토리에 `comments` 디렉토리를 만든다:
 
 ~~~html
-<template name="comment">
+<template name="commentItem">
   <li>
     <h4>
       <span class="author">{{author}}</span>
@@ -152,18 +153,18 @@ Template.postPage.helpers({
   </li>
 </template>
 ~~~
-<%= caption "client/views/comments/comment.html" %>
+<%= caption "client/templates/comments/comment_item.html" %>
 
-템플릿 헬퍼를 설정하여 `submitted` 일시를 (UNIX의 timestamp와 16진 색상 코드를 능숙하게 이해할 수 없다면?) 읽기 편한 형식으로 바꾼다.
+템플릿 헬퍼를 설정하여 `submitted` 일시를 읽기 편한 형식으로 바꾼다.
 
 ~~~js
-Template.comment.helpers({
+Template.commentItem.helpers({
   submittedText: function() {
-    return new Date(this.submitted).toString();
+    return this.submitted.toString();
   }
 });
 ~~~
-<%= caption "client/views/comments/comment.js" %>
+<%= caption "client/templates/comments/comment_item.js" %>
 
 그 다음, 각 post에 댓글의 갯수를 보여준다:
 
@@ -178,19 +179,19 @@ Template.comment.helpers({
         {{#if ownPost}}<a href="{{pathFor 'postEdit'}}">Edit</a>{{/if}}
       </p>
     </div>
-    <a href="{{pathFor 'postPage'}}" class="discuss btn">Discuss</a>
+    <a href="{{pathFor 'postPage'}}" class="discuss btn btn-default">Discuss</a>
   </div>
 </template>
 ~~~
-<%= caption "client/views/posts/post_item.html" %>
+<%= caption "client/templates/posts/post_item.html" %>
 <%= highlight "6,7" %>
 
-그리고 `postItem` 매니저에 `commentsCount` 헬퍼를 추가한다:
+그리고 `post_item.js`에 `commentsCount` 헬퍼를 추가한다:
 
 ~~~js
 Template.postItem.helpers({
   ownPost: function() {
-    return this.userId == Meteor.userId();
+    return this.userId === Meteor.userId();
   },
   domain: function() {
     var a = document.createElement('a');
@@ -202,7 +203,7 @@ Template.postItem.helpers({
   }
 });
 ~~~
-<%= caption "client/views/posts/post_item.js" %>
+<%= caption "client/templates/posts/post_item.js" %>
 <%= highlight "9,10,11" %>
 
 <%= commit "10-2", "`postPage`에 댓글 목록을 보인다." %>
@@ -213,20 +214,20 @@ Template.postItem.helpers({
 
 ### 댓글 등록하기
 
-사용자가 새로운 댓글을 등록하는 방법을 알아보자. 그 과정은 이전의 새로운 post를 등록하는 과정과 아주 유사하다.
+사용자가 새로운 댓글을 등록하는 방법을 추가해보자. 그 과정은 이전의 사용자가 새로운 post를 등록하게 했던 과정과 아주 유사하다.
 
 각 post의 하단에 comment 등록 상자를 추가한다:
 
 ~~~html
 <template name="postPage">
   {{> postItem}}
-  
+
   <ul class="comments">
     {{#each comments}}
-      {{> comment}}
+      {{> commentItem}}
     {{/each}}
   </ul>
-  
+
   {{#if currentUser}}
     {{> commentSubmit}}
   {{else}}
@@ -234,35 +235,45 @@ Template.postItem.helpers({
   {{/if}}
 </template>
 ~~~
-<%= caption "client/views/posts/post_page.html" %>
+<%= caption "client/templates/posts/post_page.html" %>
 <%= highlight "10~14" %>
 
 그리고 comment 폼 템플릿을 만든다:
 
 ~~~html
 <template name="commentSubmit">
-  <form name="comment" class="comment-form">
-    <div class="control-group">
+  <form name="comment" class="comment-form form">
+    <div class="form-group {{errorClass 'body'}}">
         <div class="controls">
             <label for="body">Comment on this post</label>
-            <textarea name="body"></textarea>
+            <textarea name="body" id="body" class="form-control" rows="3"></textarea>
+            <span class="help-block">{{errorMessage 'body'}}</span>
         </div>
     </div>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn">Add Comment</button>
-        </div>
-    </div>
+    <button type="submit" class="btn btn-primary">Add Comment</button>
   </form>
 </template>
 ~~~
-<%= caption "client/views/comments/comment_submit.html" %>
+<%= caption "client/templates/comments/comment_submit.html" %>
 
 <%= screenshot "10-2", "댓글 등록폼" %>
 
-댓글을 submit하기 위해서, `postSubmit` 매니저와 비슷한 방식으로 작동하는 `commentSubmit` 매니저에 있는 `comment` 메서드를 호출한다:
+댓글을 등록하기 위해서, `post`를 등록할 때와 비슷한 방식으로 작동하는 `comment_submit.js`의 `comment` 메서드를 호출한다:
 
 ~~~js
+Template.commentSubmit.created = function() {
+  Session.set('commentSubmitErrors', {});
+}
+
+Template.commentSubmit.helpers({
+  errorMessage: function(field) {
+    return Session.get('commentSubmitErrors')[field];
+  },
+  errorClass: function (field) {
+    return !!Session.get('commentSubmitErrors')[field] ? 'has-error' : '';
+  }
+});
+
 Template.commentSubmit.events({
   'submit form': function(e, template) {
     e.preventDefault();
@@ -273,7 +284,13 @@ Template.commentSubmit.events({
       postId: template.data._id
     };
     
-    Meteor.call('comment', comment, function(error, commentId) {
+    var errors = {};
+    if (! comment.body) {
+      errors.body = "Please write some content";
+      return Session.set('commentSubmitErrors', errors);
+    }
+    
+    Meteor.call('commentInsert', comment, function(error, commentId) {
       if (error){
         throwError(error.reason);
       } else {
@@ -283,38 +300,38 @@ Template.commentSubmit.events({
   }
 });
 ~~~
-<%= caption "client/views/comments/comment_submit.js" %>
+<%= caption "client/templates/comments/comment_submit.js" %>
 
 이전에 서버쪽 미티어 메서드인 `post`를 설정할 때와 같이, 댓글을 등록하는 `comment` 미티어 메서드를 설정한다. 모든 것이 잘 되었는 지를 확인하고 comments 컬렉션에 새로운 comment를 등록한다.
 
 ~~~js
-Comments = new Meteor.Collection('comments');
+Comments = new Mongo.Collection('comments');
 
 Meteor.methods({
-  comment: function(commentAttributes) {
+  commentInsert: function(commentAttributes) {
+    check(this.userId, String);
+    check(commentAttributes, {
+      postId: String,
+      body: String
+    });
+    
     var user = Meteor.user();
     var post = Posts.findOne(commentAttributes.postId);
-    // ensure the user is logged in
-    if (!user)
-      throw new Meteor.Error(401, "You need to login to make comments");
-      
-    if (!commentAttributes.body)
-      throw new Meteor.Error(422, 'Please write some content');
-      
+
     if (!post)
-      throw new Meteor.Error(422, 'You must comment on a post');
+      throw new Meteor.Error('invalid-comment', 'You must comment on a post');
     
-    comment = _.extend(_.pick(commentAttributes, 'postId', 'body'), {
+    comment = _.extend(commentAttributes, {
       userId: user._id,
       author: user.username,
-      submitted: new Date().getTime()
+      submitted: new Date()
     });
     
     return Comments.insert(comment);
   }
 });
 ~~~
-<%= caption "collections/comments.js" %>
+<%= caption "lib/collections/comments.js" %>
 <%= highlight "3~25" %>
 
 <%= commit "10-3", "댓글 등록폼을 만들었다." %>
@@ -327,13 +344,28 @@ Meteor.methods({
 
 생각해보면 `comments` 발행에 대하여 구독할 유일한 시간은 사용자가 post의 개별 페이지에 접근할 때이고, 그 특정 post에 연결된 comment들만 로드하면 된다.
 
-첫 단계는 comments에 구독하는 방식을 바꾸는 것이다. 지금까지 우리는 라우터 레벨에서 구독해왔다. 이것은 라우터가 초기화될 때 한 번 우리 모든 데이터를 로드하는 것을 의미한다.
+첫 단계는 comments에 구독하는 방식을 바꾸는 것이다. 지금까지 우리는 *라우터* 레벨에서 구독해왔다. 이것은 라우터가 초기화될 때 한 번 우리 모든 데이터를 로드하는 것을 의미한다.
 
-그러나 이제 우리는 경로 매개변수에 따라서 달라지는 구독을 원한다. 그리고 그 매개변수는 어느 때나 변경될 수 있다. 그러므로, 구독 코드를 라우터 레벨에서 route 레벨로 이동할 필요가 있다.
+그러나 이제 우리는 경로 매개변수에 따라서 달라지는 구독을 원한다. 그리고 그 매개변수는 어느 때나 변경될 수 있다. 그러므로, 구독 코드를 *라우터(router)* 레벨에서 *루트(route)* 레벨로 이동할 필요가 있다.
 
 이것으로 또 다른 결과도 도출된다: 데이터 로딩 시점을 앱을 초기화시킬 때 하는 대신에, 이제 우리가 route를 hit할 때마다 로드하게 될 것이다. 이것은 앱에서 브라우징을 하는 동안 로딩타임이 증가함을 의미한다. 하지만, 이것은 데이터 전체를 초기에 영구히 로드하려고 하지 않으려면 피할 수 없는 부작용이다.
 
-새로운 route 수준의 `waitOn` 함수는 다음과 같다:
+먼저, `configure` 블럭에서 모든 comments를 미리 로드하는 것을 중지하도록 (바꾸어 말하면, 이전의 상태로 되돌아가도록) `Meteor.subscribe('comments')`를 삭제한다:
+
+~~~js
+Router.configure({
+  layoutTemplate: 'layout',
+  loadingTemplate: 'loading',
+  notFoundTemplate: 'notFound',
+  waitOn: function() {
+    return Meteor.subscribe('posts');
+  }
+});
+~~~
+<%= caption "lib/router.js" %>
+<%= highlight "5" %>
+
+그리고 `postPage` route에 새로운 *루트(route)* 레벨의 `waitOn` 함수를 추가한다.
 
 ~~~js
 Router.map(function() {
@@ -355,7 +387,7 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "7~9" %>
 
-주목할 부분은 발행의 매개변수로 `this.params._id`을 전달하는 것이다. 현재 post에 속하는 comment로 제한하는 것이다:
+이 때, subscribe 함수의 매개변수로 `this.params._id`를 전달한다. 그래서 현재 post에 속하는 댓글들로만 제한하도록 새로운 정보를 이용한다.
 
 ~~~js
 Meteor.publish('posts', function() {
@@ -363,71 +395,129 @@ Meteor.publish('posts', function() {
 });
 
 Meteor.publish('comments', function(postId) {
+  check(postId, String);
   return Comments.find({postId: postId});
 });
 ~~~
 <%= caption "server/publications.js" %>
 <%= highlight "5~7" %>
 
-<%= commit "10-4", "댓글에 대한 간결한 발행/구독을 만들었다." %>
+<%= commit "10-4", "댓글에 대한 간단한 발행/구독을 만들었다." %>
 
-한 가지 문제가 있다: 홈페이지로 돌아가보면, 모든 댓글의 갯수가 0으로 나타난다:
+한 가지 문제가 남았다: 홈페이지로 돌아가보면, 모든 댓글의 갯수가 0으로 나타난다:
 
 <%= screenshot "10-3", "댓글이 사라졌다!" %>
 
 ### 댓글 갯수 세기
 
-이렇게 되는 이유는 명백하다: 우리는 로드된 post의 댓글들 중 많아야 *하나*를 가진다. 그래서 `post_item` 매니저의 `commentsCount` 헬퍼에서 `Comments.find({postId: this._id})`를 호출할 때, 필요한 클라이언트 쪽의 데이터를 찾지 못하게 된다.
+이렇게 되는 이유는 명백하다: 우리는 `postPage` 루트에 있는 댓글들만을 로드한다. 그래서 `commentsCount` 헬퍼에서 `Comments.find({postId: this._id})`를 호출할 때, 결과를 제공하는데 필요한 클라이언트 쪽의 데이터를 찾지 못하게 된다.
 
 이 문제를 해결하는 최선의 방법은 post에 연결되는 comment의 숫자를 *비정규화*하는 것이다(이게 무슨 뜻인지 몰라도 걱정마시라, 다음 사이드바 장에서 다룰테니까!). 보다시피 약간 복잡한 코드가 추가되기는 하겠지만, post 목록을 보여주려고 comment _전체_를 발행하는 작업을 하지 않아서 얻는 성능의 개선이 충분히 가치가 있다는 것을 알게 될 것이다.
 
-post 데이터 구조에 `commentsCount` 속성을 추가한다. 이를 구현하려면, post 초기화 파일을 갱신한다(그리고 `meteor reset`를 실행하여 데이터를 리로드한다 - 그 후에 계정을 다시 만드는 것을 잊지말라):
+post 데이터 구조에 `commentsCount` 속성을 추가한다. 이를 구현하려면, post 초기화 파일을 갱신한다 (그리고 `meteor reset`를 실행하여 데이터를 리로드한다 - 그 후에 계정을 다시 만드는 것을 잊지말라):
 
 ~~~js
-var telescopeId = Posts.insert({
-  title: 'Introducing Telescope',
-  ..
-  commentsCount: 2
-});
-
-Posts.insert({
-  title: 'Meteor',
-  ...
-  commentsCount: 0
-});
-
-Posts.insert({
-  title: 'The Meteor Book',
-  ...
-  commentsCount: 0
-});
+// Fixture data 
+if (Posts.find().count() === 0) {
+  var now = new Date().getTime();
+  
+  // create two users
+  var tomId = Meteor.users.insert({
+    profile: { name: 'Tom Coleman' }
+  });
+  var tom = Meteor.users.findOne(tomId);
+  var sachaId = Meteor.users.insert({
+    profile: { name: 'Sacha Greif' }
+  });
+  var sacha = Meteor.users.findOne(sachaId);
+  
+  var telescopeId = Posts.insert({
+    title: 'Introducing Telescope',
+    userId: sacha._id,
+    author: sacha.profile.name,
+    url: 'http://sachagreif.com/introducing-telescope/',
+    submitted: new Date(now - 7 * 3600 * 1000),
+    commentsCount: 2
+  });
+  
+  Comments.insert({
+    postId: telescopeId,
+    userId: tom._id,
+    author: tom.profile.name,
+    submitted: new Date(now - 5 * 3600 * 1000),
+    body: 'Interesting project Sacha, can I get involved?'
+  });
+  
+  Comments.insert({
+    postId: telescopeId,
+    userId: sacha._id,
+    author: sacha.profile.name,
+    submitted: new Date(now - 3 * 3600 * 1000),
+    body: 'You sure can Tom!'
+  });
+  
+  Posts.insert({
+    title: 'Meteor',
+    userId: tom._id,
+    author: tom.profile.name,
+    url: 'http://meteor.com',
+    submitted: new Date(now - 10 * 3600 * 1000),
+    commentsCount: 0
+  });
+  
+  Posts.insert({
+    title: 'The Meteor Book',
+    userId: tom._id,
+    author: tom.profile.name,
+    url: 'http://themeteorbook.com',
+    submitted: new Date(now - 12 * 3600 * 1000),
+    commentsCount: 0
+  });
+}
 ~~~
 <%= caption "server/fixtures.js" %>
+<%= highlight "20,21,45,46,54,55" %>
 
-그리고, 모든 새 post는 comment 0으로 시작한다:
+그러면, 모든 새 post는 comment 0으로 시작한다:
 
 ~~~js
-// pick out the whitelisted keys
-var post = _.extend(_.pick(postAttributes, 'url', 'title', 'message'), {
-  userId: user._id, 
-  author: user.username, 
-  submitted: new Date().getTime(),
+//...
+
+var post = _.extend(postAttributes, {
+  userId: user._id,
+  author: user.username,
+  submitted: new Date(),
   commentsCount: 0
 });
 
 var postId = Posts.insert(post);
+
+//...
 ~~~
 <%= caption "collections/posts.js" %>
+<%= highlight "6,7" %>
 
-그리고 다음에 새 댓글을 등록할 때, Mongo의 `$inc` 연산자(숫자 필드를 1 증가시킨다)를 사용하여 `commentsCount`값을 갱신한다:
+And then we update the relevant `commentsCount` when we make a new comment using Mongo's `$inc` operator (which increments a numeric field by one):
+
 
 ~~~js
+//...
+
+comment = _.extend(commentAttributes, {
+  userId: user._id,
+  author: user.username,
+  submitted: new Date()
+});
+
 // update the post with the number of comments
 Posts.update(comment.postId, {$inc: {commentsCount: 1}});
 
 return Comments.insert(comment);
+
+//...
 ~~~
 <%= caption "collections/comments.js "%>
+<%= highlight "9,10" %>
 
 마지막으로, 이제 post에서 직접 필드 값을 읽어 올 수 있으므로 `client/views/posts/post_item.js`에서 `commentsCount` 헬퍼를 제거한다.
 

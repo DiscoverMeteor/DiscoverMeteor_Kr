@@ -7,23 +7,32 @@ contents: 사용자에게 다른 사용자들의 행위를 알리는 알림 컬�
 paragraphs: 25
 ---
 
-이제 사용자들은 서로의 post에 댓글을 달 수 있게 되었으므로, 대화가 시작되었음을 각 사용자들에게 알려주는 것이 좋을 것이다. 
+이제 사용자들은 서로의 post에 댓글을 달 수 있게 되었으므로, 대화가 시작되었음을 각 사용자들에게 알려주면 좋을 것이다. 
 
 그렇게 하기 위해서, post의 작성자에게 댓글이 추가되었음을 알리고 댓글을 보기 위한 링크를 제공할 것이다.
 
-이것은 미티어가 진짜로 빛나는 기능이다: 왜냐면 미티어는 기본적으로 실시간이기 때문에 이런 알림을 _즉시_ 보여줄 것이다. 우리는 사용자가 페이지를 새로고침하거나 어떤 식으로는 확인하느라 기다리게 하지 않는다. 단지 어떤 특별한 코드를 작성하지 않고도 새 알림 메시지가 간단하게 나타나게 할 수 있다.
+이것이야말로 미티어가 진짜로 빛나는 기능이다: 왜냐면 미티어는 기본적으로 실시간이기 때문에 이런 알림을 _즉시_ 보여줄 것이다. 우리는 사용자가 페이지를 새로고침하거나 어떤 식으로는 확인하느라 기다리게 하지 않는다. 단지 어떤 특별한 코드를 작성하지 않고도 새 알림 메시지가 간단하게 나타나게 할 수 있다.
 
 ### 알림 생성하기
 
 우리는 작성한 post에 누군가 댓글을 달면 알림을 주게 하려고 한다. 나중에, 알림은 많은 다른 상황에도 확장될 수 있다. 그러나 지금은 사용자에게 일어나고 있는 것을 알려주는 것으로 충분할 것이다.
 
-작성한 post에 새로운 댓글이 등록되었을 때 알림을 등록하는 `createCommentNotification` 함수와 함께 `Notifications` 컬렉션을 만든다:
+`Notifications` 컬렉션을 만들고, 작성한 post에 새로운 댓글이 등록될 때마다 이에 대응하는 알림을 삽입하는 `createCommentNotification` 함수를 함께 만든다.
+
+우리가 클라이언트에서 알림을 갱신하기 때문에, `allow` 호출을 하는 것을 반드시 확인해야 한다. 그래서 우리는 다음 사항을 체크한다:
+
+- `update` 호출을 하는 사용자가 수정될 알림에 대한 소유권을 가지고 있는가
+- 그 사용자가 단일 필드만을 수정하려고 하는가
+- 그 단일 필드가 알림의 `read` 속성인가
 
 ~~~js
-Notifications = new Meteor.Collection('notifications');
+Notifications = new Mongo.Collection('notifications');
 
 Notifications.allow({
-  update: ownsDocument
+  update: function(userId, doc, fieldNames) {
+    return ownsDocument(userId, doc) && 
+      fieldNames.length === 1 && fieldNames[0] === 'read';
+  }
 });
 
 createCommentNotification = function(comment) {
@@ -39,21 +48,31 @@ createCommentNotification = function(comment) {
   }
 };
 ~~~
-<%= caption "collections/notifications.js" %>
+<%= caption "lib/collections/notifications.js" %>
 
-Post나 댓글과 같이, 이 `Notifications` 컬렉션은 클라이언트와 서버에 의해 공유될 것이다. 사용자가 알림을 열람했으면 notification을 갱신해야 하므로, 또한 수정을 가능하게 한다, 이 때 사용자가 소유한 데이터로 수정 권한을 한정한다.
+
+Posts나 Comments와 마찬가지로, 이 `Notifications` 컬렉션은 클라이언트와 서버에 의해 공유될 것이다. 사용자가 알림을 열람했으면 notification을 갱신해야 하므로, 또한 수정을 가능하게 하되, 사용자가 소유한 데이터로 수정 권한을 한정한다.
 
 또한, 사용자가 댓글을 추가한 post를 바라보는 간단한 함수를 만들어 그곳에서 알림을 받아야 할 사람들을 찾아서 새로운 알림을 등록할 것이다.
 
 우리는 이미 서버쪽 메서드로 comment를 생성하고 있다. 그래서 이 함수를 호출하는 메서드를 추가하면 된다. 우리는 `return Comments.insert(comment);` 코드를 `comment._id = Comments.insert(comment)`로 바꾸어 새로 생성된 comment의 `_id`를 변수에 저장한다. 그리고 `createCommentNotification` 함수를 호출한다:
 
 ~~~js
-Comments = new Meteor.Collection('comments');
+Comments = new Mongo.Collection('comments');
 
 Meteor.methods({
   comment: function(commentAttributes) {
 
-    // [...]
+    //...
+    
+    comment = _.extend(commentAttributes, {
+      userId: user._id,
+      author: user.username,
+      submitted: new Date()
+    });
+    
+    // update the post with the number of comments
+    Posts.update(comment.postId, {$inc: {commentsCount: 1}});
 
     // create the comment, save the id
     comment._id = Comments.insert(comment);
@@ -65,31 +84,42 @@ Meteor.methods({
   }
 });
 ~~~
-<%= caption "collections/comments.js" %>
-<%= highlight "8~14" %>
+<%= caption "lib/collections/comments.js" %>
+<%= highlight "17~123" %>
 
 또한 notification을 발행하고 클라이언트에서 구독한다:
 
 ~~~js
-// [...]
+Meteor.publish('posts', function() {
+  return Posts.find();
+});
+
+Meteor.publish('comments', function(postId) {
+  check(postId, String);
+  return Comments.find({postId: postId});
+});
 
 Meteor.publish('notifications', function() {
   return Notifications.find();
 });
 ~~~
 <%= caption "server/publications.js" %>
+<%= highlight "10~12" %>
+
+그리고 클라이언트에서 구독한다:
 
 ~~~js
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
-  waitOn: function() { 
+  notFoundTemplate: 'notFound',
+  waitOn: function() {
     return [Meteor.subscribe('posts'), Meteor.subscribe('notifications')]
   }
 });
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "5" %>
+<%= highlight "6" %>
 
 <%= commit "11-1", "기본적인 Notifications 컬렉션을 추가했다." %>
 
@@ -99,16 +129,19 @@ Router.configure({
 
 ~~~html
 <template name="header">
-  <header class="navbar">
-    <div class="navbar-inner">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="{{pathFor 'postsList'}}">Microscope</a>
-      <div class="nav-collapse collapse">
-        <ul class="nav">
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{pathFor 'postsList'}}">Microscope</a>
+      </div>
+      <div class="collapse navbar-collapse" id="navigation">
+        <ul class="nav navbar-nav">
           {{#if currentUser}}
             <li>
               <a href="{{pathFor 'postSubmit'}}">Submit Post</a>
@@ -118,16 +151,16 @@ Router.configure({
             </li>
           {{/if}}
         </ul>
-        <ul class="nav pull-right">
-          <li>{{> loginButtons}}</li>
+        <ul class="nav navbar-nav navbar-right">
+          {{> loginButtons}}
         </ul>
       </div>
     </div>
-  </header>
+  </nav>
 </template>
 ~~~
-<%= caption "client/views/includes/header.html" %>
-<%= highlight "12~19" %>
+<%= caption "client/templates/includes/header.html" %>
+<%= highlight "15~22" %>
 
 그리고 `notifications`와 `notification` 템플릿(이들은 하나의 `notifications.html`파일에 작성한다)을 만든다:
 
@@ -143,7 +176,7 @@ Router.configure({
   <ul class="notification dropdown-menu">
     {{#if notificationCount}}
       {{#each notifications}}
-        {{> notification}}
+        {{> notificationItem}}
       {{/each}}
     {{else}}
       <li><span>No Notifications</span></li>
@@ -151,7 +184,7 @@ Router.configure({
   </ul>
 </template>
 
-<template name="notification">
+<template name="notificationItem">
   <li>
     <a href="{{notificationPostPath}}">
       <strong>{{commenterName}}</strong> commented on your post
@@ -159,7 +192,7 @@ Router.configure({
   </li>
 </template>
 ~~~
-<%= caption "client/views/notifications/notifications.html" %>
+<%= caption "client/templates/notifications/notifications.html" %>
 
 계획은 각 알림은 댓글이 등록된 post에 대한 링크 정보를 담고, 댓글을 한 사용자의 이름을 담는 것이다.
 
@@ -175,23 +208,23 @@ Template.notifications.helpers({
   }
 });
 
-Template.notification.helpers({
+Template.notificationItem.helpers({
   notificationPostPath: function() {
     return Router.routes.postPage.path({_id: this.postId});
   }
-})
+});
 
-Template.notification.events({
+Template.notificationItem.events({
   'click a': function() {
     Notifications.update(this._id, {$set: {read: true}});
   }
-})
+});
 ~~~
-<%= caption "client/views/notifications/notifications.js" %>
+<%= caption "client/templates/notifications/notifications.js" %>
 
 <%= commit "11-2", "헤더에서 알림을 보여준다." %>
 
-알림 기능이 오류 기능과 크게 다르지 않다고 생각할 지도 모르겠다. 사실이다. 그 구조에서 유사한 점이 있다. 그렇지만 핵심 차이는: 클라이언트-서버 동기화 상태로 컬렉션을 만들었다는 점이다. 이 의미는 알림 기능*영구적(persistent)*이라는 것인데, 동일한 사용자 계정이면 다른 브라우저나 다른 단말기로 접속해도 유지된다는 것이다.
+알림 기능이 오류 기능과 크게 다르지 않다고 생각할 지도 모르겠다. 사실이다. 그 구조에서 유사한 점이 있다. 그렇지만 핵심 차이는: 클라이언트-서버 동기화 상태로 컬렉션을 만들었다는 점이다. 이 의미는 알림 기능이 *영구적(persistent)*이라는 것인데, 동일한 사용자 계정이면 다른 브라우저나 다른 단말기로 접속해도 유지된다는 것이다.
 
 직접 해보자: 두 번째 브라우저(이를테면 파이어폭스)을 열고, 새 계정을 만든다음, 기존 계정(이미 크롬으로 열고 있는)으로 작성한 post에 comment를 등록한다. 그러면 다음과 같은 화면을 보게 될 것이다:
 
@@ -209,7 +242,7 @@ Template.notification.events({
 ~~~
 <%= caption "브라우저 콘솔" %>
 
-이 (댓글을 등록한) 새로운 사용자는 어떤 알림도 받지 않은 상태이어야 한다. 여기서 보는 알림은 (post를 등록한) *원래* 사용자에 속하는 `Notifications` 컬렉션의 정보이다.
+이 (*댓글을 등록한*) 새로운 사용자는 어떤 알림도 받지 않은 상태이어야 한다. 여기서 보는 알림은 (post를 등록한) *원래* 사용자에 속하는 `Notifications` 컬렉션의 정보이다.
 
 잠재적인 프라이버시 이슈는 제쳐 놓더라도, 모든 다른 사용자의 브라우저에 모든 사용자의 알림이 로드되어 공개되도록 할 수는 없다. 충분히 큰 사이트에서라면, 이것은 브라우저의 메모리 문제를 일으킬 수 있고, 심각한 성능 문제를 일으킬 수 있다.
 
@@ -221,7 +254,7 @@ Template.notification.events({
 
 ~~~js
 Meteor.publish('notifications', function() {
-  return Notifications.find({userId: this.userId});
+  return Notifications.find({userId: this.userId, read: false});
 });
 ~~~
 <%= caption "server/publications.js" %>

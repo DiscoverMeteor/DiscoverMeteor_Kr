@@ -7,32 +7,34 @@ contents: 오류와 메시지를 보여주는 더 나은 구조를 만든다.|�
 paragraphs: 31
 ---
 
-사용자의 폼 입력 처리과정에서 문제가 발생했을 때 사용자에게 경고하기 위해 그저 브라우저의 표준 `alert()` 대화상자를 사용하는 것은 좀 불만이다. 이것은 확실히 좋은 UX는 아니다. 우리는 더 잘 할 수 있다.
+
+사용자의 폼 입력 처리과정에서 문제가 발생했을 때 사용자에게 경고하기 위해 그저 브라우저의 표준 `alert()` 대화상자를 사용하는 것은 좀 불만스럽다. 이것은 확실히 좋은 UX는 아니다. 우리는 더 잘 할 수 있다.
 
 대신, 사용자에게 그 흐름을 깨지 않으면서 진행 내용을 알려주는 보다 발전된 형태를 구현하는 융통성있는 오류 보고 체계를 구현해보자.
 
+우리는 브라우저 화면의 우상단에 오류를 보여주는 간단한 시스템을 구축하려고 한다. 이것은 인기있는 Mac 앱인 [Growl](http://growl.info/)과 유사하다.
+
 ### 로컬 컬렉션 소개
 
-우리는 사용자가 어떤 오류를 열람했는지 추적하고, 사이트의 "눈에 띄는" 영역에 새 오류를 보여주는, 간단한 시스템을 구현하려고 한다. 이 UX 패턴은 사용자의 작업 흐름을 방해하지 않고 발생한 내용을 사용자에게 알리는 경우에 유용하다.
+시작하기에 앞서 오류를 저장할 컬렉션을 만든다. 오류는 현재 세션에서만 적용되고 어쨋든 저장할 필요가 없으므로, 새로운 형태로 구현하는데, 그것은 *로컬 컬렉션*을 만드는 것이다. 이 의미는 `Errors` 컬렉션은 *브라우저에만* 존재하며, 서버와 동기화하지 않을 것이라는 점이다.
 
-우리가 만들려고 하는 것은 Ruby on Rails 애플리케이션에서 종종 발견되는 플래시 메시지와 유사하지만, 이것이 클라이언트 쪽에서 구현되고, 사용자가 메시지를 보았는 지를 안다는 점에서 좀 더 정교하다.
-
-시작하기에 앞서 오류를 저장할 컬렉션을 만든다. 오류는 현재 세션에서만 적용되고 어쨋든 저장할 필요가 없으므로, 새로운 형태로 구현하는데, 그것은 로컬 컬렉션을 만드는 것이다. 이 의미는 `Errors` 컬렉션은 브라우저에만 존재하며, 서버와 동기화하지 않을 것이라는 점이다.
-
-이를 완성하기 위해, 우리는 클라이언트에만 존재하는 파일에 컬렉션 이름을 `null`로 지정하여 오류를 생성한다. 우리는 이 새 로컬 컬렉션에 단순히 오류를 삽입하는 `throwError` 함수를 만든다:
+이를 완성하기 위해, 우리는 (클라이언트에서만 존재하는 컬렉션을 만들기 위해서) `client` 디렉토리 내부에 오류 컬렉션을 만드는 데, 그 MongoDB 컬렉션 이름을 `null`로 지정한다 (따라서 이 컬렉션의 데이터는 서버의 데이터베이스에는 절대로 저장되지 않을 것이다):
 
 ~~~js
 // Local (client-only) collection
-Errors = new Meteor.Collection(null);
+Errors = new Mongo.Collection(null);
 ~~~
 <%= caption "client/helpers/errors.js" %>
 
-컬렉션이 만들어졌으니, 우리는 여기에 오류를 추가할 때 호출하는 `throwError` 함수를 추가할 수 있다. 이것은 로컬 컬렉션이고 Mongo 데이터베이스에 저장되지 않을 것이므로 `allow`나 `deny`, 또는 그 비슷한 것에 대하여 걱정할 필요없다.
+Now that the collection has been created, we can add a `throwError` function which we'll call to add errors to it. We don't need to worry about `allow` or `deny` or any other security concerns, as this collection is “local” to the current user. 
+
+
+컬렉션이 만들어졌으니, 우리는 여기에 오류를 추가할 때 호출하는 `throwError` 함수를 추가할 수 있다. 이 컬렉션은 현 사용자에 "국한"되므로, `allow`나 `deny`, 또는 그 밖의 보안 관련사항에 대해서 걱정할 필요없다.
 
 ~~~js
 throwError = function(message) {
-  Errors.insert({message: message})
-}
+  Errors.insert({message: message});
+};
 ~~~
 <%= caption "client/helpers/errors.js" %>
 
@@ -53,14 +55,14 @@ throwError = function(message) {
   </div>
 </template>
 ~~~
-<%= caption "client/views/application/layout.html" %>
-<%= highlight "7" %>
+<%= caption "client/templates/application/layout.html" %>
+<%= highlight "4" %>
 
 이제 `errors.html`에 `errors`와 `error` 템플릿을 만든다:
 
 ~~~html
 <template name="errors">
-  <div class="errors row-fluid">
+  <div class="errors">
     {{#each errors}}
       {{> error}}
     {{/each}}
@@ -68,19 +70,19 @@ throwError = function(message) {
 </template>
 
 <template name="error">
-  <div class="alert alert-error">
+  <div class="alert alert-danger" role="alert">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     {{message}}
   </div>
 </template>
 ~~~
-<%= caption "client/views/includes/errors.html" %>
+<%= caption "client/templates/includes/errors.html" %>
 
 <% note do %>
 
 ### 두 개의 템플릿
 
-하나의 파일에 두 개의 템플릿이 들어있다. 지금까지 우리는 "파일 하나에, 템플릿 하나"를 고수하여 왔다. 그런데 미티어에서는 하나의 파일에 모든 템플릿을 다 넣어도 잘 작동한다(비록 이렇게 하면 `main.html`이 무척 혼란스럽긴 하겠지만 말이다!).
+하나의 파일에 두 개의 템플릿이 들어있다. 지금까지 우리는 "파일 하나에, 템플릿 하나"를 고수하여 왔다. 그런데 미티어에서는 하나의 파일에 모든 템플릿을 다 넣어도 잘 작동한다 (비록 이렇게 하면 `main.html`이 무척 혼란스럽긴 하겠지만 말이다!).
 
 이 때, 두 템플릿 모두 짧기 때문에 예외적으로 그들을 한 파일에 다 넣어서 관리가 용이하게 한다.
 
@@ -95,15 +97,40 @@ Template.errors.helpers({
   }
 });
 ~~~
-<%= caption "client/views/includes/errors.js" %>
+<%= caption "client/templates/includes/errors.js" %>
+
+이제 우리는 수작업으로 오류 메시지를 테스트해 볼 수 있다. 브라우저 콘솔을 열고 다음과 같이 입력해보자:
+
+~~~js
+throwError("I'm an error!");
+~~~
+
+<%= screenshot "9-1", "오류 메시지 테스트하기" %>
 
 <%= commit "9-1", "기본적인 오류 보고." %>
 
+<% note do %>
+
+### 두 종류의 오류
+
+이 시점에서 "앱 수준"의 오류와 "코드 수준"의 오류 사이의 차이점을 알아두는 것이 중요하다.
+
+**앱 수준(app-level)** 의 오류는 일반적으로 이용자가 일으킨다. 그리고 이용자가 그것에 순서대로 대응할 수 있다. 여기에는 유효성 오류, 접근 제한 오류, 
+"not found" 오류, 등이 포함된다. 이들은 이용자에게 무슨 문제이든 그들에게 닥친 문제점을 해결하는 데 도움을 주기 위하여 보여주는 오류를 의미한다.
+
+한 편, **코드 수준(code-level)**의 오류는 코드상의 실제 버그에 의해서 의도하지 않게 발생하는 것으로서 이용자에게 직접 보여주기를 원하지 *않으며*, 대신 ([Kadira](http://kadira.io)와 같은) 서드파티 오류 추적 서비스 등으로 관리되기를 원한다.
+
+이 장에서는, 우리는 버그를 잡기 위해서가 아니라, 전자에 초점을 맞추어 다룰 것이다. 
+
+<% end %>
+
 ### 오류 만들기
 
-이제 오류를 화면에 보여주는 방법은 알게 되었다, 그러나 여전히 뭔가 더 만들어야 할 것들이 있다. 오류는 대부분 사용자가 새로운 콘텐츠를 입력하는 과정에 발생한다. 그래서 post 등록 콜백에서 발생하는 오류를 체크하고 그렇게 발생하는 오류 메시지를 보여주도록 한다.
+We now know how to display errors, but we still need to trigger one before we'll see anything. We've actually already implemented a good error scenario: our duplicate post warning. We'll simply replace the `alert` calls in the `postSubmit` event helper with the new `throwError` function we just set up:
 
-더불어, `302` 번 오류가 발생(이는 동일한 URL을 가진 post가 이미 존재함을 가리킨다)하는 경우, 우리는 그 존재하는 post로 리다이렉트할 것이다. 기존 post의 `_id` 값을 `error.details`로부터(7장에서 `Error` 클래스의 매개변수를 전달할 때, 세 번째 매개변수 `details`에 post의 `_id`를 전달했던 것을 상기하라) 얻는다.
+
+이제 오류를 화면에 보여주는 방법은 알게 되었다, 그러나 여전히 뭔가 더 만들어야 할 것들이 있다. 실제로 우리는 이미 훌륭한 오류 시나리오 -- 중복 post 경고 --를 구현한 바 있다. 우리는 단순하게 `postSubmit` 이벤트 핸들러에 있는 `alert` 호출을 우리가 방금 구성한 새로운 `throwError` 함수로 바꾸어 볼 것이다.
+
 
 ~~~js
 Template.postSubmit.events({
@@ -112,78 +139,106 @@ Template.postSubmit.events({
     
     var post = {
       url: $(e.target).find('[name=url]').val(),
-      title: $(e.target).find('[name=title]').val(),
-      message: $(e.target).find('[name=message]').val()
-    }
+      title: $(e.target).find('[name=title]').val()
+    };
     
-    Meteor.call('post', post, function(error, id) {
-      if (error) {
-        // display the error to the user
-        throwError(error.reason);
-        
-        if (error.error === 302)
-          Router.go('postPage', {_id: error.details})
-      } else {
-        Router.go('postPage', {_id: id});
-      }
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
+      if (error)
+        return throwError(error.reason);
+      
+      // show this result but route anyway
+      if (result.postExists)
+        throwError('This link has already been posted');
+    
+      Router.go('postPage', {_id: result._id});  
     });
   }
 });
 ~~~
-<%= caption "client/views/posts/post_submit.js" %>
-<%= highlight "12~14, 16~21" %>
+<%= caption "client/templates/posts/post_submit.js" %>
+<%= highlight "13,17" %>
+
+똑같은 작업을 `postEdit` 이벤트 헬퍼에서도 구현한다:
+
+~~~js
+Template.postEdit.events({
+  'submit form': function(e) {
+    e.preventDefault();
+    
+    var currentPostId = this._id;
+    
+    var postProperties = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    }
+    
+    Posts.update(currentPostId, {$set: postProperties}, function(error) {
+      if (error) {
+        // display the error to the user
+        throwError(error.reason);
+      } else {
+        Router.go('postPage', {_id: currentPostId});
+      }
+    });
+  },
+  //...
+});
+~~~
+<%= caption "client/templates/posts/post_edit.js" %>
+<%= highlight "15" %>
 
 <%= commit "9-2", "오류 보고를 실제로 사용한다." %>
 
 시도해보자: URL `http://meteor.com`를 입력하여 post를 등록해보자. 이 URL이 이미 존재하는 post에 등록되었기 때문에, 다음과 같은 화면을 볼 것이다:
 
-<%= screenshot "9-1", "오류화면 보이기" %>
+<%= screenshot "9-2", "오류화면 보이기" %>
 
 ### 오류 지우기
 
-이 시점에서 오류창의 닫기 버튼을 누른다면, 오류창이 사라지는 것을 볼 수 있다. 이는 그 닫기 버튼이 Twitter Bootstrap의 JavaScript를 구동하기 때문이다.
+여기서 오류 메시지가 몇 초 후에 저절로 사라지는 것을 볼 수 있을 것이다. 이것은 순전히 이 책의 초반부에 우리가 추가했던 스타일시트에 포함된 약간의 CSS 마술 덕분이다:
 
-하지만, Bootstrap이 DOM에서 오류 `<div>`를 제거하는 반면, 이것이 미티어 컬렉션에서 오류 객체를 제거한 것은 아니다. 그래서 미티어가 페이지를 재로드할 때, 그 오류창이 다시 나타나는 것이다. 그러니 오류가 동작하는 순간, 로컬 컬렉션에서 이를 제거하는 방법을 추가해보자.
-
-우선, 우리는 `throwError` 함수를 수정하여 `seen` 속성을 추가한다. 이것은 나중에 사용자가 실제로 오류 메시지를 보았는 지를 추적하는데 유용하다.
-
-이 작업이 마무리되면, "열람한" 오류 메시지를 지우는 간단한 `clearErrors` 함수를 작성한다:
-
-~~~js
-// Local (client-only) collection
-Errors = new Meteor.Collection(null);
-
-throwError = function(message) {
-  Errors.insert({message: message, seen: false})
+~~~css
+@keyframes fadeOut {
+  0% {opacity: 0;}
+  10% {opacity: 1;}
+  90% {opacity: 1;}
+  100% {opacity: 0;}
 }
 
-clearErrors = function() {
-  Errors.remove({seen: true});
+//...
+
+.alert {
+  animation: fadeOut 2700ms ease-in 0s 1 forwards;
+  //...
 }
 ~~~
-<%= caption "client/helpers/errors.js" %>
-<%= highlight "5,8~10" %>
+<%= caption "client/stylesheets/style.css" %>
 
-다음, 라우터에서 오류를 지워 다른 페이지로 이동하면 이 오류들이 영구 삭제되도록 한다:
+우리는 (전체 애니메이션에서 0%, 10%, 90%, 그리고 100%의 값을 가지는) 투명도 속성에 대한 4개의 키프레임을 지정하여 `fadeOut` CSS 애니메이션을 정의하고 있다. 그리고 이 애니메이션을 `.alert` 클래스에 적용하고 있다.
 
-~~~js
-// ...
+이 애니메이션은 2700 밀리초동안을 실행하며, `ease-in` 방식을 적용하여, 0초의 지연시간으로 실행되고, 한 번만 실행하며, 마지막에 실행이 완료된 다음에는 마지막 키프레임 상태에 있게 된다.
 
-Router.onBeforeAction(requireLogin, {only: 'postSubmit'})
-Router.onBeforeAction(function() { clearErrors() });
-~~~
-<%= caption "lib/router.js" %>
-<%= highlight "4" %>
+<% note do %>
 
-`clearErrors()` 함수가 작업을 수행하려면, 오류에 `seen` 상태 표시가 이루어져야 한다. 이를 적절하게 처리하기 위해서, 극단적인 예를 검토해보자: 오류가 발생하고, 사용자는 다른 곳(중복된 링크를 post에 등록하려고 시도할 때 처럼)으로 리다이렉트될 때, 그 리다이렉션은 순간적으로 일어난다. 이는 그 사용자가 그 오류 메시지를 지워지기전에 볼 기회가 없다는 의미가 된다.
+### 애니메이션 대 애니메이션
 
-이것이 `seen` 속성이 자리할 곳을 알려준다. 확실한 것은 사용자가 실제로 오류를 보았을 때, 값을 `true`로 설정해야 한다는 것이다.
+우리가 왜 미티어 자체로 제어되는 애니메이션 대신에 (미리 결정되고 앱의 통제 밖에 있는) CSS기반의 애니메이션을 사용하는 지에 대하여 궁금해 할 지 모르겠다. 
 
-이를 구현하기 위해서 `Meteor.defer()`를 사용한다. 이 함수는 미티어가 무언가 수행된 "직후에" 콜백을 수행하도록 한다. 이것은 `defer()`가 브라우저에게 실행하기 전에 1/1000 초를 기다리라고 말하는 것과 비슷하다.
+미티어는 애니메이션을 삽입하는 기능을 제공하지만, 우리는 이 챕터에서 오류에 초점을 맞추려고 하였다. 그래서 여기서는 "멍청한" CSS 애니메이션을 사용하고 나중에 나오는 애니메이션 챕터에서 그 멋진 물건을 다루도록 할 것이다.
 
-우리가 하려는 것은 미티어가 `errors` 템플릿이 렌더링된 후 1/1000 초가 지나서 `seen`을 `true`로 설정하도록 하는 것이다. 하지만, 리다이렉션이 순간적으로 일어난다고 말했던 것을 기억하는가? 이것은 리다이렉션이 `defer` 콜백 이전에 일어나고, 이는 이 콜백이 실행될 기회가 없음을 의미한다.
+<% end %>
 
-이것이 바로 우리가 원하는 것이다: 이게 실행되지 않으면 오류는 `seen` 상태 설정이 이루어지지 않고, 이는 오류가 지워지지 않는다는 것을 의미하고, 다시 이것은 사용자가 리다이렉트되는 페이지에도 오류 메시지가 다시 나타난다는 것이다!
+이것은 잘 작동하지만, (이를테면, 동일한 링크를 세 번 클릭하여) 복수의 오류를 구동하면 이들이 상단에 차례로 쌓이는 것을 볼 수 있다:
+
+<%= screenshot "9-3", "Stack overflow." %>
+
+이것은 `.alert` 엘리먼트가 *보이기에는* 사라지고 있지만, DOM에서는 여전히 존재하고 있기 때문이다. 이 문제를 해결하여야 한다.
+
+이것이 바로 미티어가 반짝이는 바로 그런 상황이다. `Errors` 컬렉션은 반응형이기 때문에, 이 지나간 오류들을 제거하기 위해서 우리가 할 일은 컬렉션에서 제거하기만 하면 된다!
+
+우리는 `Meteor.setTimeout`을 사용하여 지정한 시간 후에 (이 경우는 3000밀리초) 구동되도록 할 것이다.
+
 
 ~~~js
 Template.errors.helpers({
@@ -194,26 +249,316 @@ Template.errors.helpers({
 
 Template.error.rendered = function() {
   var error = this.data;
-  Meteor.defer(function() {
-    Errors.update(error._id, {$set: {seen: true}});
-  });
+  Meteor.setTimeout(function () {
+    Errors.remove(error._id);
+  }, 3000);
 };
 ~~~
-<%= caption "client/views/includes/errors.js" %>
+<%= caption "client/templates/includes/errors.js" %>
 <%= highlight "7~12" %>
 
-<%= commit "9-3", "어떤 오류가 보여지는 지를 관찰하고 라우팅 과정에서 삭제한다." %>
+<%= commit "9-3", "3초 후에 오류가 모두 사라진다." %>
 
-`rendered` 콜백은 브라우저에서 템플릿이 렌더링되었을 때 한 번 구동된다. 콜백 내부에서 `this`는 현 템플릿 인스턴스를 가리키며, `this.data`로 현재 렌더링이 일어나는 객체(여기서는 오류 객체)의 데이터에 접근할 수 있다.
+[`rendered`](http://docs.meteor.com/#template_rendered) 콜백은 템플릿이 브라우저에 렌더링된 후에 한 번 구동된다. 콜백 내부에서 `this`는 현 템플릿 인스턴스를 가리킨다. 그리고 `this.data`를 통해서 우리는 현재 렌더링되는 객체의 데이터에 (이 경우, 오류 객체) 접근할 수 있다. 
 
-휴! 여기까지가 사용자들이 결코 보지 않기를 바라는 그 무언가에 대한 많은 작업이었다!
+### 유효화 구현
 
-<% note do %>
+지금까지 우리는 폼에서 어떤 유효화도 적용하지 않았다. 최소한의 수준에서, 우리는 이용자들이 post의 URL과 제목을 입력하기를 바란다. 그래서 이용자들이 그렇게 하도록 해보자.
 
-### `rendered` 콜백
+우리는 입력이 누락된 필드를 찾아내기 위해서 두 가지를 할 것이다: 첫째, 모든 문제가 있는 폼 필드의 부모 `div` 엘리먼트에 `has-error` CSS 클래스를 지정한다. 둘째, 해당 필드 아랫쪽에 도움말 오류 메시지를 보여준다.
 
-템플릿의 `rendered` 콜백은 템플릿이 브라우저에서 렌더링이 될 때마다 구동된다. 물론 이것은 화면에 나타나는 첫 순간을 포함한다. 그러나 기억해야 할 것은 이 콜백은 템플릿이 다시 렌더링되는 모든 순간에도 구동된다는 것이다. 즉, 그 데이터가 변경되는 모든 순간에 구동된다는 의미이다.
+이를 위해서, `postSubmit` 템플릿에 새로운 헬퍼를 적용한다:
 
-Rendered 콜백은 전형적으로 최소 두 번 구동된다: 첫째 앱이 처음 로드될 때, 둘째는 컬렉션 데이터가 로드되었을 때이다. 그러므로 여기에 두 번 구동(경고창, 이벤트 추적 분석 코드 등 같은)되어선 안되는 코드를 넣을 때 주의해야 한다.
+~~~html
+<template name="postSubmit">
+  <form class="main form">
+    <div class="form-group {{errorClass 'url'}}">
+      <label class="control-label" for="url">URL</label>
+      <div class="controls">
+          <input name="url" id="url" type="text" value="" placeholder="Your URL" class="form-control"/>
+          <span class="help-block">{{errorMessage 'url'}}</span>
+      </div>
+    </div>
+    <div class="form-group {{errorClass 'title'}}">
+      <label class="control-label" for="title">Title</label>
+      <div class="controls">
+          <input name="title" id="title" type="text" value="" placeholder="Name your post" class="form-control"/>
+          <span class="help-block">{{errorMessage 'title'}}</span>
+      </div>
+    </div>
+    <input type="submit" value="Submit" class="btn btn-primary"/>
+  </form>
+</template>
+~~~
+<%= caption "client/templates/posts/post_submit.html" %>
+<%= highlight "3,7,10,14" %>
 
-<% end %>
+여기서 각 헬퍼마다 (`url`과 `title`) 매개변수를 전달하는 것이 유의하기 바란다. 이것은 동시에 동일한 헬퍼를 재사용하는 데, 매개변수에 따라서 그 작동이 다르게 적용된다.
+
+이제부터 재미있는 부분이다: 이 헬퍼들을 실제로 작동시켜보자.
+
+어떠한 잠재적인 오류 메시지이든 담는 `postSubmitErrors` 객체를 **Session**에 저장한다. 이용자가 폼을 입력하면, 이 객체가 변경되면서, 차례로 폼의 마크업과 콘텐츠를 반응형으로 수정한다.
+
+우선, `postSubmit` 템플릿이 생성되는 시점에 객체를 초기화한다. 이로써 이용자는 이 페이지에 이전 방문했을 때 남아있던 예전 오류 메시지를 보이지 않게 한다.
+
+그리고는 두 템플릿 헬퍼를 정의한다. 이 둘은 모두 `Session.get('postSubmitErrors')` 객체의 `field` 속성을 바라본다 (여기서 `field`는 우리가 헬퍼를 호출하는 위치에 따라서 `url`이거나 `title`이다).
+
+`errorMessage`가 단순히 메시지 자체를 리턴하는 반면, `errorClass`는 메시지의 *존재*를 검사하여 만약 메시지가 있다면 `has-error`를 리턴한다.
+
+~~~js
+Template.postSubmit.created = function() {
+  Session.set('postSubmitErrors', {});
+}
+
+Template.postSubmit.helpers({
+  errorMessage: function(field) {
+    return Session.get('postSubmitErrors')[field];
+  },
+  errorClass: function (field) {
+    return !!Session.get('postSubmitErrors')[field] ? 'has-error' : '';
+  }
+});
+~~~
+<%= caption "client/templates/posts/post_submit.js" %>
+
+브라우저 콘솔을 열고 다음 코드를 입력하면 헬퍼가 제대로 작동하는 것을 테스트해 볼 수 있다:
+
+~~~js
+Session.set('postSubmitErrors', {title: 'Warning! Intruder detected. Now releasing robo-dogs.'});
+~~~
+<%= caption "Browser console" %>
+
+<%= screenshot "9-4", "빨간 경고! 빨간 경고!" %>
+
+다음 단계는 `postSubmitErrors` Session 객체를 폼에 연동하는 작업이다.
+
+이 작업을 하기 전에, `post` 객체를 바라보는 `posts.js`에 `validatePost` 함수를 새로 만든다. 그리고 (말하자면, `title`이나 `url` 필드가 누락되었는 지를 담는) 적절한 오류를 담는 `errors` 객체를 리턴한다:
+
+~~~js
+//...
+
+validatePost = function (post) {
+  var errors = {};
+
+  if (!post.title)
+    errors.title = "Please fill in a headline";
+  
+  if (!post.url)
+    errors.url =  "Please fill in a URL";
+
+  return errors;
+}
+
+//...
+~~~
+<%= caption "lib/collections/posts.js" %>
+<%= highlight "3~13" %>
+
+이 함수를 `postSubmit` 이벤트 핸들러에서 호출한다:
+
+~~~js
+Template.postSubmit.events({
+  'submit form': function(e) {
+    e.preventDefault();
+    
+    var post = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    };
+    
+    var errors = validatePost(post);
+    if (errors.title || errors.url)
+      return Session.set('postSubmitErrors', errors);
+    
+    Meteor.call('postInsert', post, function(error, result) {
+      // display the error to the user and abort
+      if (error)
+        return throwError(error.reason);
+      
+      // show this result but route anyway
+      if (result.postExists)
+        throwError('This link has already been posted');
+    
+      Router.go('postPage', {_id: result._id});  
+    });
+  }
+});
+~~~
+<%= caption "client/templates/posts/post_submit.js" %>
+<%= highlight "10~12" %>
+
+유의할 것은 오류가 존재하는 경우 헬퍼의 실행을 취소하기 위해서 `return`을 사용하는 것이지, 실제로 이 값을 다른 어디로 리턴하려고 그러는 것이 아니라는 점이다.
+
+<%= screenshot "9-5", "Caught red-handed." %>
+
+### 서버에서의 유효성 검사
+
+다 된 것은 아직 아니다. 우리는 *클라이언트*에서 URL과 title의 존재에 대하여 유효성 검사를 하고 있다. 하지만 *서버*에서는 어떻게 될까? 결국, 누군가는 여전히 브라우저 콘솔에서 `postInsert` 메서드를 수작업으로 호출하여 빈 post를 입력하려고 시도할 수 있다.
+
+이 경우에 서버에서 어떤 오류 메시지도 보여줄 필요는 없겠지만, 우리는 동일한 `validatePost` 함수를 이용할 수 있다. 이번의 경우만 제외하고, 우리는 이것을 이벤트 헬퍼에서 뿐만아니라, `postInsert` *method*에서도 호출할 것이다.
+
+~~~js
+Meteor.methods({
+  postInsert: function(postAttributes) {
+    check(this.userId, String);
+    check(postAttributes, {
+      title: String,
+      url: String
+    });
+    
+    var errors = validatePost(postAttributes);
+    if (errors.title || errors.url)
+      throw new Meteor.Error('invalid-post', "You must set a title and URL for your post");
+    
+    var postWithSameLink = Posts.findOne({url: postAttributes.url});
+    if (postWithSameLink) {
+      return {
+        postExists: true,
+        _id: postWithSameLink._id
+      }
+    }
+    
+    var user = Meteor.user();
+    var post = _.extend(postAttributes, {
+      userId: user._id, 
+      author: user.username, 
+      submitted: new Date()
+    });
+    
+    var postId = Posts.insert(post);
+    
+    return {
+      _id: postId
+    };
+  }
+});
+~~~
+<%= caption "lib/collections/posts.js" %>
+<%= highlight "9~11" %>
+
+또 다시, 이용자들이 “You must set a title and URL for your post” 메시지를 보아야 하는 것은 절대 아니다. 이것은 우리가 공들여 구현한 사용자 인터페이스를 우회하여, 직접 콘솔을 통해서 접근하려는 그 누군가에게만 보여질 것이다. 
+
+이를 테스트하기 위해서 브라우저 콘솔을 열고 URL이 없는 post를 등록해보자:
+
+~~~js
+Meteor.call('postInsert', {url: '', title: 'No URL here!'});
+~~~
+
+작업이 제대로 되었다면, “You must set a title and URL for your post” 메시지와 함께 무서운 코드 덩이가 되돌아 올 것이다.
+
+<%= commit "9-4", "등록시에 post 콘텐츠의 유효성 검사." %>
+
+### 유효성 편집
+
+이 작업을 post *수정* 폼에도 동일한 유효성 검사과정을 적용한다. 코드는 매우 비숫하다:
+먼저 템플릿:
+
+~~~html
+<template name="postEdit">
+  <form class="main form">
+    <div class="form-group {{errorClass 'url'}}">
+      <label class="control-label" for="url">URL</label>
+      <div class="controls">
+          <input name="url" id="url" type="text" value="{{url}}" placeholder="Your URL" class="form-control"/>
+          <span class="help-block">{{errorMessage 'url'}}</span>
+      </div>
+    </div>
+    <div class="form-group {{errorClass 'title'}}">
+      <label class="control-label" for="title">Title</label>
+      <div class="controls">
+          <input name="title" id="title" type="text" value="{{title}}" placeholder="Name your post" class="form-control"/>
+          <span class="help-block">{{errorMessage 'title'}}</span>
+      </div>
+    </div>
+    <input type="submit" value="Submit" class="btn btn-primary submit"/>
+    <hr/>
+    <a class="btn btn-danger delete" href="#">Delete post</a>
+  </form>
+</template>
+~~~
+<%= caption "client/templates/posts/post_edit.html" %>
+<%= highlight "3,7,10,14" %>
+
+그리고 템플릿 헬퍼:
+
+~~~js
+Template.postEdit.created = function() {
+  Session.set('postEditErrors', {});
+}
+
+Template.postEdit.helpers({
+  errorMessage: function(field) {
+    return Session.get('postEditErrors')[field];
+  },
+  errorClass: function (field) {
+    return !!Session.get('postEditErrors')[field] ? 'has-error' : '';
+  }
+});
+
+Template.postEdit.events({
+  'submit form': function(e) {
+    e.preventDefault();
+    
+    var currentPostId = this._id;
+    
+    var postProperties = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    }
+    
+    var errors = validatePost(postProperties);
+    if (errors.title || errors.url)
+      return Session.set('postEditErrors', errors);
+    
+    Posts.update(currentPostId, {$set: postProperties}, function(error) {
+      if (error) {
+        // display the error to the user
+        throwError(error.reason);
+      } else {
+        Router.go('postPage', {_id: currentPostId});
+      }
+    });
+  },
+  
+  'click .delete': function(e) {
+    e.preventDefault();
+    
+    if (confirm("Delete this post?")) {
+      var currentPostId = this._id;
+      Posts.remove(currentPostId);
+      Router.go('postsList');
+    }
+  }
+});
+~~~
+<%= caption "client/templates/posts/post_edit.js" %>
+<%= highlight "1~12,25~27,32" %>
+
+Post 등록 폼에서 우리가 했던 것처럼, 서버에서도 post에 대한 유효성 검사를 하려고 한다. 명심할 것은 post 수정은 method를 사용하지 않고,
+클라이언트에서 직접 `update`를 호출한다는 점이다. 
+
+이것은 대신에 새로운 `deny` 콜백을 추가해야 한다는 사실을 의미한다:
+
+~~~js
+//...
+
+Posts.deny({
+  update: function(userId, post, fieldNames, modifier) {
+    var errors = validatePost(modifier.$set);
+    return errors.title || errors.url;
+  }
+});
+
+//...
+~~~
+<%= caption "lib/collections/posts.js" %>
+<%= highlight "3~8" %>
+
+매개변수 post는 *기존*의 post 값을 가리킨다. 이 경우, 우리는 *수정본*에 대한 유효성을 검사하고자 한다. 그래서 (`Posts.update({$set: {title: ..., url: ...}})`에서와 마찬가지로) `modifier`의 `$set` 속성의 콘텐츠에 대하여 `validatePost`를 호출한다 
+
+이것이 동작하는 이유는 `modifier.$set`가 전체 `post` 객체가 그러하듯이 동일한 두 개의 속성 `title`과 `url`을 담고 있기 때문이다. 물론, `title` 만 또는 `url`만을 수정하는 부분 수정은 실패하지만, 사실 이것은 별 이슈는 아니다.
+
+여기서 `deny` 콜백이 두 번째라는 점을 유의할 필요가 있다. 복수의 `deny` 콜백을 추가하는 경우, 그들중의 어느 하나만 `true`를 리턴해도 실패한다. 이 경우, `update`는 `title`과 `url` 필드 모두 empty값이 아니고, 이 둘만을 수정하려고 할 때에만 성공할 것이라는 것을 의미한다.
+
+<%= commit "9-5", "수정할 때 post contents의 유효성을 검사한다." %>
+
