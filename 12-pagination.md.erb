@@ -17,7 +17,7 @@ Microscope는 훌륭해 보인다. 그리고 우리는 이것이 세계에 모�
 
 ### 더 많은 Post 추가하기
 
-첫째, 초기 설정 데이터에서 페이징이 의미를 가지는 충분한 post 목록을 로드하도록 한다:
+우선, 초기 설정 데이터에 페이징이 의미를 가지는 충분한 post 목록을 로드하도록 한다:
 
 ~~~js
 // Fixture data 
@@ -30,7 +30,7 @@ if (Posts.find().count() === 0) {
     userId: tom._id,
     author: tom.profile.name,
     url: 'http://themeteorbook.com',
-    submitted: now - 12 * 3600 * 1000,
+    submitted: new Date(now - 12 * 3600 * 1000),
     commentsCount: 0
   });
   
@@ -40,7 +40,7 @@ if (Posts.find().count() === 0) {
       author: sacha.profile.name,
       userId: sacha._id,
       url: 'http://google.com/?q=test-' + i,
-      submitted: now - i * 3600 * 1000,
+      submitted: new Date(now - i * 3600 * 1000),
       commentsCount: 0
     });
   }
@@ -73,6 +73,7 @@ if (Posts.find().count() === 0) {
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
+  notFoundTemplate: 'notFound',
   waitOn: function() { 
     return [Meteor.subscribe('notifications')]
   }
@@ -84,16 +85,16 @@ Router.configure({
 그 다음, 경로에 매개변수 `postsLimit`를 추가한다. 매개변수 명 다음에 `?`를 추가하는 것은 이것이 선택적이라는 의미이다. 그러므로 route는 `http://localhost:3000/50`뿐 아니라 이전의 `http://localhost:3000`도 수용한다.
 
 ~~~js
-Router.map(function() {
-  //...
-  
-  this.route('postsList', {
-    path: '/:postsLimit?'
-  });
+//...
+
+Router.route('/:postsLimit?', {
+  name: 'postsList',
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "5" %>
+<%= highlight "3" %>
 
 유의할 사항은 `/:paramter?`의 형태를 가지는 경로는 모든 가능한 경로와 다 맞는다는 점이다. 각 route가 순차적으로 파싱이 이루어지면서 현재 경로와 맞는 것을 찾으므로, route의 순서를 특수성을 줄이는 방향으로 정렬을 시켜야 한다.
 
@@ -102,29 +103,34 @@ Router.map(function() {
 이제 올바른 데이터를 찾고 구독하는 어려운 문제를 해결해야 할 시간이다. 우리는 매개변수 `postsLimit`의 값이 없는 경우 여기에 초기값을 지정하는 방법을 처리해야 한다. 초기값으로는 “5”를 지정하여 페이징처리 과정에서 충분한 여유를 두려고 한다.
 
 ~~~js
-Router.map(function() {
-  //..
-  
-  this.route('postsList', {
-    path: '/:postsLimit?',
-    waitOn: function() {
-      var postsLimit = parseInt(this.params.postsLimit) || 5; 
-      return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: postsLimit});
-    }
-  });
+//...
+
+Router.route('/:postsLimit?', {
+  name: 'postsList',
+  waitOn: function() {
+    var limit = parseInt(this.params.postsLimit) || 5; 
+    return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
+  }
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "6~9" %>
+<%= highlight "7~9" %>
 
 주목할 점은 `posts` 발행의 이름 다음에 JavaScript 객체({limit: postsLimit})를 매개변수로 전달하고 있는 것이다. 이 객체는 서버쪽의 `Posts.find()`문에 대하여 `options` 매개변수를 제공할 것이다. 서버쪽 코드를 이것을 구현한 것으로 바꾸어 보자:
 
 ~~~js
 Meteor.publish('posts', function(options) {
+  check(options, {
+    sort: Object,
+    limit: Number
+  });
   return Posts.find({}, options);
 });
 
 Meteor.publish('comments', function(postId) {
+  check(postId, String);
   return Comments.find({postId: postId});
 });
 
@@ -133,7 +139,7 @@ Meteor.publish('notifications', function() {
 });
 ~~~
 <%= caption "server/publications.js" %>
-<%= highlight "1~3" %>
+<%= highlight "1~7" %>
 
 <% note do %>
 
@@ -160,26 +166,26 @@ Meteor.publish('posts', function(sort, limit) {
 이 의미는 단순히 템플릿 내에서 `this`로 은연중에 사용하는 대신에 데이터 컨텍스트에서 `posts`를 이용할 수 있게 될 것이다. 이 작은 요소는 제외하면 나머지 코드는 익숙할 것이다:
 
 ~~~js
-Router.map(function() {
-  //..
-  
-  this.route('postsList', {
-    path: '/:postsLimit?',
-    waitOn: function() {
-      var limit = parseInt(this.params.postsLimit) || 5; 
-      return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
-    },
-    data: function() {
-      var limit = parseInt(this.params.postsLimit) || 5; 
-      return {
-        posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
-      };
-    }
-  });
+//...
+
+Router.route('/:postsLimit?', {
+  name: 'postsList',
+  waitOn: function() {
+    var limit = parseInt(this.params.postsLimit) || 5; 
+    return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
+  },
+  data: function() {
+    var limit = parseInt(this.params.postsLimit) || 5; 
+    return {
+      posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
+    };
+  }
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "10~15" %>
+<%= highlight "9~14" %>
 
 라우터 수준에서 데이터 컨텍스트를 지정하였으므로, 우리는 `posts_list.js` 파일 내에 있는 `posts` 템플릿 헬퍼를 안전하게 제거할 수 있다. 그리고 우리가 데이터 컨텍스트를 `posts`라고 (헬퍼와 동일한 이름으로) 명명하였으므로 `postsList` 템플릿을 건들 필요도 없다!
 
@@ -189,31 +195,58 @@ Router.map(function() {
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
+  notFoundTemplate: 'notFound',
   waitOn: function() { 
     return [Meteor.subscribe('notifications')]
   }
 });
 
-Router.map(function() {
-  //...
-
-  this.route('postsList', {
-    path: '/:postsLimit?',
-    waitOn: function() {
-      var limit = parseInt(this.params.postsLimit) || 5; 
-      return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
-    },
-    data: function() {
-      var limit = parseInt(this.params.postsLimit) || 5; 
-      return {
-        posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
-      };
-    }
-  });
+Router.route('/posts/:_id', {
+  name: 'postPage',
+  waitOn: function() {
+    return Meteor.subscribe('comments', this.params._id);
+  },
+  data: function() { return Posts.findOne(this.params._id); }
 });
+
+Router.route('/posts/:_id/edit', {
+  name: 'postEdit',
+  data: function() { return Posts.findOne(this.params._id); }
+});
+
+Router.route('/submit', {name: 'postSubmit'});
+
+Router.route('/:postsLimit?', {
+  name: 'postsList',
+  waitOn: function() {
+    var limit = parseInt(this.params.postsLimit) || 5; 
+    return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
+  },
+  data: function() {
+    var limit = parseInt(this.params.postsLimit) || 5; 
+    return {
+      posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
+    };
+  }
+});
+
+var requireLogin = function() {
+  if (! Meteor.user()) {
+    if (Meteor.loggingIn()) {
+      this.render(this.loadingTemplate);
+    } else {
+      this.render('accessDenied');
+    }
+  } else {
+    this.next();
+  }
+}
+
+Router.onBeforeAction('dataNotFound', {only: 'postPage'});
+Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "5, 11~21" %>
+<%= highlight "6,25~37" %>
 
 <%= commit "12-2", "제한을 걸기 위해서 postsList route에 코드를 추가했다." %>
 
@@ -252,14 +285,16 @@ Router.map(function() {
 Iron Router의 새로운 관점, *Route Controller*를 소개한다. Route controller는 어떤 route도 상속받을 수 있는 멋진 재사용가능한 패키지에 라우팅 기능들을 모아서 그룹을 만드는 간단한 방법이다. 여기서는 단일 route에 대하여만 이것을 사용하지만, 다음 장에서는 이 기능이 얼마나 편리한 지를 보게될 것이다.
 
 ~~~js
+//...
+
 PostsListController = RouteController.extend({
   template: 'postsList',
   increment: 5, 
-  limit: function() { 
+  postsLimit: function() { 
     return parseInt(this.params.postsLimit) || this.increment; 
   },
   findOptions: function() {
-    return {sort: {submitted: -1}, limit: this.limit()};
+    return {sort: {submitted: -1}, limit: this.postsLimit()};
   },
   waitOn: function() {
     return Meteor.subscribe('posts', this.findOptions());
@@ -269,16 +304,16 @@ PostsListController = RouteController.extend({
   }
 });
 
-Router.map(function() {
-  //...
+//...
 
-  this.route('postsList', {
-    path: '/:postsLimit?',
-    controller: PostsListController
-  });
+Router.route('/:postsLimit?', {
+  name: 'postsList'
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
+<%= highlight "3~18, 25" %>
 
 단계별로 해보자. 첫째, `RouteController`를 확장한 controller를 만든다. 다음, `template` 속성을 전에 했던 것처럼 지정한다. 그 다음, `increment` 속성을 지정한다.
 
@@ -299,14 +334,16 @@ Router.map(function() {
 이전과 같이, 우리의 route에 페이징 로직을 추가하려고 한다. 우리가 익명의 커서를 사용하지 않고 명시적으로 데이터 콘텍스트를 명명했던 때가 언제인지 기억하는가? 글쎄, `data` 함수가 커서만 전달할 수 있다는 그런 규칙은 없다. 그러므로 “load more” 버튼의 URL을 사용하는데 동일한 기법을 사용할 것이다.
 
 ~~~js
+//...
+
 PostsListController = RouteController.extend({
   template: 'postsList',
   increment: 5, 
-  limit: function() { 
+  postsLimit: function() { 
     return parseInt(this.params.postsLimit) || this.increment; 
   },
   findOptions: function() {
-    return {sort: {submitted: -1}, limit: this.limit()};
+    return {sort: {submitted: -1}, limit: this.postsLimit()};
   },
   waitOn: function() {
     return Meteor.subscribe('posts', this.findOptions());
@@ -315,17 +352,19 @@ PostsListController = RouteController.extend({
     return Posts.find({}, this.findOptions());
   },
   data: function() {
-    var hasMore = this.posts().count() === this.limit();
-    var nextPath = this.route.path({postsLimit: this.limit() + this.increment});
+    var hasMore = this.posts().count() === this.postsLimit();
+    var nextPath = this.route.path({postsLimit: this.postsLimit() + this.increment});
     return {
       posts: this.posts(),
       nextPath: hasMore ? nextPath : null
     };
   }
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "13~15,17~22" %>
+<%= highlight "15~25" %>
 
 이 마술같은 라우터를 깊이있게 들여다보자. (현재 작동하는 `PostsListController controller`에서 상속받을) `postsList` route는 매개변수 `postsLimit`를 가진다는 점을 기억하기 바란다.
 
@@ -360,7 +399,7 @@ PostsListController = RouteController.extend({
   </div>
 </template>
 ~~~
-<%= caption "client/views/posts/posts_list.html" %>
+<%= caption "client/templates/posts/posts_list.html" %>
 <%= highlight "7~10" %>
 
 Post 목록 화면은 다음과 같이 보일 것이다:
@@ -371,36 +410,69 @@ Post 목록 화면은 다음과 같이 보일 것이다:
 
 ### 더 나은 프로그레스 바
 
-페이징은 현재 잘 작동하지만, 한 가지 짜증나는 일이 있다: “load more” 버튼을 누를 때마다 라우터는 더 많은 post를 요구하고 새로운 데이터를 받을 때까지 loading 템플릿이 구동된다. 이 결과로 로딩될 때마다 페이지의 탑으로 이동해서 아랫쪽으로 스크롤해야 하는 사태가 일어난다.
+페이징은 현재 잘 작동하지만, 한 가지 짜증나는 일이 있다: “load more” 버튼을 누를 때마다 라우터는 더 많은 post를 요구하고, Iron Router의 `waitOn` 기능으로 인해 새로운 데이터를 받을 때까지 loading 템플릿이 구동된다. 이 결과로 로딩될 때마다 페이지의 탑으로 이동해서 아랫쪽으로 스크롤해야 하는 사태가 일어난다.
 
-한 페이지에서 이 작업을 계속하면, 새로운 데이터가 현재 로딩중이라는 알림이 계속 보여지고, 상태는 더욱 심해질 것이다. 다행히 `iron-router-progress` 패키지가 바로 이 문제를 해결해준다.
+그러므로 먼저, Iron Router에게 구독을 `waitOn`하지 않도록 해야 한다. 대신 구독을 `subscriptions` hook 내부에 정의할 것이다. 
 
-iOS의 사파리나 Medium과 유튜브같은 사이트와 유사하게, `iron-router-progress`는 얇은 로딩바를 화면의 상단에 추가한다. 이를 구현하는 것은 앱에 패키지를 추가하는 것처럼 쉽다:
-
-~~~bash
-meteor add mrt:iron-router-progress
-~~~
-<%= caption "bash console" %>
-
-이 스마트 패키지가 부리는 마술을 통해, 우리의 새로운 프로그레스 알리미는 완벽하게 작동할 것이다. 프로그레스바는 각 route별로 작동하여, 그 route에서 요구하는 데이터 로딩이 끝나면 자동으로 완료한다.
-
-한 가지 약간 고칠 것이 있다. `postSubmit` 요청을 처리할 때에는 `iron-router-progress`를 사용하지 않게 한다. 이 경우는 어떤 구독 데이터도 기다릴 필요가 없기 때문이다(사실상, 이것은 그저 빈 폼이다):
+또한 데이터 컨텍스트에 `this.postsSub.ready`를 참조하는 `ready` 변수를 만들어 전달할 것이다. 이것은 post 구독의 로딩이 완료되는 시점을 템플릿에게 알려준다.
 
 ~~~js
-Router.map(function() {
- 
-  //...
-  
-  this.route('postSubmit', {
-    path: '/submit',
-    disableProgress: true
-  });
+//...
+
+PostsListController = RouteController.extend({
+  template: 'postsList',
+  increment: 5, 
+  postsLimit: function() { 
+    return parseInt(this.params.postsLimit) || this.increment; 
+  },
+  findOptions: function() {
+    return {sort: {submitted: -1}, limit: this.postsLimit()};
+  },
+  subscriptions: function() {
+    this.postsSub = Meteor.subscribe('posts', this.findOptions());
+  },
+  posts: function() {
+    return Posts.find({}, this.findOptions());
+  },
+  data: function() {
+    var hasMore = this.posts().count() === this.postsLimit();
+    var nextPath = this.route.path({postsLimit: this.postsLimit() + this.increment});
+    return {
+      posts: this.posts(),
+      ready: this.postsSub.ready,
+      nextPath: hasMore ? nextPath : null
+    };
+  }
 });
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "7" %>
+<%= highlight "12~14, 23" %>
 
-<%= commit "12-5", "iron-router-progress 패키지를 사용하여 페이징 기능을 더 보기좋게 만들었다." %>
+그리고 템플릿에서 이 `ready` 변수를 검사하여 post 목록의 하단에 새로운 post 목록을 로드하는 동안 spinner를 보여준다:
+
+~~~html
+<template name="postsList">
+  <div class="posts">
+    {{#each posts}}
+      {{> postItem}}
+    {{/each}}
+    
+    {{#if nextPath}}
+      <a class="load-more" href="{{nextPath}}">Load more</a>
+    {{else}}
+      {{#unless ready}}
+        {{> spinner}}
+      {{/unless}}
+    {{/if}}
+  </div>
+</template>
+~~~
+<%= caption "client/templates/posts/posts_list.html" %>
+<%= highlight "10~12" %>
+
+<%= commit "12-5", "spinner를 추가하여 페이징을 더 멋지게 만들었다." %>
 
 ### Post 열람페이지 접속
 
@@ -420,8 +492,11 @@ Meteor.publish('posts', function(options) {
 });
 
 Meteor.publish('singlePost', function(id) {
-  return id && Posts.find(id);
+  check(id, String)
+  return Posts.find(id);
 });
+
+//...
 ~~~
 <%= caption "server/publications.js" %>
 <%= highlight "5~7" %>
@@ -429,36 +504,32 @@ Meteor.publish('singlePost', function(id) {
 이제 클라이언트 쪽의 post 목록을 구독한다. 우리는 이미 `postPage` route의 `waitOn` 함수에 `comments` 발행을 구독하고 있다. 그래서 여기에 `singlePost`에 대한 구독을 추가한다. 그리고 같은 데이터를 요구하는 `postEdit` route에도 동일한 구독을 추가하는 것을 잊지 말라.:
 
 ~~~js
-Router.map(function() {
+//...
 
-  //...
-    
-  this.route('postPage', {
-    path: '/posts/:_id',
-    waitOn: function() {
-      return [
-        Meteor.subscribe('singlePost', this.params._id),
-        Meteor.subscribe('comments', this.params._id)
-      ];
-    },
-    data: function() { return Posts.findOne(this.params._id); }
-  });
-
-  this.route('postEdit', {
-    path: '/posts/:_id/edit',
-    waitOn: function() { 
-      return Meteor.subscribe('singlePost', this.params._id);
-    },
-    data: function() { return Posts.findOne(this.params._id); }    
-  });
-  
-  /...
-
+Router.route('/posts/:_id', {
+  name: 'postPage',
+  waitOn: function() {
+    return [
+      Meteor.subscribe('singlePost', this.params._id),
+      Meteor.subscribe('comments', this.params._id)
+    ];
+  },
+  data: function() { return Posts.findOne(this.params._id); }
 });
+
+Router.route('/posts/:_id/edit', {
+  name: 'postEdit',
+  waitOn: function() { 
+    return Meteor.subscribe('singlePost', this.params._id);
+  },
+  data: function() { return Posts.findOne(this.params._id); }
+});
+
+//...
 ~~~
 <%= caption "lib/router.js" %>
-<%= highlight "7~12,18~20" %>
+<%= highlight "6~9,16~18" %>
 
 <%= commit "12-6","항상 올바른 post를 열람하도록 단일 post 구독을 사용하였다." %>
 
-페이징이 구현되니 우리 앱은 이제 더 이상 확장성 문제로 어려움을 겪지 않는다. 그리고 사용자들은 전보다 더 많은 링크를 등록할 수 있다. 이제 이 링크에 순위를 매기는 것이 좋을까? 이것이 바로 다음 장의 주제, *투표*이다.
+페이징이 구현되니 우리 앱은 이제 더 이상 확장성 문제로 어려움을 겪지 않는다. 그리고 사용자들은 전보다 더 많은 링크를 등록할 수 있다. 이제 이 링크에 순위를 매기는 방법이 있다면 좋지 않을까? 여러분이 생각하시는 대로, 이것이 바로 다음 장의 주제이다!
