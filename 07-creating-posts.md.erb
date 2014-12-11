@@ -340,7 +340,7 @@ Meteor method 콜백은 항상 2개의 매개변수 `error`와 `result`를 가�
 
 이 패키지는 미리 정의된 패턴에 따라서 JavaScript 객체를 검사한다. 예제에서 우리는 이를 이용하여 method를 호출하는 사용자가 제대로 로그인된 상태인지를 (`Meteor.userId()`가 `String`인지를 확인하여) 검사한다. 그리고 매개변수로 전달되는 `postAttributes` 객체의 `title`과 `url`이 문자열인지도 검사한다. 그래서 데이터베이스에 아무 데이터나 들어가지 않도록 한다.
 
-이제 `collections/posts.js` 파일에 `postInsert` 메서드를 정의하자. `posts.js`에서 `allow()` 블럭은 삭제하는데, 이것은 Meteor Method는 이것들을 건너뛰기 때문이다.
+이제 `lib/collections/posts.js` 파일에 `postInsert` 메서드를 정의하자. `posts.js`에서 `allow()` 블럭은 삭제하는데, 이것은 Meteor Method는 이것들을 건너뛰기 때문이다.
 
 그 다음엔 `postAttributes` 객체를 `확장`하여 3개의 속성값을 추가한다: 사용자의 `_id`, `username`, 그리고 post가 `등록`된 시간이다. 
 이것을 데이터베이스이 입력하여 리턴되는 `_id`값을 JavaScript 객체 형태로 리턴하여 클라이언트( 이 method를 호출한 사용자)에 전달한다.
@@ -371,7 +371,7 @@ Meteor.methods({
   }
 });
 ~~~
-<%= caption "collections/posts.js" %>
+<%= caption "lib/collections/posts.js" %>
 <%= highlight "3~24" %>
 
 `_.extend()`는 [Underscore](http://underscorejs.org) 라이브러리의 method로서, 단순히 하나의 객체에 속성을 추가하여 “확장”하는 기능을 한다.
@@ -424,14 +424,8 @@ Meteor.methods({
   }
 });
 ~~~
-<%= caption "collections/posts.js" %>
+<%= caption "lib/collections/posts.js" %>
 <%= highlight "9~15" %>
-
-We're searching our database for any posts with the same URL. If any are found, we `return` that post's `_id` along with a `postExists: true` flag to let the client know about this special situation.
-
-And since we're triggering a `return` call, the method stops at that point without executing the `insert` statement, thus elegantly preventing any duplicates. 
-
-All that's left is to use this new `postExists` information in our client-side event helper to show a warning message:
 
 데이터베이스에서 동일한 URL을 가지는 post를 검색한다. 하나라도 발견되면, 해당 post의 `_id`와 함께 `postExists: true` 플래그를 추가하여 `리턴`함으로써 클라이언트가 이 특별한 상황을 알도록 한다.
 
