@@ -26,8 +26,6 @@ Errors = new Mongo.Collection(null);
 ~~~
 <%= caption "client/helpers/errors.js" %>
 
-Now that the collection has been created, we can add a `throwError` function which we'll call to add errors to it. We don't need to worry about `allow` or `deny` or any other security concerns, as this collection is “local” to the current user. 
-
 
 컬렉션이 만들어졌으니, 우리는 여기에 오류를 추가할 때 호출하는 `throwError` 함수를 추가할 수 있다. 이 컬렉션은 현 사용자에 "국한"되므로, `allow`나 `deny`, 또는 그 밖의 보안 관련사항에 대해서 걱정할 필요없다.
 
@@ -125,8 +123,6 @@ throwError("I'm an error!");
 <% end %>
 
 ### 오류 만들기
-
-We now know how to display errors, but we still need to trigger one before we'll see anything. We've actually already implemented a good error scenario: our duplicate post warning. We'll simply replace the `alert` calls in the `postSubmit` event helper with the new `throwError` function we just set up:
 
 
 이제 오류를 화면에 보여주는 방법은 알게 되었다, 그러나 여전히 뭔가 더 만들어야 할 것들이 있다. 실제로 우리는 이미 훌륭한 오류 시나리오 -- 중복 post 경고 --를 구현한 바 있다. 우리는 단순하게 `postSubmit` 이벤트 핸들러에 있는 `alert` 호출을 우리가 방금 구성한 새로운 `throwError` 함수로 바꾸어 볼 것이다.
