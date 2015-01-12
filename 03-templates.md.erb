@@ -171,7 +171,7 @@ Template.postsList.helpers({
 
 `posts` 헬퍼를 정의함으로써 템플릿을 사용할 수 있다. 따라서 템플릿은 `postsData` 배열을 반복처리하고, 그 안에 들어있는 각 배열 객체를 `postItem` 템플릿으로 보낸다.
 
-<%= commit "3-1", "Added basic posts list template and static data." %>
+<%= commit "3-1", "기본적인 posts 목록 템플릿과 정적 데이터를 추가했다." %>
 
 ### `domain` 헬퍼
 
@@ -200,7 +200,7 @@ Template.postItem.helpers({
 
 이제 `this.url`이 어떻게 현재 post의 URL을 리턴하는 지 알았다. 또한, `post_item.html` 템플릿 내부에서 `{{title}}`과 `{{url}}`을 사용하면, 미티어가 이것이 `this.title`과 `this.url`을 의미한다는 것을 인지하여 그 올바른 값을 리턴한다.
 
-<%= commit "3-2", "Setup a `domain` helper on the `postItem`." %>
+<%= commit "3-2", "`postItem`의 `domain` 헬퍼 설정." %>
 
 <% note do %>
 

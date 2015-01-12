@@ -236,8 +236,6 @@ Template.postItem.helpers({
 
 우리는 이제 두 가지 경우를 처리해야 한다: 헬퍼가 템플릿이 그려지기 때문에 실행되는 경우 (A), 혹은 속성이 변경되었기 때문에 반응형으로 실행되는 경우(B).
 
-We only want to animate the element in case B, which is why we make sure that `post.position` is defined (we'll see *how* it's defined shortly).
-
 우리는 B 경우의 엘리먼트만을 애니메이션하기를 원하는 데, 이를 위해서 `post.position`이 정의되는 지를 확인하는 것이다. (우리는 이를 간단히 *정의하는 방법*을 보게 될 것이다).  
 
 더욱이, B 경우는 두 가지 상세 경우 B1, B2를 생각할 수 있다: 우리가 DOM 엘리먼트를 “출발점” (이전 위치를 말한다)으로 *순간이동*시키거나 또는 우리가 이것을 이전 위치에서 새 위치로 *애니메이션* 시키거나 하는 경우를 말한다.
@@ -269,7 +267,7 @@ We only want to animate the element in case B, which is why we make sure that `p
 
 이제 사이트를 열고 upvote을 시작하라. 그러면 post가 발레와 같은 우아함으로 부드럽게 위, 아래로 움직이는 것을 볼 수 있을 것이다!
 
-<%= commit "14-1", "Added post reordering animation." %>
+<%= commit "14-1", "post를 다시 정렬하는 애니메이션을 추가했다." %>
 
 ### 새 post 등록 애니메이션
 
@@ -306,7 +304,7 @@ attributes: function() {
 
 우리가 여기서 하려는 작업은 **(A)** 경우를 분리하여 엘리먼트에 `invisible` CSS 클래스를 추가하는 것이다. 헬퍼가 다음에 반응형으로 재실행되고 그 엘리먼트에 `animate` 클래스가 적용될 때, 불투명도의 차이가 애니메이션되면서 페이드 인 효과를 가지면서 엘리먼트가 나타날 것이다.
  
-<%= commit "14-2", "Fade items in when they are drawn." %>
+<%= commit "14-2", "항목이 그려질 때 페이드 인 된다." %>
 
 <% note do %>
 
