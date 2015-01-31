@@ -509,7 +509,7 @@ comment = _.extend(commentAttributes, {
   submitted: new Date()
 });
 
-// post의 comments 갯수를 갱신한다
+// update the post with the number of comments
 Posts.update(comment.postId, {$inc: {commentsCount: 1}});
 
 return Comments.insert(comment);
