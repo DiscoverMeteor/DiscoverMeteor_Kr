@@ -497,7 +497,7 @@ var postId = Posts.insert(post);
 <%= caption "collections/posts.js" %>
 <%= highlight "6,7" %>
 
-And then we update the relevant `commentsCount` when we make a new comment using Mongo's `$inc` operator (which increments a numeric field by one):
+그리고 새로운 코멘트를 만들 때, Mongo의 `$inc` 연산자(숫자 필드를 1씩 증가 시키는)를 사용하여 관련 `commentsCount`를 갱신한다:
 
 
 ~~~js
@@ -509,7 +509,7 @@ comment = _.extend(commentAttributes, {
   submitted: new Date()
 });
 
-// update the post with the number of comments
+// post의 comments 갯수를 갱신한다
 Posts.update(comment.postId, {$inc: {commentsCount: 1}});
 
 return Comments.insert(comment);
