@@ -19,7 +19,7 @@ paragraphs: 46
 </head>
 <body>
   <div class="container">
-    <header class="navbar navbar-default" role="navigation"> 
+    <header class="navbar navbar-default" role="navigation">
       <div class="navbar-header">
         <a class="navbar-brand" href="/">Microscope</a>
       </div>
@@ -38,7 +38,7 @@ paragraphs: 46
 
 핵심은, 소셜 뉴스 사이트는 목록 구조의 포스트들로 이루어지는데, 템플릿을 구성하는 방식도 정확하게 일치한다.
 
-`/client` 디렉토리 하위에 `/views` 디렉토리를 만들자. 이곳에 모든 템플릿을 두는데, 깔끔하게 `/views` 디렉토리 하위에 `/posts` 디렉토리를 만들고 post 관련 템플릿들을 넣을 것이다.
+`/client` 디렉토리 하위에 `/templates` 디렉토리를 만들자. 이곳에 모든 템플릿을 두는데, 깔끔하게 `/templates` 디렉토리 하위에 `/posts` 디렉토리를 만들고 post 관련 템플릿들을 넣을 것이다.
 
 <% note do %>
 
@@ -130,11 +130,11 @@ var postsData = [
   {
     title: 'Introducing Telescope',
     url: 'http://sachagreif.com/introducing-telescope/'
-  }, 
+  },
   {
     title: 'Meteor',
     url: 'http://meteor.com'
-  }, 
+  },
   {
     title: 'The Meteor Book',
     url: 'http://themeteorbook.com'
@@ -225,6 +225,6 @@ Template.postItem.helpers({
 
 이것은 미티어가 프로젝트 디렉토리에 있는 모든 파일을 추적하기 때문이다. 그리고 그 파일들 중에 하나라도 변경이 감지되면 브라우저를 자동으로 새로고침한다.
 
-미티어의 hot code reload는 매우 똑똑해서 두 새로고침 사이의 애플리케이션의 상태도 유지한다! 
+미티어의 hot code reload는 매우 똑똑해서 두 새로고침 사이의 애플리케이션의 상태도 유지한다!
 
 <% end %>
